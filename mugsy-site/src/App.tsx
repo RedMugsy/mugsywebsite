@@ -275,20 +275,20 @@ export default function App() {
           />
         </div>
 
-        {/* Hero art - positioned to not overlay text on mobile */}
+        {/* Hero art - positioned under text on mobile, alongside text on desktop */}
         <img
           src="img/mugsy-rabbit.webp"
           alt="Red Mugsy holding a mug"
-          className="pointer-events-none select-none absolute right-2 top-2 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-60 sm:opacity-100"
+          className="pointer-events-none select-none absolute right-[20%] bottom-8 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
           style={{ scale: 0.7475 }}
         />
         <motion.img
           src="img/mugsy-ech042.webp"
           alt="Astronaut bunny with red mug"
           initial={{ y: -10, opacity: 0 }}
-          animate={{ y: [-10, 8, -10], opacity: 0.6 }}
+          animate={{ y: [-10, 8, -10], opacity: 0.7 }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-          className="pointer-events-none select-none absolute left-2 bottom-2 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-50 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
+          className="pointer-events-none select-none absolute left-[20%] bottom-8 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-60 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
         />
 
         <div className="max-w-4xl px-4 sm:px-6 text-center space-y-4 sm:space-y-6">

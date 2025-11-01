@@ -1,0 +1,264 @@
+[2025-10-21T21:01:04.746Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:292:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-21T21:05:13.126Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:296:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-21T21:06:19.876Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:298:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-21T21:07:38.653Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:298:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-22T05:40:08.618Z] Global error: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:92:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\raw-body\index.js:238:16)
+    at done (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\raw-body\index.js:227:7)
+    at IncomingMessage.onEnd (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\raw-body\index.js:287:7)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[2025-10-22T06:36:20.847Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:36:29.806Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:42:32.775Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:42:33.645Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:47:46.269Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:48:45.398Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:49:29.409Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\src\index.ts:32:17)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:49:30.076Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\src\index.ts:32:17)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:52:39.313Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:371:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-22T06:58:59.077Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T06:58:59.932Z] Global error: Not allowed by CORS
+Error: Not allowed by CORS
+    at origin (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:32:19)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\cors\lib\index.js:204:7)
+    at Layer.handle [as handle_request] (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\body-parser\lib\types\json.js:122:7)
+[2025-10-22T07:06:14.780Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:371:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-22T07:21:04.904Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:396:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-22T07:22:33.643Z] UncaughtException: listen EADDRINUSE: address already in use :::8787
+Error: listen EADDRINUSE: address already in use :::8787
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:396:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-23T21:14:57.478Z] UncaughtException: listen EADDRINUSE: address already in use :::8788
+Error: listen EADDRINUSE: address already in use :::8788
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:396:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-25T02:58:13.193Z] UncaughtException: listen EADDRINUSE: address already in use :::8788
+Error: listen EADDRINUSE: address already in use :::8788
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:396:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+[2025-10-25T07:25:04.431Z] UncaughtException: listen EADDRINUSE: address already in use :::8788
+Error: listen EADDRINUSE: address already in use :::8788
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\AliAchkar\red-mugsy\mugsy-website\contact-api\dist\index.js:416:5)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)

@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "홈",
+    "about": "소개",
+    "tokenomics": "토크노믹스",
+    "security": "보안",
+    "roadmap": "로드맵",
+    "faq": "자주 묻는 질문",
+    "contact": "문의하기"
+  },
+  "hero": {
+    "title": "RED MUGSY를 만나보세요",
+    "subtitle": "생각보다 더 필요한 크립토 코미디언",
+    "cta_primary": "빨간 머그를 잡아라",
+    "cta_secondary": "토크노믹스 보기"
+  }
+}
+

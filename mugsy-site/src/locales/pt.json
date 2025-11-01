@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Início",
+    "about": "Sobre",
+    "tokenomics": "Tokenomics",
+    "security": "Segurança",
+    "roadmap": "Roteiro",
+    "faq": "Perguntas",
+    "contact": "Fale Conosco"
+  },
+  "hero": {
+    "title": "CONHEÇA O RED MUGSY",
+    "subtitle": "O comediante cripto que você não sabia que precisava",
+    "cta_primary": "Pegue sua caneca vermelha",
+    "cta_secondary": "Ver Tokenomics"
+  }
+}
+

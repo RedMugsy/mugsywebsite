@@ -1,0 +1,492 @@
+@import "tailwindcss";
+
+/* =========================
+   Base
+========================= */
+:root { color-scheme: dark; }
+html, body, #root { height: 100%; }
+html { scroll-behavior: smooth; }
+body { @apply bg-black text-slate-200 antialiased; }
+
+/* =========================
+   Cards & Buttons (global)
+========================= */
+.card {
+  @apply rounded-2xl p-5 border;
+  /* default: Neon Red edge/glow on a deep neutral card */
+  --edge: rgba(255, 26, 75, 0.20);
+  --glow: rgba(255, 26, 75, 0.14);
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+      rgba(255,255,255,0.04) 0%,
+      rgba(255,255,255,0.015) 45%,
+      rgba(0,0,0,0) 100%),
+    #0a0b0f;
+  border-color: var(--edge);
+  box-shadow:
+    0 0 0 1px var(--edge) inset,
+    0 12px 38px var(--glow);
+}
+
+/* Red ghost variant: neon red border + subtle red gradient glow, transparent fill */
+.card--red-ghost {
+  --edge: rgba(255, 26, 75, 0.60);
+  --glow: rgba(255, 26, 75, 0.35);
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+      rgba(255,26,75,0.20) 0%,
+      rgba(255,26,75,0.06) 45%,
+      rgba(0,0,0,0) 100%) !important;
+  border-color: #ff1a4b !important;
+  box-shadow: 0 0 0 1px rgba(255,26,75,0.60) inset, 0 14px 42px rgba(255,26,75,0.35) !important;
+}
+
+/* Cyan electric border + neon red transparent gradient fill */
+.card--cyan-redghost {
+  --edge: rgba(0, 240, 255, 0.26);
+  --glow: rgba(0, 240, 255, 0.16);
+  border-color: #00F0FF !important;
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+      rgba(255,26,75,0.20) 0%,
+      rgba(255,26,75,0.06) 45%,
+      rgba(0,0,0,0) 100%) !important;
+  box-shadow: 0 0 0 1px rgba(0,240,255,0.26) inset, 0 14px 42px rgba(0,240,255,0.16) !important;
+}
+
+/* Optional Cyan variant (only if you explicitly add class="card card--blue") */
+.card--blue {
+  --edge: rgba(0, 240, 255, 0.20);
+  --glow: rgba(0, 240, 255, 0.14);
+  border-color: var(--edge);
+  box-shadow:
+    0 0 0 1px var(--edge) inset,
+    0 12px 38px var(--glow);
+}
+
+/* =========================
+   TOKENOMICS: use electric cyan (project neonBlue)
+   These rules target the Tokenomics section and force the cyan edge/glow
+   so tokenomics cards appear electric-blue regardless of other classes.
+========================= */
+
+/* 1) Ensure tokenomics cards use neonBlue */
+#tokenomics .card--tokenomics,
+#tokenomics [class*="tokenomic"] .card,
+#tokenomics .card[class*="token"],
+#tokenomics .card {
+  --edge: rgba(0, 240, 255, 0.26) !important; /* Cayan Electric */
+  --glow: rgba(0, 240, 255, 0.16) !important;
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+      rgba(0,240,255,0.04) 0%,
+      rgba(0,240,255,0.01) 45%,
+      rgba(0,0,0,0) 100%),
+    #02131a !important;
+  border-color: var(--edge) !important;
+  box-shadow:
+    0 0 0 1px var(--edge) inset,
+  0 14px 42px var(--glow) !important;
+}
+
+/* 2) Belt-and-suspenders: ensure background is dark neutral if directly set */
+#tokenomics .card {
+  background-color: #02131a !important;
+  outline-color: transparent !important;
+}
+
+/* High-specificity force: ensure tokenomics cards use exact Cayan Electric (#00F0FF)
+   This belt-and-suspenders rule sets variables and directly applies border/color
+   and box-shadow with !important to override any competing rules or specificity. */
+#tokenomics .card.card--tokenomics {
+  /* Only apply the edge/glow, border and background to the card itself —
+     do NOT apply these styles to child elements (that was creating
+     faint inner lines by forcing box-shadow/borders on children). */
+  --edge: rgba(0, 240, 255, 0.26) !important;
+  --glow: rgba(0, 240, 255, 0.16) !important;
+  border-color: #00F0FF !important;
+  box-shadow: 0 0 0 1px rgba(0,240,255,0.26) inset, 0 14px 42px rgba(0,240,255,0.16) !important;
+  background: radial-gradient(120% 140% at 100% 0%, rgba(0,240,255,0.04) 0%, rgba(0,240,255,0.01) 45%, rgba(0,0,0,0) 100%), #02131a !important;
+}
+
+/* Remove any accidental separators/striping inside tokenomics cards (list items)
+   Some utilities or global rules can leave faint borders or background-images
+   on <li> elements; scope a targeted override to clear those visuals here. */
+#tokenomics .card ul,
+#tokenomics .card ul li {
+  background-image: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Strict: remove any internal separators, pseudo-elements, or accidental backgrounds
+   from elements inside tokenomics cards. This preserves the card's outer border and
+   box-shadow but strips inner decorations that look like rows/dividers. */
+#tokenomics .card.card--tokenomics ul,
+#tokenomics .card.card--tokenomics li,
+#tokenomics .card.card--tokenomics p,
+#tokenomics .card.card--tokenomics div,
+#tokenomics .card.card--tokenomics span,
+#tokenomics .card.card--tokenomics a {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  outline: none !important;
+}
+
+#tokenomics .card.card--tokenomics *::before,
+#tokenomics .card.card--tokenomics *::after {
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* =========================
+   Buttons
+========================= */
+.btn-neo {
+  @apply relative inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold text-black transition-transform;
+  background: linear-gradient(135deg, #ff1a4b, #00F0FF);
+  box-shadow: 0 10px 30px #ff1a4b30, 0 6px 20px #00F0FF20;
+}
+.btn-neo:hover { transform: translateY(-2px) scale(1.02); }
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-slate-200 hover:bg-white/10;
+}
+
+/* Red ghost button variant: uses neon red edge/glow variables */
+.btn-ghost--red {
+  --edge: rgba(255, 26, 75, 0.60);
+  --glow: rgba(255, 26, 75, 0.35);
+  border-color: var(--edge);
+  color: #ffffff;
+  background: transparent;
+  box-shadow: 0 0 0 1px var(--edge) inset, 0 12px 38px var(--glow);
+}
+.btn-ghost--red:hover {
+  background: rgba(255, 26, 75, 0.10);
+}
+
+/* Brand CTA buttons */
+.btn-buy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem; /* 12px 20px */
+  border-radius: 0.75rem;   /* 12px */
+  font-weight: 800;
+  font-size: 1.125rem;      /* text-lg */
+  color: #0b0b0b;           /* black text */
+  background: #FF1A4B;
+  box-shadow: 0 12px 30px rgba(255, 26, 75, 0.25);
+  transition: background-color .2s ease, box-shadow .2s ease;
+}
+.btn-buy:hover {
+  background: #E01540;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10), 0 12px 30px rgba(224, 21, 64, 0.30);
+}
+
+.btn-claim {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: #3CF2FF;                 /* neon blue text */
+  background: transparent;         /* ghost */
+  border: 2px solid #3CF2FF;       /* neon blue outline */
+  box-shadow: 0 12px 30px rgba(60,242,255,0.18);
+  transition: background-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+.btn-claim:hover {
+  background: rgba(60,242,255,0.10);
+}
+
+/* =========================
+   Icon Spheres (red-ghost)
+========================= */
+.icon-sphere {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 0;
+  color: #ffffff;
+  background:
+    radial-gradient(90% 90% at 30% 30%, rgba(255,26,75,0.35) 0%, rgba(255,26,75,0.12) 42%, rgba(0,0,0,0) 60%),
+    radial-gradient(120% 140% at 100% 0%, rgba(255,26,75,0.20) 0%, rgba(0,0,0,0) 100%);
+  box-shadow:
+    inset 0 6px 12px rgba(255,255,255,0.06),
+    inset 0 -10px 18px rgba(0,0,0,0.35),
+    0 12px 38px var(--glow);
+  transition: transform .15s ease, box-shadow .2s ease, background-color .2s ease;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  overflow: hidden;
+}
+.icon-sphere:hover { transform: translateY(-1px) scale(1.03); }
+.icon-sphere:active { transform: translateY(0); }
+.icon-sphere--red {
+  --edge: rgba(255, 26, 75, 0.60);
+  --glow: rgba(255, 26, 75, 0.35);
+}
+.icon-sphere::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 28% 28%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 22%, rgba(255,255,255,0.0) 40%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Legend dots */
+.badge {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  margin-right: 8px;
+}
+
+/* =========================
+   Nav link underline
+========================= */
+.nav-link { @apply relative transition-colors; }
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px; height: 2px;
+  background: linear-gradient(90deg, #ff1a4b, #00F0FF);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .3s ease, opacity .3s ease;
+}
+.nav-link:hover::after { opacity: .7; transform: scaleX(1); }
+
+/* =========================
+   Glitch text
+========================= */
+.glitch-text { position: relative; text-shadow: 0 0 18px #ff1a4b88, 0 0 22px #00F0FF66; }
+.glitch-layer {
+  position: absolute; inset: 0; color: white; mix-blend-mode: screen; pointer-events: none;
+  animation: glitch 2s infinite linear alternate;
+}
+.glitch-layer[data-offset="1"] { transform: translate(2px, -1px); color: #ff1a4b; }
+.glitch-layer[data-offset="-1"] { transform: translate(-2px, 1px); color: #00F0FF; }
+@keyframes glitch {
+  0%   { clip-path: inset(0 0 80% 0); }
+  20%  { clip-path: inset(10% 0 60% 0); }
+  40%  { clip-path: inset(40% 0 30% 0); }
+  60%  { clip-path: inset(70% 0 0 0); }
+  80%  { clip-path: inset(20% 0 50% 0); }
+  100% { clip-path: inset(0 0 80% 0); }
+}
+
+/* Neon red emoji (attempts to recolor multi-color emoji and add glow) */
+.emoji-neon-red {
+  display: inline-block;
+  color: #ff1a4b; /* Neon red color source for SVG via currentColor */
+  /* Size tuning to visually match the coffee emoji */
+  font-size: 1.25em; /* pairs with #root h1 .emoji-neon-red override */
+  line-height: 1;
+  vertical-align: -0.06em;
+  /* Soft neon glow */
+  text-shadow: 0 0 8px rgba(255, 26, 75, 0.55), 0 0 14px rgba(255, 26, 75, 0.38);
+}
+.emoji-neon-red svg {
+  width: 1em; height: 1em; display: inline-block;
+  vertical-align: -0.06em;
+  filter: drop-shadow(0 0 6px rgba(255, 26, 75, 0.6)) drop-shadow(0 0 12px rgba(255, 26, 75, 0.4));
+}
+
+/* =========================
+   Floating orbs (background accents)
+========================= */
+.orb {
+  position: fixed;
+  border-radius: 9999px;
+  filter: blur(40px);
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: -1;
+}
+.orb-1 { top: 10%; left: -5%; width: 320px; height: 320px; background: #ff1a4b; animation: float 12s ease-in-out infinite, blob 18s ease-in-out infinite; }
+.orb-2 { bottom: 5%; right: -6%; width: 360px; height: 360px; background: #00F0FF; animation: float 14s ease-in-out infinite, blob 22s ease-in-out infinite; }
+.orb-3 { top: 60%; left: 50%; transform: translateX(-50%); width: 280px; height: 280px; background: radial-gradient(circle, #00F0FF, transparent 60%); animation: float 18s ease-in-out infinite; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-18px); }
+}
+@keyframes blob {
+  0%, 100% { border-radius: 46% 54% 47% 53% / 47% 42% 58% 53%; }
+  50%      { border-radius: 36% 64% 34% 66% / 52% 32% 68% 48%; }
+}
+
+/* =========================
+   Single 3D Coin (two faces, one spinner)
+   Works with the Coin3D component you posted.
+========================= */
+.coin3d { position: relative; perspective: 800px; }
+.coin3d-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: coin-spin linear infinite;
+  will-change: transform;
+}
+.coin3d-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.coin3d-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.coin3d-front { transform: rotateY(0deg); }
+.coin3d-back  { transform: rotateY(180deg); }
+
+@keyframes coin-spin {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
+
+/* ======= Tokenomics — typography and alignment tweaks ======= */
+/* Increase title and body sizes inside tokenomics cards and vertically center content */
+#tokenomics .card.card--tokenomics h3 { font-size: 1.53rem; line-height: 1.1; }
+#tokenomics .card.card--tokenomics p,
+#tokenomics .card.card--tokenomics li,
+#tokenomics .card.card--tokenomics span { font-size: 1.0625rem; line-height: 1.4; }
+
+/* Vertically center direct children of tokenomics cards while preserving spacing */
+#tokenomics .card.card--tokenomics {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* =========================
+   WHY section — reduce card glow
+   Applies only to cards inside the "Why Crypto Needed a Comedian" section
+========================= */
+#why .card {
+  box-shadow: 0 0 0 1px var(--edge) inset, 0 8px 20px var(--glow) !important;
+}
+#why .card.card--red-ghost {
+  box-shadow: 0 0 0 1px rgba(255,26,75,0.60) inset, 0 8px 20px rgba(255,26,75,0.28) !important;
+}
+#why .card.card--cyan-redghost {
+  box-shadow: 0 0 0 1px rgba(0,240,255,0.26) inset, 0 8px 20px rgba(0,240,255,0.16) !important;
+}
+
+/* Increase body text size in WHY section by ~50% */
+#why p,
+#why li {
+  font-size: 150% !important;
+}
+
+/* Match WHY body text size in other sections */
+#security p,
+#security li {
+  font-size: 150% !important;
+}
+#roadmap p,
+#roadmap li {
+  font-size: 150% !important;
+}
+#faq p,
+#faq li {
+  font-size: 150% !important;
+}
+
+/* FAQ — double the question title size inside each card */
+#faq summary {
+  font-size: 200% !important;
+  line-height: 1.1;
+}
+
+/* =========================
+   Uniform Text Size (Global)
+   Make all text the same size sitewide except:
+   - Main Title (h1)
+   - Section Titles (h2)
+   This override comes last and uses #root to match ID specificity
+   used elsewhere (e.g., #tokenomics, #why), ensuring it wins.
+========================= */
+#root :not(h1):not(h2) {
+  font-size: 1rem !important; /* 16px base */
+  line-height: 1.5;
+}
+
+/* =========================
+   Card Typography Scale
+   Increase all card titles by 25% and subtitles by 15%.
+   Titles: any heading within a .card (h1–h6), excluding section/hero headings.
+   Subtitles: common lighter paragraphs within cards.
+========================= */
+#root .card h1,
+#root .card h2,
+#root .card h3,
+#root .card h4,
+#root .card h5,
+#root .card h6 {
+  font-size: 1.25rem !important; /* +25% over 1rem base */
+  line-height: 1.3;
+}
+
+/* Subtitle patterns seen in cards (e.g., text-slate-300/400) */
+#root .card p.text-slate-300,
+#root .card p.text-slate-400 {
+  font-size: 1.15rem !important; /* +15% over 1rem base */
+  line-height: 1.5;
+}
+
+/* =========================
+   Emoji Size Fix (after uniform text rule)
+   Ensure rabbit emoji in the H1 is not shrunk by the global
+   #root :not(h1):not(h2) font-size override.
+   Scale slightly to match coffee emoji visual size.
+========================= */
+#root h1 .emoji-neon-red {
+  font-size: 1.35em !important; /* scale up to match coffee emoji */
+  line-height: 1;
+  vertical-align: -0.06em;
+}
+#root h1 .emoji-neon-red svg {
+  font-size: inherit !important; /* defeat global 1rem rule on SVG */
+  width: 1em; height: 1em;
+}
+/* =========================
+   Header Background: Rabbit Face
+   Applies a semi-transparent rabbit image as the header background.
+   70% transparency => 30% opacity.
+========================= */
+.header-rabbit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/img/Rabbit Face.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.3; /* 70% transparent */
+  pointer-events: none;
+}

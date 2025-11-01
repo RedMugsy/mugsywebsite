@@ -1,0 +1,10 @@
+[
+  { "iso2": "US", "name": "United States", "flag": "🇺🇸", "dialCode": "+1" },
+  { "iso2": "LB", "name": "Lebanon", "flag": "🇱🇧", "dialCode": "+961" },
+  { "iso2": "GB", "name": "United Kingdom", "flag": "🇬🇧", "dialCode": "+44" },
+  { "iso2": "CA", "name": "Canada", "flag": "🇨🇦", "dialCode": "+1" },
+  { "iso2": "AE", "name": "United Arab Emirates", "flag": "🇦🇪", "dialCode": "+971" },
+  { "iso2": "SA", "name": "Saudi Arabia", "flag": "🇸🇦", "dialCode": "+966" },
+  { "iso2": "FR", "name": "France", "flag": "🇫🇷", "dialCode": "+33" },
+  { "iso2": "DE", "name": "Germany", "flag": "🇩🇪", "dialCode": "+49" }
+]

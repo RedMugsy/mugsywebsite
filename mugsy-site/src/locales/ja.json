@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "ホーム",
+    "about": "概要",
+    "tokenomics": "トークノミクス",
+    "security": "セキュリティ",
+    "roadmap": "ロードマップ",
+    "faq": "よくある質問",
+    "contact": "お問い合わせ"
+  },
+  "hero": {
+    "title": "RED MUGSY を知ろう",
+    "subtitle": "あなたが必要としていると気づかなかったクリプト芸人",
+    "cta_primary": "赤いマグを手に入れる",
+    "cta_secondary": "トークノミクスを見る"
+  }
+}
+

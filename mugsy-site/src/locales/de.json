@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Start",
+    "about": "Über uns",
+    "tokenomics": "Tokenomics",
+    "security": "Sicherheit",
+    "roadmap": "Roadmap",
+    "faq": "FAQ",
+    "contact": "Kontakt"
+  },
+  "hero": {
+    "title": "TRIFF RED MUGSY",
+    "subtitle": "Der Krypto‑Komiker, von dem du nicht wusstest, dass du ihn brauchst",
+    "cta_primary": "Hol dir deinen roten Becher",
+    "cta_secondary": "Tokenomics ansehen"
+  }
+}
+

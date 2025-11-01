@@ -1,0 +1,51 @@
+{
+    "nav":  {
+                "home":  "Home",
+                "about":  "About",
+                "tokenomics":  "Tokenomics",
+                "security":  "Security",
+                "roadmap":  "Roadmap",
+                "faq":  "FAQ",
+                "contact":  "Contact Us"
+            },
+    "hero":  {
+                 "title":  "MEET RED MUGSY",
+                 "subtitle":  "The Crypto Comedian You Didn\u0027t Know You Needed",
+                 "cta_primary":  "Get Your Red Mug",
+                 "cta_secondary":  "View Tokenomics"
+             },
+    "sections":  {
+                     "about":  {
+                                   "title":  "Who Is Red Mugsy?",
+                                   "kicker":  "The Crypto Comedian"
+                               },
+                     "tokenomics":  {
+                                        "title":  "Tokenomics"
+                                    },
+                     "security":  {
+                                      "title":  "Security",
+                                      "kicker":  "Proof, Not Promises"
+                                  },
+                     "roadmap":  {
+                                     "title":  "Roadmap",
+                                     "kicker":  "No Promises, Just Plans"
+                                 },
+                     "faq":  {
+                                 "title":  "FAQ",
+                                 "kicker":  "Read Before Aping"
+                             }
+                 },
+    "footer":  {
+                   "tagline":  "For everyone who still believes. Chronically online, terminally optimistic, catastrophically funny.",
+                   "privacy":  "Privacy Policy",
+                   "privacyRequest":  "Privacy Request Form",
+                   "terms":  "Terms of Use",
+                   "cookiePolicy":  "Cookie Policy",
+                   "disclaimer":  "Disclaimer Risk",
+                   "quickLinks":  "Quick Links",
+                   "cookiePreferences":  "Cookie Preferences",
+                   "community":  "Community",
+                   "disclaimerShort":  "A culture token, not financial advice.",
+                   "disclaimerLong":  "Not an investment. No guarantees. You could lose everything. Please consult someone more qualified than a caffeinated rabbit."
+               }
+}

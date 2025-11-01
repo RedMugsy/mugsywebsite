@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  name            String
+  email           String
+  company         String?
+  phoneE164       String?
+  phoneDialCode   String?
+  phoneNational   String?
+  purpose         String
+  subject         String?
+  message         String
+  walletAddress   String?
+  attachmentPath  String?
+  attachmentMime  String?
+  attachmentName  String?
+  ip              String?
+  userAgent       String?
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("MASTER")
+  fullName     String?
+}
+
+model ClaimEvent {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  type       String   // eligibility_check | claim_initiated | claim_success | claim_failed | other
+  address    String?
+  chainId    Int?
+  contract   String?
+  txHash     String?
+  amount     String?  // store as string for SQLite
+  status     String?  // pending | success | failed
+  payload    String?  // JSON string for extra details
+  ip         String?
+  userAgent  String?
+}

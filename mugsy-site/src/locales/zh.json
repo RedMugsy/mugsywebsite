@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于",
+    "tokenomics": "代币经济",
+    "security": "安全",
+    "roadmap": "路线图",
+    "faq": "常见问题",
+    "contact": "联系我们"
+  },
+  "hero": {
+    "title": "认识 RED MUGSY",
+    "subtitle": "你没想到却离不开的加密喜剧人",
+    "cta_primary": "拿下你的红杯子",
+    "cta_secondary": "查看代币经济"
+  }
+}
+

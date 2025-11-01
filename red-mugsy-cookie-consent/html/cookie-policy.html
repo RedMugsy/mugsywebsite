@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cookie Policy</title>
+  <link rel="stylesheet" href="../css/cookie-consent.css">
+</head>
+<body class="rm-bg">
+  <main class="policy">
+    <h1>Cookie Policy</h1>
+    <p class="muted">Last Updated: <span id="lastUpdated"></span> • Effective Date: <span id="effectiveDate"></span></p>
+
+    <h2>What Are Cookies?</h2>
+    <p>Cookies are small text files placed on your device. This policy explains what cookies are, how we use them on redmugsy.com, and how you can control them.</p>
+
+    <h2>Types of Cookies We Use</h2>
+    <table class="table">
+      <thead>
+        <tr><th>Cookie Name</th><th>Category</th><th>Purpose</th><th>Duration</th><th>Third Party?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>mugsy_session</td><td>Essential</td><td>Session management and security</td><td>Session</td><td>No</td></tr>
+        <tr><td>mugsy_csrf_token</td><td>Essential</td><td>CSRF protection</td><td>Session</td><td>No</td></tr>
+        <tr><td>mugsy_wallet_connected</td><td>Essential</td><td>Wallet connection state</td><td>7 days</td><td>No</td></tr>
+        <tr><td>_ga</td><td>Analytics</td><td>Anonymous site usage (GA)</td><td>2 years</td><td>Yes (Google)</td></tr>
+        <tr><td>_gid</td><td>Analytics</td><td>Session tracking (GA)</td><td>24 hours</td><td>Yes (Google)</td></tr>
+        <tr><td>mugsy_theme</td><td>Functional</td><td>Dark/light mode preference</td><td>365 days</td><td>No</td></tr>
+        <tr><td>mugsy_language</td><td>Functional</td><td>Language preference</td><td>365 days</td><td>No</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Third-Party Cookies</h2>
+    <p><strong>Google Analytics</strong>: Provider Google LLC — Privacy https://policies.google.com/privacy — Opt-out https://tools.google.com/dlpage/gaoptout</p>
+    <p><strong>Cloudflare</strong>: Provider Cloudflare Inc — Privacy https://www.cloudflare.com/privacypolicy/</p>
+
+    <h2>How to Control Cookies</h2>
+    <p>Manage preferences on <a href="/cookie-preferences">/cookie-preferences</a> or via your browser settings.</p>
+
+    <h2>Cookie Lifespan</h2>
+    <ul>
+      <li>Session cookies: deleted when closing browser</li>
+      <li>Short-term: 24h–7d</li>
+      <li>Medium-term: 30–90d</li>
+      <li>Long-term: 365d</li>
+    </ul>
+
+    <h2>Updates</h2>
+    <p>We may update this policy for legal/technical reasons. Material changes may be announced on site.</p>
+
+    <h2>Contact</h2>
+    <p>Email privacy@redmugsy.com</p>
+  </main>
+
+  <script>
+    const d = new Date().toISOString().slice(0,10);
+    document.getElementById('lastUpdated').textContent = d;
+    document.getElementById('effectiveDate').textContent = d;
+  </script>
+</body>
+</html>
+

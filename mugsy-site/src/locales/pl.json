@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Start",
+    "about": "O nas",
+    "tokenomics": "Tokenomika",
+    "security": "Bezpieczeństwo",
+    "roadmap": "Mapa drogowa",
+    "faq": "Pytania",
+    "contact": "Kontakt"
+  },
+  "hero": {
+    "title": "POZNAJ RED MUGSY",
+    "subtitle": "Komik krypto, którego nie wiedziałeś, że potrzebujesz",
+    "cta_primary": "Zdobądź swój czerwony kubek",
+    "cta_secondary": "Zobacz tokenomikę"
+  }
+}
+

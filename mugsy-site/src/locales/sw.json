@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Nyumbani",
+    "about": "Kuhusu",
+    "tokenomics": "Tokenomics",
+    "security": "Usalama",
+    "roadmap": "Ramani ya Njia",
+    "faq": "Maswali",
+    "contact": "Wasiliana Nasi"
+  },
+  "hero": {
+    "title": "KUTANA NA RED MUGSY",
+    "subtitle": "Mchekeshaji wa kripto ambaye hukujua unamhitaji",
+    "cta_primary": "Chukua kikombe chako chekundu",
+    "cta_secondary": "Tazama Tokenomics"
+  }
+}
+

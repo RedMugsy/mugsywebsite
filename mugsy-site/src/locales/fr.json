@@ -1,0 +1,18 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "tokenomics": "Tokenomics",
+    "security": "Sécurité",
+    "roadmap": "Feuille de route",
+    "faq": "FAQ",
+    "contact": "Nous contacter"
+  },
+  "hero": {
+    "title": "RENCONTREZ RED MUGSY",
+    "subtitle": "Le comique crypto dont vous ne saviez pas avoir besoin",
+    "cta_primary": "Obtenez votre Mug rouge",
+    "cta_secondary": "Voir les Tokenomics"
+  }
+}
+

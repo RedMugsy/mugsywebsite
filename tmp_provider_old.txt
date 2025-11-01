@@ -1,0 +1,34 @@
+// Minimal first-party CAPTCHA provider used by contact.ts
+// Exposes: getCaptcha().verify({ nonce, solution, ip, ua })
+
+export type CaptchaVerifyInput = {
+  nonce?: string
+  solution?: string
+  ip?: string
+  ua?: string
+}
+
+export type CaptchaVerifyResult = {
+  ok: boolean
+  score?: number
+  reason?: string
+}
+
+// Simple “text” captcha: expects the word "red" (same as the ALTCHA text path)
+async function verifyText({ solution }: CaptchaVerifyInput): Promise<CaptchaVerifyResult> {
+  const ok = (solution ?? '').trim().toLowerCase() === 'red'
+  return ok ? { ok: true, score: 1 } : { ok: false, reason: 'invalid_answer' }
+}
+
+// If you later wire a real provider (hCaptcha/ReCAPTCHA/turnstile), swap this verify()
+// or branch on an env var.
+export function getCaptcha() {
+  return {
+    async verify(input: CaptchaVerifyInput): Promise<CaptchaVerifyResult> {
+      return verifyText(input)
+    },
+  }
+}
+
+// Optional default export (harmless if unused):
+export default getCaptcha

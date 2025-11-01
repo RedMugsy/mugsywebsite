@@ -1,0 +1,329 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/admin/mugsy-logo-admin.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/admin/apple-touch-icon.png" />
+    <link rel="manifest" href="/admin/manifest.webmanifest" />
+    <meta name="theme-color" content="#0b0c10" />
+    <title>Admin - Contact Submissions</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background:#0b0c10; color:#e8e8e8; margin:0; }
+      header, footer { padding: 12px 16px; background:#11131a; border-bottom:1px solid #222; }
+      main { padding: 16px; }
+      input, button { padding:8px; border-radius:6px; border:1px solid #333; background:#11131a; color:#e8e8e8 }
+      table { width:100%; border-collapse: collapse; margin-top:12px }
+      th, td { border-bottom:1px solid #222; text-align:left; padding:8px }
+      .card { border:1px solid #222; border-radius:8px; padding:12px; background:#0f1117 }
+      .row { display:flex; gap:8px; align-items:center }
+      .mt { margin-top:12px }
+      /* layout */
+      .layout { display:flex; gap:12px; min-height:60vh }
+      .sidebar { width:220px; background:#11131a; border:1px solid #222; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px }
+      .nav-btn { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid #2a2a2a; background:#0f1117; border-radius:8px; cursor:pointer }
+      .nav-btn.active { border-color:#445; background:#121624 }
+      .spacer { flex:1 }
+      .content { flex:1; }
+    </style>
+  </head>
+  <body>
+    <header><strong>Red Mugsy Admin</strong></header>
+    <main>
+      <div id="login" class="card">
+        <div class="row">
+          <input id="username" placeholder="Username" />
+          <input id="password" type="password" placeholder="Password" />
+          <button id="loginBtn">Login</button>
+        </div>
+        <div id="loginMsg" class="mt" style="color:#f88"></div>
+      </div>
+
+      <div id="panel" class="card" style="display:none">
+        <div class="layout">
+          <aside class="sidebar">
+            <button id="tabContacts" class="nav-btn active">Contacts</button>
+            <button id="tabClaims" class="nav-btn">Claims</button>
+            <div class="spacer"></div>
+            <button id="btnSettings" class="nav-btn">Settings</button>
+          </aside>
+          <section class="content">
+        <!-- Contacts Tab -->
+        <div id="contactsTab">
+           <div class="row">
+             <button id="refresh">Refresh</button>
+             <input id="q" placeholder="Search name/email/purpose/subject or YYYY-MM-DD" style="flex:1" />
+             <select id="sortBy">
+               <option value="date">Date</option>
+               <option value="name">Name</option>
+               <option value="email">Email</option>
+               <option value="purpose">Purpose</option>
+               <option value="subject">Subject</option>
+             </select>
+             <select id="sortDir">
+               <option value="desc">Desc</option>
+               <option value="asc">Asc</option>
+             </select>
+             <span id="count" style="margin-left:auto"></span>
+           </div>
+           <div class="mt" id="tokenInfo" style="font-size:12px;color:#9ad">Token: <span id="tokState">—</span></div>
+           <table id="tbl">
+             <thead>
+               <tr>
+                 <th>Date</th><th>Name</th><th>Email</th><th>Purpose</th><th>Subject</th><th></th>
+               </tr>
+             </thead>
+             <tbody></tbody>
+           </table>
+           <pre id="details" class="mt" style="white-space:pre-wrap"></pre>
+        </div>
+
+        <!-- Claims Tab -->
+        <div id="claimsTab" style="display:none">
+          <div class="row">
+            <button id="refreshClaims">Refresh</button>
+            <input id="qClaims" placeholder="Search address/contract/tx/type/status or YYYY-MM-DD" style="flex:1" />
+            <select id="sortByClaims">
+              <option value="date">Date</option>
+              <option value="address">Address</option>
+              <option value="chain">Chain</option>
+              <option value="contract">Contract</option>
+              <option value="type">Type</option>
+              <option value="status">Status</option>
+              <option value="amount">Amount</option>
+            </select>
+            <select id="sortDirClaims">
+              <option value="desc">Desc</option>
+              <option value="asc">Asc</option>
+            </select>
+            <span id="countClaims" style="margin-left:auto"></span>
+          </div>
+          <table id="tblClaims">
+            <thead>
+              <tr>
+                <th>Date</th><th>Address</th><th>Chain</th><th>Contract</th><th>Type</th><th>Status</th><th>Amount</th><th>Tx</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <pre id="detailsClaims" class="mt" style="white-space:pre-wrap"></pre>
+        </div>
+        
+        <!-- Settings / User Management -->
+        <div id="settingsPanel" style="display:none">
+          <div class="row" style="align-items:center; justify-content:space-between">
+            <h3 style="margin:0">User Management</h3>
+            <button id="umAddBtn" title="Add User" style="width:34px;height:34px;border:1px solid #2a2a2a;border-radius:6px;background:#0f1117">+</button>
+          </div>
+          <div id="umForm" class="row" style="display:none; margin-top:8px">
+            <input id="umFullName" placeholder="Full Name" />
+            <input id="umUsername" placeholder="Email (username)" />
+            <input id="umPassword" type="password" placeholder="Password (leave blank to keep)" />
+            <select id="umRole">
+              <option value="MASTER">Master</option>
+              <option value="ENGAGEMENT">Engagement</option>
+              <option value="CLAIM_MANAGER">Claim Manager</option>
+            </select>
+            <button id="umSave">Submit</button>
+            <button id="umCancel" style="display:none">Cancel</button>
+          </div>
+          <table id="tblUsers" style="margin-top:8px">
+            <thead>
+              <tr><th>Name</th><th>Username</th><th>Role</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="umMsg" class="mt" style="color:#9ad"></div>
+        </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer>© Red Mugsy</footer>
+    <script>
+      const api = location.origin
+      let token = ''
+      const login = document.getElementById('login')
+      const panel = document.getElementById('panel')
+      const msg = document.getElementById('loginMsg')
+      document.getElementById('loginBtn').onclick = async () => {
+        const btn = document.getElementById('loginBtn')
+        btn.disabled = true
+        msg.textContent = 'Signing in…'
+        try {
+          const u = document.getElementById('username').value
+          const p = document.getElementById('password').value
+          const body = new URLSearchParams({ grant_type:'password', username:u, password:p })
+          const r = await fetch(api + '/oauth/token', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body })
+          const text = await r.text()
+          let j = {}
+          try { j = JSON.parse(text) } catch {}
+          if (!r.ok) { msg.textContent = (j && j.error) ? String(j.error) : (text || 'Login failed'); return }
+          token = j.access_token
+          await afterLogin()
+          login.style.display = 'none'; panel.style.display='block'
+          showToken()
+          load()
+        } catch (e) {
+          console.error('Login error', e)
+          msg.textContent = 'Network error. Is the server running?'
+        } finally {
+          btn.disabled = false
+        }
+      }
+      document.getElementById('refresh').onclick = load
+      document.getElementById('q').onkeydown = (e)=>{ if(e.key==='Enter') load() }
+      document.getElementById('sortBy').onchange = load
+      document.getElementById('sortDir').onchange = load
+      // Tab handling
+      const tabContacts = document.getElementById('tabContacts')
+      const tabClaims = document.getElementById('tabClaims')
+      const contactsTab = document.getElementById('contactsTab')
+      const claimsTab = document.getElementById('claimsTab')
+      const settingsPanel = document.getElementById('settingsPanel')
+      tabContacts.onclick = ()=>{ contactsTab.style.display='block'; claimsTab.style.display='none'; settingsPanel.style.display='none'; tabContacts.classList.add('active'); tabClaims.classList.remove('active') }
+      tabClaims.onclick = ()=>{ contactsTab.style.display='none'; claimsTab.style.display='block'; settingsPanel.style.display='none'; tabContacts.classList.remove('active'); tabClaims.classList.add('active'); loadClaims() }
+      document.getElementById('btnSettings').onclick = ()=>{ contactsTab.style.display='none'; claimsTab.style.display='none'; settingsPanel.style.display='block'; tabContacts.classList.remove('active'); tabClaims.classList.remove('active'); loadUsers() }
+      function showToken(){
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          const exp = new Date(payload.exp*1000)
+          document.getElementById('tokState').textContent = `valid • expires ${exp.toLocaleString()}`
+        } catch { document.getElementById('tokState').textContent = 'unknown' }
+      }
+      // role / privilege handling
+      let myRole = 'MASTER'
+      async function afterLogin(){
+        try {
+          const r = await fetch(api+'/api/admin/me', { headers:{ Authorization:'Bearer '+token }})
+          if (r.ok){ const me = await r.json(); myRole = me.role || 'MASTER' }
+        } catch {}
+        // Hide UI based on role
+        if (myRole === 'ENGAGEMENT') { tabClaims.style.display='none'; document.getElementById('btnSettings').style.display='none' }
+        if (myRole === 'CLAIM_MANAGER') { tabContacts.style.display='none'; document.getElementById('btnSettings').style.display='none'; tabClaims.click() }
+      }
+
+      async function load(){
+        const q = encodeURIComponent(document.getElementById('q').value || '')
+        const sortBy = document.getElementById('sortBy').value
+        const sortDir = document.getElementById('sortDir').value
+        const url = api + `/api/admin/submissions?take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
+        const r = await fetch(url, { headers:{ Authorization: 'Bearer '+token }})
+        const j = await r.json()
+        document.getElementById('count').textContent = `Total: ${j.total}`
+        const tbody = document.querySelector('#tbl tbody'); tbody.innerHTML = ''
+        for (const s of j.items){
+          const tr = document.createElement('tr')
+          tr.innerHTML = `<td>${new Date(s.createdAt).toLocaleString()}</td><td>${s.name}</td><td>${s.email}</td><td>${s.purpose}</td><td>${s.subject||''}</td><td><button data-id="${s.id}">View</button></td>`
+          tbody.appendChild(tr)
+        }
+        tbody.querySelectorAll('button').forEach(btn=>{
+          btn.onclick = async () => {
+            const id = btn.getAttribute('data-id')
+            const r = await fetch(api+`/api/admin/submissions/${id}`, { headers:{ Authorization: 'Bearer '+token }})
+            const s = await r.json()
+            const d = document.getElementById('details')
+            d.textContent = JSON.stringify(s, null, 2)
+          }
+        })
+      }
+
+      // Claims loader
+      document.getElementById('refreshClaims').onclick = loadClaims
+      document.getElementById('qClaims').onkeydown = (e)=>{ if(e.key==='Enter') loadClaims() }
+      document.getElementById('sortByClaims').onchange = loadClaims
+      document.getElementById('sortDirClaims').onchange = loadClaims
+      async function loadClaims(){
+        const q = encodeURIComponent(document.getElementById('qClaims').value || '')
+        const sortBy = document.getElementById('sortByClaims').value
+        const sortDir = document.getElementById('sortDirClaims').value
+        const url = api + `/api/admin/claims?take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
+        const r = await fetch(url, { headers:{ Authorization: 'Bearer '+token }})
+        const j = await r.json()
+        document.getElementById('countClaims').textContent = `Total: ${j.total}`
+        const tbody = document.querySelector('#tblClaims tbody'); tbody.innerHTML = ''
+        for (const s of j.items){
+          const tr = document.createElement('tr')
+          const tx = s.txHash ? s.txHash.slice(0,10)+'…' : ''
+          const amt = s.amount ?? ''
+          tr.innerHTML = `<td>${new Date(s.createdAt).toLocaleString()}</td><td>${s.address||''}</td><td>${s.chainId||''}</td><td>${s.contract||''}</td><td>${s.type||''}</td><td>${s.status||''}</td><td>${amt}</td><td>${tx}</td><td><button data-id="${s.id}">View</button></td>`
+          tbody.appendChild(tr)
+        }
+        tbody.querySelectorAll('button').forEach(btn=>{
+          btn.onclick = async () => {
+            const id = btn.getAttribute('data-id')
+            const r = await fetch(api+`/api/admin/claims/${id}`, { headers:{ Authorization: 'Bearer '+token }})
+            const s = await r.json()
+            const d = document.getElementById('detailsClaims')
+            d.textContent = JSON.stringify(s, null, 2)
+          }
+        })
+      }
+
+      // --- User Management ---
+      let editingUserId = ''
+      async function loadUsers(){
+        const r = await fetch(api+'/api/admin/users', { headers:{ Authorization:'Bearer '+token }})
+        if (!r.ok) { document.getElementById('umMsg').textContent = 'Not authorized or error'; return }
+        const j = await r.json()
+        const tbody = document.querySelector('#tblUsers tbody'); tbody.innerHTML=''
+        for (const u of j.items){
+          const tr = document.createElement('tr')
+          tr.innerHTML = `<td>${u.fullName||''}</td><td>${u.username}</td><td>${u.role}</td><td>${new Date(u.createdAt).toLocaleString()}</td><td><button class="umMenu" data-id="${u.id}">⋯</button><div class="menu" style="display:none; position:absolute; background:#11131a; border:1px solid #333; border-radius:6px; padding:4px"><button data-id="${u.id}" data-act="edit">Modify</button><button data-id="${u.id}" data-act="del">Delete</button></div></td>`
+          tbody.appendChild(tr)
+        }
+        // wire menus
+        tbody.querySelectorAll('.umMenu').forEach(btn=>{
+          btn.onclick = ()=>{
+            const div = btn.nextElementSibling
+            if (!div) return
+            const style = div.style
+            style.display = style.display==='none' || !style.display ? 'block' : 'none'
+            const rect = btn.getBoundingClientRect()
+            style.left = (rect.left-20)+'px'
+            style.top = (rect.bottom+4)+'px'
+          }
+        })
+        tbody.querySelectorAll('.menu button').forEach(btn=>{
+          btn.onclick = async ()=>{
+            const id = btn.getAttribute('data-id')
+            const act = btn.getAttribute('data-act')
+            if (act==='del'){
+              if (!confirm('Delete user?')) return
+              await fetch(api+`/api/admin/users/${id}`, { method:'DELETE', headers:{ Authorization:'Bearer '+token }})
+              loadUsers();
+            } else {
+              const row = btn.closest('tr')
+              editingUserId = id
+              document.getElementById('umFullName').value = row.children[0].textContent
+              document.getElementById('umUsername').value = row.children[1].textContent
+              document.getElementById('umPassword').value = ''
+              document.getElementById('umRole').value = row.children[2].textContent
+              document.getElementById('umSave').textContent = 'Submit'
+              document.getElementById('umCancel').style.display='inline-block'
+              document.getElementById('umForm').style.display='flex'
+            }
+          }
+        })
+      }
+      document.getElementById('umAddBtn').onclick = ()=>{ editingUserId=''; document.getElementById('umFullName').value=''; document.getElementById('umUsername').value=''; document.getElementById('umPassword').value=''; document.getElementById('umRole').value='ENGAGEMENT'; document.getElementById('umSave').textContent='Submit'; document.getElementById('umCancel').style.display='inline-block'; document.getElementById('umForm').style.display='flex' }
+      document.getElementById('umCancel').onclick = ()=>{ editingUserId=''; document.getElementById('umFullName').value=''; document.getElementById('umUsername').value=''; document.getElementById('umPassword').value=''; document.getElementById('umRole').value='ENGAGEMENT'; document.getElementById('umSave').textContent='Submit'; document.getElementById('umCancel').style.display='none'; document.getElementById('umForm').style.display='none' }
+      document.getElementById('umSave').onclick = async ()=>{
+        const fullName = document.getElementById('umFullName').value.trim()
+        const username = document.getElementById('umUsername').value.trim()
+        const password = document.getElementById('umPassword').value
+        const role = document.getElementById('umRole').value
+        if (!username) { alert('Username required'); return }
+        if (!editingUserId && !password) { alert('Password required'); return }
+        const payload = Object.assign({ username, role }, password?{password}: {}, fullName?{fullName}: {})
+        const opts = { method: editingUserId ? 'PATCH':'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+token }, body: JSON.stringify(payload) }
+        const url = api + (editingUserId ? `/api/admin/users/${editingUserId}` : '/api/admin/users')
+        const r = await fetch(url, opts)
+        if (!r.ok) { alert('Error saving'); return }
+        document.getElementById('umMsg').textContent = 'Saved'
+        document.getElementById('umCancel').click()
+        loadUsers()
+      }
+    </script>
+  </body>
+  </html>

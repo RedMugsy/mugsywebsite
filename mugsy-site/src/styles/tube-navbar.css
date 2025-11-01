@@ -1,0 +1,117 @@
+/* Tube body: metallic cylinder with inner glow */
+.tube-nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  height: 60px;
+  border-radius: 9999px;
+  z-index: 20; /* ensure dropdown overlays CTA buttons */
+  background:
+    radial-gradient(100% 80% at 50% 20%, rgba(255,255,255,0.06) 0%, transparent 60%) ,
+    linear-gradient(180deg, rgba(58,58,58,0.5) 0%, rgba(15,15,15,0.5) 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(255,255,255,0.04),
+    inset 0 -4px 10px rgba(0,0,0,0.3),
+    0 10px 24px rgba(0,0,0,0.225);
+}
+
+.tube-items {
+  display: flex;
+  gap: 14px; /* uniform, slightly larger gaps */
+  position: relative;
+  z-index: 1; /* above tube body */
+  padding: 0 8px;
+}
+
+.tube-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+/* Silver/steel label look */
+.tube-label {
+  background: linear-gradient(180deg, #ffffff 0%, #cfcfcf 45%, #9f9f9f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  font-size: 70%; /* reduce label size by ~30% */
+}
+
+/* Active label (on red ring) goes dark for contrast */
+.tube-item--active .tube-label {
+  background: none;
+  color: #0b0b0b;
+}
+
+/* Active item shows a red border regardless of ring position */
+.tube-item--active {
+  box-shadow: inset 0 0 0 2px #ff1a4b, 0 0 0 1px rgba(255,26,75,0.35);
+}
+
+/* Hovered non-active item turns label neon red while ring previews move */
+.tube-item:not(.tube-item--active):hover .tube-label {
+  background: none; /* disable silver gradient to allow solid text color */
+  color: #0b0b0b;   /* black text when ring previews on hover */
+}
+
+/* When previewing another item, keep active border and switch active text to neon red */
+.tube-nav[data-preview="true"] .tube-item--active .tube-label {
+  color: #ff1a4b;
+}
+
+/* The red wrap-around ring */
+.tube-ring {
+  position: absolute;
+  top: 50%;
+  left: 0; /* Controlled via inline style left: ringX */
+  width: 150px;              /* slightly narrower ring */
+  height: 50px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background:
+    radial-gradient(120% 140% at 50% 10%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, #ff405f 0%, #ff1a4b 35%, #c40f2f 100%);
+  box-shadow:
+    inset 0 2px 8px rgba(255,255,255,0.25),
+    inset 0 -6px 12px rgba(0,0,0,0.35),
+    0 6px 18px rgba(255, 26, 75, 0.35);
+  z-index: 0; /* under labels */
+  transition: transform 360ms cubic-bezier(.2,.8,.2,1), left 360ms cubic-bezier(.2,.8,.2,1);
+}
+
+/* Subtle wrap lip using pseudo elements */
+.tube-ring::before,
+.tube-ring::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 8px;
+  border-radius: 9999px;
+  filter: blur(1px);
+}
+.tube-ring::before { left: -4px; background: rgba(0,0,0,0.55); }
+.tube-ring::after  { right: -4px; background: rgba(0,0,0,0.55); }
+
+/* Mobile fallback underline */
+@media (max-width: 767px) {
+  .tube-ring { display: none; }
+  .tube-underline {
+    position: absolute;
+    bottom: 6px;
+    height: 3px;
+    width: 80px;
+    border-radius: 9999px;
+    background: linear-gradient(180deg, #ff405f, #ff1a4b);
+    box-shadow: 0 2px 8px rgba(255,26,75,0.5);
+    transition: transform 280ms cubic-bezier(.2,.8,.2,1), left 280ms cubic-bezier(.2,.8,.2,1);
+  }
+}

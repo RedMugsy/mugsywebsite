@@ -93,25 +93,18 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
     return () => window.clearTimeout(id);
   }, [computeCenters, links.length]);
 
-  // Measure tube's left relative to outer and expand width to the right edge only
+  // Measure tube's left relative to outer and expand width to the full navigation area
   const measureAndExpand = useCallback(() => {
     const outer = outerRef.current;
     const tube = containerRef.current;
     if (!outer || !tube) return;
-    // Fallback measurement: align tube's right edge to CTA group's left edge
     const nav = outer.closest('nav');
     const o = outer.getBoundingClientRect();
     const t = tube.getBoundingClientRect();
     const left = Math.max(0, t.left - o.left);
-    let width: number;
-    const cta = document.getElementById('cta-buttons') || document.getElementById('cta-group');
-    if (cta) {
-      const c = cta.getBoundingClientRect();
-      width = Math.max(0, Math.round(c.right - t.left));
-    } else {
-      const n = nav ? (nav as HTMLElement).getBoundingClientRect() : o;
-      width = Math.max(0, Math.round(n.right - t.left));
-    }
+    // Always extend to the full width of the navigation container
+    const n = nav ? (nav as HTMLElement).getBoundingClientRect() : o;
+    const width = Math.max(0, Math.round(n.right - t.left));
     setTubeLeft(left);
     setTubeWidth(width);
   }, []);

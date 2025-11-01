@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import MainNav from './components/MainNav'
+import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from 'react-i18next'
@@ -246,7 +246,18 @@ export default function App() {
       </div>
 
       {/* NAV */}
-      <MainNav />
+      <SiteHeader onHome />
+      {/* Action buttons row (CTAs not part of the shared header) */}
+      <div className="py-2 px-6">
+        <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-end">
+          <div id="cta-buttons" className="flex items-center gap-3 shrink-0">
+            <a href="#buy" className="btn-buy" aria-label="Buy $MUGSY">Buy $MUGSY</a>
+            {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
+              <a href="/claim" className="btn-claim" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* HERO */}
       <section

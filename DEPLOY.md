@@ -1,105 +1,177 @@
-Red Mugsy — Deployment Guide
+# 🚀 Complete Deployment Guide - Red Mugsy Website
 
-This guide walks you through launching the site on your domain (purchased on GoDaddy). Pick a hosting option for the static frontend and one for the Node.js API.
+## Overview
+Your Red Mugsy website consists of two parts:
+1. **Frontend** (React/Vite) → Deployed on GitHub Pages
+2. **Backend** (Node.js/Express) → Deployed on Railway
 
-Overview
-- Frontend (static): mugsy-site (Vite + React) → host on Netlify, Vercel, or Cloudflare Pages
-- Backend API: contact-api (Node.js + Express) → host on Render, Railway, Fly.io, or a VPS
-- Domain: managed on GoDaddy — update DNS to point to your hosts
+## 📋 Prerequisites
+- GitHub account (already set up ✅)
+- Railway account (need to create)
+- Gmail account (for sending emails)
 
-What You’ll Need
-- GoDaddy account access (to update DNS)
-- A hosting account (Netlify/Vercel/Cloudflare for frontend; Render/Railway/Fly/your VPS for backend)
-- Backend environment variables (see below)
-- Frontend environment variables (see below)
+---
 
-Frontend (mugsy-site)
-1) Environment
-   Create mugsy-site/.env.production with the following keys:
-   - VITE_API_BASE=           # leave empty if using same-origin proxy; else https://api.redmugsy.com
-   - VITE_TURNSTILE_SITEKEY=  # Cloudflare Turnstile site key (prod)
-   - VITE_FEATURE_CLAIM=false # or true if launching the claim page
-   - VITE_CLAIM_CONTRACT=     # 0x… (if claim enabled)
-   - VITE_CLAIM_CHAIN_ID=     # e.g., 1 (Ethereum), 8453 (Base)
-   - VITE_CLAIM_RPC_URL=      # public RPC; required if claim enabled
-   - VITE_MAX_UPLOAD_MB=10
-   - VITE_GA_ID=              # optional; Google Analytics 4 ID
+## 🔧 Backend Deployment (Railway)
 
-2) Build locally
-   cd mugsy-site
-   npm ci
-   npm run build
-   # Output: mugsy-site/dist
+### Step 1: Create Railway Account
+1. Go to [Railway.app](https://railway.app)
+2. Sign up with your GitHub account
+3. Verify your email
 
-3) Host options
-   - Netlify: New Site → Build command: "npm run build"; Publish dir: "mugsy-site/dist"; Base dir: "mugsy-site".
-   - Vercel: Import → Framework: Vite; Root directory: mugsy-site; Build: npm run build; Output: dist.
-   - Cloudflare Pages: Project root: mugsy-site; Build command: npm run build; Output: dist.
+### Step 2: Deploy Backend
+1. In Railway, click **"New Project"**
+2. Select **"Deploy from GitHub repo"**
+3. Choose your `mugsywebsite` repository
+4. Select **"contact-api"** as the root directory
+5. Railway will auto-detect Node.js and start building
 
-4) Rewrites (SPA + API proxy)
-   Ensure SPA fallback and /api proxy to backend:
-   - Netlify _redirects example (put in mugsy-site/_redirects):
-     /*                /index.html   200
-     /api/*            https://api.redmugsy.com/:splat   200
+### Step 3: Configure Environment Variables
+In Railway project dashboard → **Variables** tab:
 
-   - Vercel vercel.json example (put in mugsy-site/vercel.json):
-     {
-       "rewrites": [
-         { "source": "/api/:path*", "destination": "https://api.redmugsy.com/:path*" }
-       ]
-     }
+**Required Variables:**
+```bash
+DATABASE_URL=file:./data.db
+PORT=8787
+ALLOWED_ORIGINS=https://redmugsy.github.io
+```
 
-Backend (contact-api)
-1) Environment (.env)
-   - PORT=4000
-   - APP_BASE_URL=https://redmugsy.com       # Frontend origin for CORS
-   - SESSION_SECRET=your-strong-secret
-   - SMTP_HOST=…
-   - SMTP_PORT=587
-   - SMTP_USER=…
-   - SMTP_PASS=…
-   - SMTP_FROM="Red Mugsy <no-reply@redmugsy.com>"
-   - CAPTCHA_PROVIDER=turnstile
-   - TURNSTILE_SECRET=…                      # Cloudflare Turnstile secret key
-   - FEATURE_CLAIM=false                     # or true, plus rate limits
-   - RATE_LIMIT_PER_MINUTE=5
-   - RATE_LIMIT_PER_DAY=50
-   - RATE_EMAIL_PER_HOUR=3
-   - MAX_UPLOAD_MB=10
-   - ALLOWED_UPLOAD_MIME=application/pdf,image/png,image/jpeg,image/webp,text/plain
-   - (Optional) REDIS_URL=…                  # enables stronger rate-limiting/session cache
+**Email Configuration (Gmail):**
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-gmail-app-password
+MAIL_FROM=noreply@redmugsy.com
+MAIL_TO=support@redmugsy.com
+```
 
-2) Build & run
-   cd contact-api
-   npm ci
-   npm run build
-   npm start  # serves on PORT
+**Admin Panel (Optional):**
+```bash
+ADMIN_UI_ENABLED=true
+ADMIN_USER=admin
+ADMIN_PASS=your-secure-password
+ADMIN_JWT_SECRET=your-super-secret-jwt-key-128-chars-long
+ADMIN_NAME=Red Mugsy Admin
+```
 
-3) Hosted options
-   - Render: New Web Service → Build: npm run build, Start: npm start
-   - Railway/Fly.io: similar (Docker optional)
-   - VPS (Nginx reverse proxy): point /api to http://127.0.0.1:4000
+### Step 4: Gmail App Password Setup
+1. Enable 2-Factor Authentication on Gmail
+2. Go to Google Account → Security → App passwords
+3. Generate app password for "Mail"
+4. Use this password for `SMTP_PASS` (not your regular Gmail password)
 
-DNS (GoDaddy)
-1) Frontend host
-   - If Netlify: add a CNAME for "www" to your Netlify subdomain. Set root A record via Netlify DNS or ANAME/ALIAS if supported. Enable HTTPS.
-   - If Vercel: add domain; Vercel provides CNAME/A/AAAA targets. Enable HTTPS.
-   - If Cloudflare Pages: set CNAME, enable SSL.
+### Step 5: Get Your Railway URL
+After deployment, Railway gives you a URL like:
+```
+https://contact-api-production-xyz.railway.app
+```
+**Save this URL - you'll need it for frontend configuration!**
 
-2) Backend host (optional custom api subdomain)
-   - Add A/AAAA or CNAME for api.redmugsy.com to your backend provider.
-   - Update frontend rewrite target to https://api.redmugsy.com.
+---
 
-Go‑Live Checklist
-- Frontend renders at https://redmugsy.com and https://www.redmugsy.com
-- /api/geo, /api/contact/csrf, /api/contact health check OK from the browser
-- Contact form end‑to‑end: captcha verifies, emails send/receive
-- Footer/legal links open
-- Cookie pages display
-- HTTPS and redirects (http→https, apex→www or vice versa) working
-- Performance: fast on mobile (Lighthouse acceptable)
+## 🌐 Frontend Configuration
 
-Notes
-- Language selector is currently hidden per request; translations default to English.
-- When ready, re‑enable translations and QA coverage before exposing.
+### Step 6: Update Frontend API URL
+1. Edit `mugsy-site/.env.production`
+2. Replace `your-railway-app` with your actual Railway URL:
+```bash
+VITE_API_BASE=https://contact-api-production-xyz.railway.app
+```
+
+### Step 7: Deploy Frontend Updates
+```bash
+git add mugsy-site/.env.production
+git commit -m "Update API URL for production"
+git push origin main
+```
+
+GitHub Actions will automatically rebuild and deploy your site!
+
+---
+
+## ✅ Testing Your Deployment
+
+### Backend Health Check
+Visit: `https://your-railway-url.railway.app/health`
+Should return: `{"status":"ok"}`
+
+### Admin Panel
+Visit: `https://your-railway-url.railway.app/admin/`
+Login with your `ADMIN_USER` and `ADMIN_PASS`
+
+### Frontend
+Visit: `https://redmugsy.github.io/mugsywebsite/`
+Test the contact form - it should now work with your Railway backend!
+
+---
+
+## 🔒 Security Notes
+
+- ✅ Use strong passwords for admin accounts
+- ✅ Keep your JWT secret long and complex (128+ characters)
+- ✅ Only add trusted domains to `ALLOWED_ORIGINS`
+- ✅ Use Gmail App Passwords, not regular passwords
+- ✅ Keep environment variables private
+
+---
+
+## 📊 Monitoring
+
+### Railway Dashboard
+- View logs, metrics, and deployment status
+- Monitor database usage and API calls
+- Set up alerts for downtime
+
+### GitHub Actions
+- Monitor frontend deployment status
+- View build logs and errors
+- Automatic deployments on code changes
+
+---
+
+## 🛠 Troubleshooting
+
+### Common Issues
+
+**"CORS Error"**
+- Check `ALLOWED_ORIGINS` includes your GitHub Pages URL
+- Verify Railway deployment is running
+
+**"Email not sending"**
+- Verify Gmail App Password is correct
+- Check SMTP settings in Railway variables
+- Ensure 2FA is enabled on Gmail
+
+**"Admin login fails"**
+- Check `ADMIN_USER` and `ADMIN_PASS` variables
+- Verify `ADMIN_JWT_SECRET` is set
+- Try clearing browser cookies
+
+**"Contact form not working"**
+- Verify `VITE_API_BASE` points to Railway URL
+- Check Railway deployment is healthy (/health endpoint)
+- Verify CORS settings
+
+### Support
+If you encounter issues:
+1. Check Railway deployment logs
+2. Verify all environment variables are set
+3. Test individual API endpoints
+4. Check GitHub Actions build logs
+
+---
+
+## 🎉 You're Done!
+
+Your complete Red Mugsy website is now live with:
+- ✅ Frontend hosted on GitHub Pages
+- ✅ Backend API hosted on Railway  
+- ✅ Contact form fully functional
+- ✅ Admin panel for managing submissions
+- ✅ Automatic deployments on code changes
+- ✅ Professional email delivery system
+
+**Website:** https://redmugsy.github.io/mugsywebsite/
+**Admin:** https://your-railway-url.railway.app/admin/
 

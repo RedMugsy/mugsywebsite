@@ -363,12 +363,12 @@ export default function App() {
       {/* All action buttons row (moved from header and hero) */}
       <div className="py-2 px-6 -mt-24">
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
-          <div id="cta-buttons" className="flex items-center gap-4 shrink-0 flex-wrap justify-center">
-            <a href="#buy" className="btn-neo text-lg px-8 py-4" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
-            <a href="#tokenomics" className="btn-ghost btn-ghost--red text-lg px-8 py-4" aria-label="View Tokenomics">{t('hero.cta_secondary')}</a>
-            <a href="#buy" className="btn-buy text-lg px-8 py-4" aria-label="Buy $MUGSY">Buy $MUGSY</a>
+          <div id="cta-buttons" className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4 sm:shrink-0 sm:flex-wrap sm:justify-center w-full sm:w-auto">
+            <a href="#buy" className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
+            <a href="#tokenomics" className="btn-ghost btn-ghost--red text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="View Tokenomics">{t('hero.cta_secondary')}</a>
+            <a href="#buy" className="btn-buy text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">Buy $MUGSY</a>
             {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
-              <a href="/claim" className="btn-claim text-lg px-8 py-4" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+              <a href="/claim" className="btn-claim text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Claim $MUGSY">Claim $MUGSY</a>
             )}
           </div>
         </div>

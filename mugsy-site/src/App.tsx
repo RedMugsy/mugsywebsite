@@ -54,7 +54,7 @@ function BackToTop() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          src="/img/Rabbit Face.png"
+          src="img/Rabbit Face.png"
           alt="Rabbit face"
           className="fixed bottom-6 right-28 z-40 h-[3.75rem] w-[3.75rem] rounded-full shadow-lg pointer-events-none select-none drop-shadow-[0_0_10px_#ff1a4b66]"
           loading="lazy"
@@ -70,8 +70,8 @@ function BackToTop() {
   The inner wrapper spins; front/back are flipped 180deg so only one coin is visible at a time.
 */
 function Coin3D({
-  front = "/img/mugsy-coin.png",
-  back = "/img/Golden and Black Coin Back.png",
+  front = "img/mugsy-coin.png",
+  back = "img/Golden and Black Coin Back.png",
   size = 120,
   speed = "7s",
   className = "",
@@ -180,7 +180,7 @@ export default function App() {
           aria-label="X / Twitter"
           title="X / Twitter"
         >
-          <img src="/img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
+          <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
         </a>
         <a
           href="#"
@@ -190,7 +190,7 @@ export default function App() {
           aria-label="BlueSky"
           title="BlueSky"
         >
-          <img src="/img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
+          <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
         </a>
         <a
           href="https://t.me/REDMUGSY"
@@ -200,7 +200,7 @@ export default function App() {
           aria-label="Telegram"
           title="Telegram"
         >
-          <img src="/img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
+          <img src="img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
         </a>
         <a
           href="https://discord.gg/9GJcjKhaYj"
@@ -210,7 +210,7 @@ export default function App() {
           aria-label="Discord"
           title="Discord"
         >
-          <img src="/img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
+          <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
         </a>
         <a
           href="#"
@@ -220,7 +220,7 @@ export default function App() {
           aria-label="TikTok"
           title="TikTok"
         >
-          <img src="/img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
+          <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
         </a>
         <a
           href="https://www.instagram.com/redmugsy/"
@@ -230,7 +230,7 @@ export default function App() {
           aria-label="Instagram"
           title="Instagram"
         >
-          <img src="/img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
+          <img src="img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
         </a>
         <a
           href="https://www.reddit.com/user/redmugsy/"
@@ -240,7 +240,7 @@ export default function App() {
           aria-label="Reddit"
           title="Reddit"
         >
-          <img src="/img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
+          <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
         </a>
         </div>
       </div>
@@ -277,13 +277,13 @@ export default function App() {
 
         {/* Hero art */}
         <img
-          src="/img/mugsy-rabbit.webp"
+          src="img/mugsy-rabbit.webp"
           alt="Red Mugsy holding a mug"
           className="pointer-events-none select-none absolute right-[10%] top-20 sm:right-[10%] sm:top-16 w-36 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88]"
           style={{ scale: 0.7475 }}
         />
         <motion.img
-          src="/img/mugsy-ech042.webp"
+          src="img/mugsy-ech042.webp"
           alt="Astronaut bunny with red mug"
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: [-10, 8, -10], opacity: 0.9 }}
@@ -395,7 +395,7 @@ export default function App() {
 
           <div className="flex items-center justify-center">
             <img
-              src="/img/RedMugsy Home Office Trading.png"
+              src="img/RedMugsy Home Office Trading.png"
               alt="Red Mugsy at home office trading"
               loading="lazy"
               className="w-full max-w-md rounded-xl shadow-2xl drop-shadow-[0_0_24px_#ff1a4b55]"
@@ -408,7 +408,7 @@ export default function App() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="flex items-center justify-center order-2 md:order-1">
               <img
-                src="/img/ECH042 Profile Pic.png"
+                src="img/ECH042 Profile Pic.png"
                 alt="Ech042 AI Barista Profile"
                 loading="lazy"
                 className="w-full max-w-md rounded-xl shadow-2xl drop-shadow-[0_0_24px_#00F0FF55]"
@@ -482,8 +482,8 @@ export default function App() {
         titleRight={
           <div className="hidden md:block">
             <Coin3D
-              front="/img/mugsy-coin.png"
-              back="/img/Golden and Black Coin Back.png"
+              front="img/mugsy-coin.png"
+              back="img/Golden and Black Coin Back.png"
               size={120}
               speed="7s"
               className="drop-shadow-[0_0_18px_#ff1a4b55]"

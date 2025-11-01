@@ -8,13 +8,13 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
       <nav className="max-w-7xl mx-auto flex items-start justify-between py-3 px-6">
         <div>
           <a href="/" className="flex items-center gap-2 font-extrabold text-white tracking-tight text-lg">
-            <img src="/img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-28 w-auto" />
+            <img src="img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-28 w-auto" />
             <span><span className="text-[#ff1a4b]">RED</span> $MUGSY</span>
           </a>
           {showBackHome && (
             <div className="mt-2">
               <a href="/" className="btn-ghost btn-ghost--red gap-2">
-                <img src="/img/Back Home Icon.png" alt="" aria-hidden className="h-5 w-5" />
+                <img src="img/Back Home Icon.png" alt="" aria-hidden className="h-5 w-5" />
                 Back to Home
               </a>
             </div>

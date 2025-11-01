@@ -483,7 +483,7 @@ body { @apply bg-black text-slate-200 antialiased; }
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/img/Rabbit Face.png");
+  background-image: url("img/Rabbit Face.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;

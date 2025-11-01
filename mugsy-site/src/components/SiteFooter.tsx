@@ -42,25 +42,25 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
             <h3 className="font-bold text-white mb-3">{t('footer.community')}</h3>
             <div className="flex items-center gap-3">
               <a href="https://x.com/RedMugsy85838" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="X / Twitter" title="X / Twitter">
-                <img src="/img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
+                <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
               </a>
               <a href="#" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="BlueSky" title="BlueSky">
-                <img src="/img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
+                <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
               </a>
               <a href="https://t.me/REDMUGSY" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Telegram" title="Telegram">
-                <img src="/img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
+                <img src="img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
               </a>
               <a href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Discord" title="Discord">
-                <img src="/img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
+                <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
               </a>
               <a href="#" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
-                <img src="/img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
+                <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
               </a>
               <a href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Instagram" title="Instagram">
-                <img src="/img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
+                <img src="img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
               </a>
               <a href="https://www.reddit.com/user/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Reddit" title="Reddit">
-                <img src="/img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
+                <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
               </a>
             </div>
           </div>

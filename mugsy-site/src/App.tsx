@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import SiteHeader from './components/SiteHeader'
+import MainNav from './components/MainNav'
 import SiteFooter from './components/SiteFooter'
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from 'react-i18next'
@@ -246,18 +246,7 @@ export default function App() {
       </div>
 
       {/* NAV */}
-      <SiteHeader onHome />
-      {/* Action buttons row (CTAs not part of the shared header) */}
-      <div className="py-2 px-6">
-        <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-end">
-          <div id="cta-buttons" className="flex items-center gap-3 shrink-0">
-            <a href="#buy" className="btn-buy" aria-label="Buy $MUGSY">Buy $MUGSY</a>
-            {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
-              <a href="/claim" className="btn-claim" aria-label="Claim $MUGSY">Claim $MUGSY</a>
-            )}
-          </div>
-        </div>
-      </div>
+      <MainNav />
 
       {/* HERO */}
       <section
@@ -274,22 +263,6 @@ export default function App() {
             style={parallaxStyle}
           />
         </div>
-
-        {/* Hero art - positioned under text on mobile, alongside text on desktop */}
-        <img
-          src="img/mugsy-rabbit.webp"
-          alt="Red Mugsy holding a mug"
-          className="pointer-events-none select-none absolute right-[20%] bottom-8 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
-          style={{ scale: 0.7475 }}
-        />
-        <motion.img
-          src="img/mugsy-ech042.webp"
-          alt="Astronaut bunny with red mug"
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: [-10, 8, -10], opacity: 0.7 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-          className="pointer-events-none select-none absolute left-[20%] bottom-8 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-60 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
-        />
 
         <div className="max-w-4xl px-4 sm:px-6 text-center space-y-4 sm:space-y-6">
             <h1 className="glitch-text text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-tight break-words">
@@ -360,6 +333,22 @@ export default function App() {
             </Marquee>
           </div>
         </div>
+
+        {/* Hero art - positioned under text on mobile, alongside text on desktop */}
+        <img
+          src="img/mugsy-rabbit.webp"
+          alt="Red Mugsy holding a mug"
+          className="pointer-events-none select-none absolute right-[20%] bottom-8 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
+          style={{ scale: 0.7475 }}
+        />
+        <motion.img
+          src="img/mugsy-ech042.webp"
+          alt="Astronaut bunny with red mug"
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: [-10, 8, -10], opacity: 0.7 }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+          className="pointer-events-none select-none absolute left-[20%] bottom-8 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-60 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
+        />
       </section>
 
       {/* ABOUT */}

@@ -247,22 +247,11 @@ export default function App() {
 
       {/* NAV */}
       <SiteHeader onHome />
-      {/* Action buttons row (CTAs not part of the shared header) */}
-      <div className="py-2 px-6">
-        <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-end">
-          <div id="cta-buttons" className="flex items-center gap-3 shrink-0">
-            <a href="#buy" className="btn-buy" aria-label="Buy $MUGSY">Buy $MUGSY</a>
-            {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
-              <a href="/claim" className="btn-claim" aria-label="Claim $MUGSY">Claim $MUGSY</a>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* HERO */}
       <section
         id="hero"
-        className="relative pt-8 pb-24 sm:pt-12 sm:pb-32 overflow-visible min-h-[80vh]"
+        className="relative pt-8 pb-24 sm:pt-12 sm:pb-32 overflow-visible min-h-[90vh]"
       >
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div
@@ -369,13 +358,24 @@ export default function App() {
               <img
                 src="img/mugsy-rabbit.webp"
                 alt="Red Mugsy holding a mug"
-                className="pointer-events-none select-none w-20 sm:w-32 lg:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100 lg:mt-16"
-                style={{ scale: 0.7475 }}
+                className="pointer-events-none select-none w-32 sm:w-48 lg:w-80 xl:w-96 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
               />
             </div>
           </div>
         </div>
       </section>
+
+      {/* Action buttons row (moved from header) */}
+      <div className="py-8 px-6 -mt-8">
+        <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
+          <div id="cta-buttons" className="flex items-center gap-3 shrink-0">
+            <a href="#buy" className="btn-buy" aria-label="Buy $MUGSY">Buy $MUGSY</a>
+            {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
+              <a href="/claim" className="btn-claim" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* ABOUT */}
       <Section id="about" title={t('sections.about.title')} kicker={t('sections.about.kicker')}>

@@ -262,7 +262,7 @@ export default function App() {
       {/* HERO */}
       <section
         id="hero"
-        className="relative grid items-start justify-center pt-8 pb-24 sm:pt-12 sm:pb-32 overflow-visible min-h-[80vh]"
+        className="relative pt-8 pb-24 sm:pt-12 sm:pb-32 overflow-visible min-h-[80vh]"
       >
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div
@@ -275,7 +275,25 @@ export default function App() {
           />
         </div>
 
-        <div className="max-w-4xl px-4 sm:px-6 text-center space-y-4 sm:space-y-6">
+        {/* Container Layout: Three Equal Parts */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-4">
+          
+          {/* Left Container - Owl */}
+          <div className="flex-1 relative order-3 lg:order-1">
+            <div className="flex justify-center lg:justify-end lg:pr-8">
+              <motion.img
+                src="img/mugsy-ech042.webp"
+                alt="Astronaut bunny with red mug"
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: [-10, 8, -10], opacity: 0.7 }}
+                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+                className="pointer-events-none select-none w-16 sm:w-24 lg:w-40 opacity-60 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
+              />
+            </div>
+          </div>
+
+          {/* Center Container - Text */}
+          <div className="flex-1 text-center space-y-4 sm:space-y-6 order-1 lg:order-2">
             <h1 className="glitch-text text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-tight break-words">
               {t('hero.title')}
             </h1>
@@ -343,23 +361,20 @@ export default function App() {
               <span className="mx-6 tracking-[0.2em] uppercase text-sm">10% Operations</span>
             </Marquee>
           </div>
-        </div>
+          </div>
 
-        {/* Hero art - positioned under text on mobile, alongside text on desktop */}
-        <img
-          src="img/mugsy-rabbit.webp"
-          alt="Red Mugsy holding a mug"
-          className="pointer-events-none select-none absolute right-[20%] bottom-8 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
-          style={{ scale: 0.7475 }}
-        />
-        <motion.img
-          src="img/mugsy-ech042.webp"
-          alt="Astronaut bunny with red mug"
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: [-10, 8, -10], opacity: 0.7 }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-          className="pointer-events-none select-none absolute left-[20%] bottom-8 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-60 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
-        />
+          {/* Right Container - Tall Rabbit */}
+          <div className="flex-1 relative order-2 lg:order-3">
+            <div className="flex justify-center lg:justify-start lg:pl-8">
+              <img
+                src="img/mugsy-rabbit.webp"
+                alt="Red Mugsy holding a mug"
+                className="pointer-events-none select-none w-20 sm:w-32 lg:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100 lg:mt-16"
+                style={{ scale: 0.7475 }}
+              />
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ABOUT */}

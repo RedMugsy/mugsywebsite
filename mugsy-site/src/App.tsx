@@ -326,11 +326,6 @@ export default function App() {
             
           </div>
 
-          <div className="flex items-center justify-center gap-3 pt-4">
-            <a href="#buy" className="btn-neo">{t('hero.cta_primary')}</a>
-            <a href="#tokenomics" className="btn-ghost">{t('hero.cta_secondary')}</a>
-          </div>
-
           {/* dual marquees */}
           <div className="mt-8 space-y-3">
             <Marquee gradient={false} speed={60} className="opacity-90">
@@ -358,20 +353,22 @@ export default function App() {
               <img
                 src="img/mugsy-rabbit.webp"
                 alt="Red Mugsy holding a mug"
-                className="pointer-events-none select-none w-32 sm:w-48 lg:w-80 xl:w-96 drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
+                className="pointer-events-none select-none w-48 sm:w-64 lg:w-96 xl:w-[500px] 2xl:w-[600px] drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Action buttons row (moved from header) */}
+      {/* All action buttons row (moved from header and hero) */}
       <div className="py-8 px-6 -mt-8">
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
-          <div id="cta-buttons" className="flex items-center gap-3 shrink-0">
-            <a href="#buy" className="btn-buy" aria-label="Buy $MUGSY">Buy $MUGSY</a>
+          <div id="cta-buttons" className="flex items-center gap-4 shrink-0 flex-wrap justify-center">
+            <a href="#buy" className="btn-neo text-lg px-8 py-4" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
+            <a href="#tokenomics" className="btn-ghost btn-ghost--red text-lg px-8 py-4" aria-label="View Tokenomics">{t('hero.cta_secondary')}</a>
+            <a href="#buy" className="btn-buy text-lg px-8 py-4" aria-label="Buy $MUGSY">Buy $MUGSY</a>
             {(((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true') && (
-              <a href="/claim" className="btn-claim" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+              <a href="/claim" className="btn-claim text-lg px-8 py-4" aria-label="Claim $MUGSY">Claim $MUGSY</a>
             )}
           </div>
         </div>

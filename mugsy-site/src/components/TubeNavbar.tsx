@@ -280,7 +280,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
                   <a onClick={()=>setContactOpen(false)} href="https://bsky.app/profile/redmugsy.bsky.social" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">BlueSky</a>
                   <a onClick={()=>setContactOpen(false)} href="https://t.me/REDMUGSY" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Telegram</a>
                   <a onClick={()=>setContactOpen(false)} href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Discord</a>
-                  <a onClick={()=>setContactOpen(false)} href="https://www.tiktok.com/@redmugsytoken" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">TikTok</a>
+                  <a onClick={()=>setContactOpen(false)} href="https://www.tiktok.com/@redmugsy" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">TikTok</a>
                   <a onClick={()=>setContactOpen(false)} href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Instagram</a>
                   <a onClick={()=>setContactOpen(false)} href="https://www.reddit.com/user/redmugsy/" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Reddit</a>
                 </div>

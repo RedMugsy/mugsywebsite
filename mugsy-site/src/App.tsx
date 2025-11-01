@@ -213,7 +213,7 @@ export default function App() {
           <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
         </a>
         <a
-          href="https://www.tiktok.com/@redmugsytoken"
+          href="https://www.tiktok.com/@redmugsy"
           target="_blank"
           rel="noopener noreferrer"
           className="icon-sphere icon-sphere--red"

@@ -53,7 +53,7 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
               <a href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Discord" title="Discord">
                 <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
               </a>
-              <a href="https://www.tiktok.com/@redmugsytoken" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
+              <a href="https://www.tiktok.com/@redmugsy" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
                 <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
               </a>
               <a href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Instagram" title="Instagram">

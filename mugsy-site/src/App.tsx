@@ -309,7 +309,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-4">
-            <button  className="btn-neo">{t('hero.cta_primary')}</button>
+            <a href="#buy" className="btn-neo">{t('hero.cta_primary')}</a>
             <a href="#tokenomics" className="btn-ghost">{t('hero.cta_secondary')}</a>
           </div>
 

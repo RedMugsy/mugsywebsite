@@ -37,7 +37,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
         
         {/* Mobile hamburger menu button */}
         <div className="flex sm:hidden items-center gap-2">
-          <a href="/#buy" className={`${btnCyan} text-xs px-2 py-1`} aria-label="Buy $MUGSY">Buy</a>
+          <a href="#buy" className={`${btnCyan} text-xs px-2 py-1`} aria-label="Buy $MUGSY">Buy</a>
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 text-white hover:text-[#ff1a4b] transition-colors"
@@ -59,7 +59,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
         </div>
         
         <div className="hidden sm:flex items-center gap-3">
-          <a href="/#buy" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Buy $MUGSY">Buy $MUGSY</a>
+          <a href="#buy" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Buy $MUGSY">Buy $MUGSY</a>
           {FEATURE_CLAIM && (
             <a href="/claim" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Claim $MUGSY">Claim $MUGSY</a>
           )}

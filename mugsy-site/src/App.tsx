@@ -275,11 +275,11 @@ export default function App() {
           />
         </div>
 
-        {/* Hero art */}
+        {/* Hero art - hidden on mobile to prevent text overlay */}
         <img
           src="img/mugsy-rabbit.webp"
           alt="Red Mugsy holding a mug"
-          className="pointer-events-none select-none absolute right-[10%] top-20 sm:right-[10%] sm:top-16 w-36 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88]"
+          className="hidden sm:block pointer-events-none select-none absolute right-[10%] top-16 w-56 drop-shadow-[0_0_30px_#ff1a4b88]"
           style={{ scale: 0.7475 }}
         />
         <motion.img
@@ -288,7 +288,7 @@ export default function App() {
           initial={{ y: -10, opacity: 0 }}
           animate={{ y: [-10, 8, -10], opacity: 0.9 }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-          className="pointer-events-none select-none absolute left-[15%] bottom-12 sm:left-[15%] sm:bottom-16 w-28 sm:w-40 opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
+          className="hidden sm:block pointer-events-none select-none absolute left-[15%] bottom-16 w-40 opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
         />
 
         <div className="max-w-4xl px-6 text-center space-y-6">
@@ -492,9 +492,9 @@ export default function App() {
         }
       >
   <div className="grid md:grid-cols-2 gap-10 items-start">
-          {/* Chart (larger) */}
+          {/* Chart (larger) with coin in center */}
           <div className="space-y-5">
-            <div className="h-[420px] md:h-[460px]">
+            <div className="relative h-[420px] md:h-[460px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={tokenomics} innerRadius={120} outerRadius={190} paddingAngle={3} dataKey="value">
@@ -510,6 +510,17 @@ export default function App() {
                   />
                 </PieChart>
               </ResponsiveContainer>
+              
+              {/* Rotating coin in center of donut chart - visible on all screen sizes */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <Coin3D
+                  front="img/mugsy-coin.png"
+                  back="img/Golden and Black Coin Back.png"
+                  size={80}
+                  speed="7s"
+                  className="drop-shadow-[0_0_18px_#ff1a4b55]"
+                />
+              </div>
             </div>
 
             {/* Tokenomics CTA under the chart */}
@@ -722,7 +733,7 @@ export default function App() {
           <div className="flex items-center justify-center gap-4 pt-6">
             <button className="btn-neo text-lg px-8 py-4">Buy $MUGSY</button>
             <a
-              href="/Public%20Documents/$MUGSY%20Whitepaper%20V3.0.pdf"
+              href="Public Documents/$MUGSY Whitepaper V3.0.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-ghost btn-ghost--red text-lg px-8 py-4"
@@ -730,7 +741,7 @@ export default function App() {
               Read Whitepaper
             </a>
             <a
-              href="/Public%20Documents/$MUGSY%20Manifesto.pdf"
+              href="Public Documents/$MUGSY Manifesto.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-ghost btn-ghost--red text-lg px-8 py-4"

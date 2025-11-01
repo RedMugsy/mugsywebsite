@@ -20,6 +20,18 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
             </div>
           )}
         </div>
+        {/* Mobile menu - show main links */}
+        <div className="flex sm:hidden flex-col gap-2 text-xs">
+          {([
+            ["About", "/#about"],
+            ["Tokenomics", "/#tokenomics"],
+            ["FAQ", "/#faq"],
+          ] as Array<[string,string]>).map(([label, href]) => (
+            <a key={href} href={href} className="text-slate-300 hover:text-white transition-colors">{label}</a>
+          ))}
+        </div>
+        
+        {/* Desktop menu */}
         <div className="hidden sm:flex gap-6 text-sm items-center">
           {([
             ["About", "/#about"],
@@ -32,10 +44,11 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
             <a key={href} href={href} className="text-slate-300 hover:text-white transition-colors">{label}</a>
           ))}
         </div>
-        <div className="flex items-center gap-3">
-          <a href="/#buy" className={btnCyan} aria-label="Buy $MUGSY">Buy $MUGSY</a>
+        
+        <div className="flex items-center gap-2 sm:gap-3">
+          <a href="/#buy" className={`${btnCyan} text-sm sm:text-xl px-3 sm:px-5 py-2 sm:py-3`} aria-label="Buy $MUGSY">Buy $MUGSY</a>
           {FEATURE_CLAIM && (
-            <a href="/claim" className={btnCyan} aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            <a href="/claim" className={`${btnCyan} text-sm sm:text-xl px-3 sm:px-5 py-2 sm:py-3`} aria-label="Claim $MUGSY">Claim $MUGSY</a>
           )}
         </div>
       </nav>

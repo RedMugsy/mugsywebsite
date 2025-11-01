@@ -353,7 +353,7 @@ export default function App() {
               <img
                 src="img/mugsy-rabbit.webp"
                 alt="Red Mugsy holding a mug"
-                className="pointer-events-none select-none w-48 sm:w-64 lg:w-96 xl:w-[500px] 2xl:w-[600px] drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
+                className="pointer-events-none select-none w-32 sm:w-48 md:w-64 lg:w-96 xl:w-[500px] 2xl:w-[600px] drop-shadow-[0_0_30px_#ff1a4b88] opacity-70 sm:opacity-100"
               />
             </div>
           </div>

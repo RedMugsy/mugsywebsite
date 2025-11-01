@@ -720,7 +720,7 @@ export default function App() {
             "Because refusing to quit on the thing that brought you here? That's where it gets interesting."
           </p>
           <div className="flex items-center justify-center gap-4 pt-6">
-            <button className="btn-neo text-lg px-8 py-4">Buy $MUGSY</button>
+            <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="btn-neo text-lg px-8 py-4">Buy $MUGSY</a>
             <a
               href="Public Documents/$MUGSY Whitepaper V3.0.pdf"
               target="_blank"

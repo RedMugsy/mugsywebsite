@@ -41,10 +41,10 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
           <div>
             <h3 className="font-bold text-white mb-3">{t('footer.community')}</h3>
             <div className="flex items-center gap-3">
-              <a href="https://x.com/RedMugsy85838" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="X / Twitter" title="X / Twitter">
+              <a href="https://x.com/RedMugsyToken" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="X / Twitter" title="X / Twitter">
                 <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="BlueSky" title="BlueSky">
+              <a href="https://bsky.app/profile/redmugsy.bsky.social" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="BlueSky" title="BlueSky">
                 <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
               </a>
               <a href="https://t.me/REDMUGSY" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Telegram" title="Telegram">
@@ -53,7 +53,7 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
               <a href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Discord" title="Discord">
                 <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
               </a>
-              <a href="#" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
+              <a href="https://www.tiktok.com/@redmugsytoken" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
                 <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
               </a>
               <a href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Instagram" title="Instagram">

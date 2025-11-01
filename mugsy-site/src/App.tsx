@@ -173,7 +173,7 @@ export default function App() {
         {/* Icons */}
         <div className="flex flex-col items-center gap-4">
         <a
-          href="https://x.com/RedMugsy85838"
+          href="https://x.com/RedMugsyToken"
           target="_blank"
           rel="noopener noreferrer"
           className="icon-sphere icon-sphere--red"
@@ -183,7 +183,7 @@ export default function App() {
           <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
         </a>
         <a
-          href="#"
+          href="https://bsky.app/profile/redmugsy.bsky.social"
           target="_blank"
           rel="noopener noreferrer"
           className="icon-sphere icon-sphere--red"
@@ -213,7 +213,7 @@ export default function App() {
           <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
         </a>
         <a
-          href="#"
+          href="https://www.tiktok.com/@redmugsytoken"
           target="_blank"
           rel="noopener noreferrer"
           className="icon-sphere icon-sphere--red"
@@ -275,24 +275,24 @@ export default function App() {
           />
         </div>
 
-        {/* Hero art - hidden on mobile to prevent text overlay */}
+        {/* Hero art - positioned to not overlay text on mobile */}
         <img
           src="img/mugsy-rabbit.webp"
           alt="Red Mugsy holding a mug"
-          className="hidden sm:block pointer-events-none select-none absolute right-[10%] top-16 w-56 drop-shadow-[0_0_30px_#ff1a4b88]"
+          className="pointer-events-none select-none absolute right-2 top-2 w-20 sm:right-[10%] sm:top-16 sm:w-56 drop-shadow-[0_0_30px_#ff1a4b88] opacity-60 sm:opacity-100"
           style={{ scale: 0.7475 }}
         />
         <motion.img
           src="img/mugsy-ech042.webp"
           alt="Astronaut bunny with red mug"
           initial={{ y: -10, opacity: 0 }}
-          animate={{ y: [-10, 8, -10], opacity: 0.9 }}
+          animate={{ y: [-10, 8, -10], opacity: 0.6 }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
-          className="hidden sm:block pointer-events-none select-none absolute left-[15%] bottom-16 w-40 opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
+          className="pointer-events-none select-none absolute left-2 bottom-2 w-16 sm:left-[15%] sm:bottom-16 sm:w-40 opacity-50 sm:opacity-80 drop-shadow-[0_0_22px_#00F0FF66]"
         />
 
-        <div className="max-w-4xl px-6 text-center space-y-6">
-            <h1 className="glitch-text text-5xl sm:text-7xl font-extrabold tracking-tight">
+        <div className="max-w-4xl px-4 sm:px-6 text-center space-y-4 sm:space-y-6">
+            <h1 className="glitch-text text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-tight break-words">
               {t('hero.title')}
             </h1>
           {/*
@@ -318,18 +318,18 @@ export default function App() {
           </div>
           */}
 
-          <p className="text-xl sm:text-2xl font-semibold text-white">
+          <p className="text-lg sm:text-xl md:text-2xl font-semibold text-white leading-tight">
             {t("hero.subtitle")}
           </p>
 
-          <div className="text-slate-300 text-base sm:text-lg max-w-3xl mx-auto space-y-4">
-            <p className="text-[125%]">
+          <div className="text-slate-300 text-sm sm:text-base md:text-lg max-w-3xl mx-auto space-y-3 sm:space-y-4">
+            <p className="text-[110%] sm:text-[125%] leading-relaxed">
               <strong className="text-white">Red Mugsy is all of us</strong>—the ones three espressos past coherent thought and seventeen rabbit holes deep into whitepapers, charts, and conspiracy-level Twitter threads.
             </p>
-            <p className="text-[125%]">
+            <p className="text-[110%] sm:text-[125%] leading-relaxed">
               He's a twitchy, witty, unhinged white rabbit clutching a Red Mug like it personally shorted his portfolio—running on equal parts caffeine and delusion.
             </p>
-            <p className="text-[150%]">
+            <p className="text-[130%] sm:text-[150%] leading-tight">
               <strong className="text-[#ff1a4b]">He either cracked the code... or just cracked.</strong>
             </p>
             

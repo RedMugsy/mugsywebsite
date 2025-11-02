@@ -18,29 +18,29 @@ function RootRouter() {
   const FEATURE_CLAIM = ((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true'
   const [ClaimComp, setClaimComp] = useState<React.ComponentType | null>(null)
   useEffect(()=>{
-    if (FEATURE_CLAIM && (path === '/claim' || path === '/claim/')) {
+    if (FEATURE_CLAIM && (path === '/mugsywebsite/claim' || path === '/mugsywebsite/claim/' || path === '/claim' || path === '/claim/')) {
       import('./claim/ClaimPage').then(mod => setClaimComp(()=>mod.default)).catch(()=>setClaimComp(()=>(()=>
         <div className="max-w-xl mx-auto p-6"><h1 className="text-xl font-bold">Claim</h1><p className="text-slate-400 mt-2">Module not available.</p></div>
       )))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
-  if (path === '/cookie-preferences' || path === '/cookie-preferences/') {
+  if (path === '/mugsywebsite/cookie-preferences' || path === '/mugsywebsite/cookie-preferences/' || path === '/cookie-preferences' || path === '/cookie-preferences/') {
     return <CookiePreferences />
   }
-  if (path === '/cookie-policy' || path === '/cookie-policy/') {
+  if (path === '/mugsywebsite/cookie-policy' || path === '/mugsywebsite/cookie-policy/' || path === '/cookie-policy' || path === '/cookie-policy/') {
     return <CookiePolicy />
   }
-  if (path === '/contact' || path === '/contact/') {
+  if (path === '/mugsywebsite/contact' || path === '/mugsywebsite/contact/' || path === '/contact' || path === '/contact/') {
     return <Contact />
   }
-  if (path === '/admin' || path === '/admin/') {
+  if (path === '/mugsywebsite/admin' || path === '/mugsywebsite/admin/' || path === '/admin' || path === '/admin/') {
     return <Admin />
   }
-  if (path === '/privacy-request' || path === '/privacy-request/') {
+  if (path === '/mugsywebsite/privacy-request' || path === '/mugsywebsite/privacy-request/' || path === '/privacy-request' || path === '/privacy-request/') {
     return <PrivacyRequestForm />
   }
-  if (path === '/claim' || path === '/claim/') {
+  if (path === '/mugsywebsite/claim' || path === '/mugsywebsite/claim/' || path === '/claim' || path === '/claim/') {
     if (!FEATURE_CLAIM) {
       return <div className="max-w-xl mx-auto p-6"><h1 className="text-xl font-bold">Claim is not enabled</h1><p className="text-slate-400 mt-2">Set VITE_FEATURE_CLAIM=true to enable.</p></div>
     }

@@ -35,7 +35,7 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
               <a href={anchor('security')} className="hover:text-white">{t('nav.security')}</a>
               <a href={anchor('faq')} className="hover:text-white">{t('nav.faq')}</a>
               <a href="/cookie-preferences" className="hover:text-white">{t('footer.cookiePreferences')}</a>
-              <a href="/contact" className="hover:text-white">{t('nav.contact')}</a>
+              <a href="/mugsywebsite/contact" className="hover:text-white">{t('nav.contact')}</a>
             </div>
           </div>
           <div>

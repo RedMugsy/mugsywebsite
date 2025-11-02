@@ -9,7 +9,7 @@ const DEFAULT_LINKS: LinkItem[] = [
   { label: "SECURITY", href: "#security" },
   { label: "ROADMAP", href: "#roadmap" },
   { label: "FAQ", href: "#faq" },
-  { label: "CONTACT US", href: "/contact" },
+  { label: "CONTACT US", href: "/mugsywebsite/contact" },
 ];
 
 type Props = {
@@ -52,7 +52,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
   }, [cancelClose]);
 
   const contactIdx = useMemo(
-    () => links.findIndex((l) => l.href === '/contact' || l.href?.startsWith('/contact')),
+    () => links.findIndex((l) => l.href === '/contact' || l.href?.startsWith('/contact') || l.href === '/mugsywebsite/contact' || l.href?.startsWith('/mugsywebsite/contact')),
     [links]
   );
 
@@ -260,7 +260,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
           >
             <div className="flex flex-col gap-2">
               <a
-                href="/contact"
+                href="/mugsywebsite/contact"
                 className="relative inline-flex items-center justify-center rounded-lg px-4 py-3 font-extrabold text-black bg-[#00F0FF] hover:bg-[#ff1a4b] hover:text-white transition-colors"
                 onClick={() => setContactOpen(false)}
               >

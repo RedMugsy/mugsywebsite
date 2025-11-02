@@ -367,7 +367,7 @@ export default function App() {
             <a href="#buy" className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
             <a href="#tokenomics" className="btn-ghost btn-ghost--red text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="View Tokenomics">{t('hero.cta_secondary')}</a>
             <a href="#buy" className="btn-buy text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">Buy $MUGSY</a>
-            <a href="/claim" className="btn-claim text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            <a href="/mugsywebsite/claim" className="btn-claim text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Claim $MUGSY">Claim $MUGSY</a>
           </div>
         </div>
       </div>

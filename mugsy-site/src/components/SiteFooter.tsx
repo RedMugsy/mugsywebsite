@@ -16,12 +16,12 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
               <div className="flex flex-wrap items-center gap-3">
                 <a href="/Public%20Documents/Privacy%20Policy.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t('footer.privacy')}</a>
                 <span className="opacity-50">•</span>
-                <a href="/privacy-request" className="hover:text-white">{t('footer.privacyRequest')}</a>
+                <a href="#/privacy-request" className="hover:text-white">{t('footer.privacyRequest')}</a>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <a href="/Public%20Documents/Terms%20of%20Services.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t('footer.terms')}</a>
                 <span className="opacity-50">•</span>
-                <a href="/cookie-policy" className="hover:text-white">{t('footer.cookiePolicy')}</a>
+                <a href="#/cookie-policy" className="hover:text-white">{t('footer.cookiePolicy')}</a>
                 <span className="opacity-50">•</span>
                 <a href="/Public%20Documents/Disclaimer%20Risk.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t('footer.disclaimer')}</a>
               </div>
@@ -34,8 +34,8 @@ export default function SiteFooter({ onHome = false }: { onHome?: boolean }) {
               <a href={anchor('tokenomics')} className="hover:text-white">{t('nav.tokenomics')}</a>
               <a href={anchor('security')} className="hover:text-white">{t('nav.security')}</a>
               <a href={anchor('faq')} className="hover:text-white">{t('nav.faq')}</a>
-              <a href="/cookie-preferences" className="hover:text-white">{t('footer.cookiePreferences')}</a>
-              <a href="/mugsywebsite/contact" className="hover:text-white">{t('nav.contact')}</a>
+              <a href="#/cookie-preferences" className="hover:text-white">{t('footer.cookiePreferences')}</a>
+              <a href="#/contact" className="hover:text-white">{t('nav.contact')}</a>
             </div>
           </div>
           <div>

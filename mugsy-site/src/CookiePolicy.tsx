@@ -65,7 +65,7 @@ export default function CookiePolicy() {
 
         <section className="mt-8 space-y-3 text-slate-300 text-sm">
           <h2 className="text-white font-semibold text-lg">How to Control Cookies</h2>
-          <p>On this website: visit <a href="/cookie-preferences" className="underline decoration-[#2323FF]">Cookie Preferences</a> to enable/disable optional cookies.</p>
+          <p>On this website: visit <a href="#/cookie-preferences" className="underline decoration-[#2323FF]">Cookie Preferences</a> to enable/disable optional cookies.</p>
           <p>In your browser settings, you can also control cookies. Blocking all cookies may prevent certain features from working.</p>
         </section>
 

@@ -14,7 +14,9 @@ import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/config'
 
 function RootRouter() {
-  const path = typeof window !== 'undefined' ? window.location.pathname : '/';
+  // Use hash for routing to avoid 404 issues on GitHub Pages
+  const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
+  const path = hash || (typeof window !== 'undefined' ? window.location.pathname : '/');
   const FEATURE_CLAIM = ((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true'
   const [ClaimComp, setClaimComp] = useState<React.ComponentType | null>(null)
   useEffect(()=>{

@@ -106,7 +106,7 @@ export default function CookiePreferences() {
         {saved && <p className="mt-3 text-sm text-[#00F0FF]">Preferences saved.</p>}
 
         <div className="mt-10 flex flex-wrap gap-4 text-sm text-slate-400">
-          <a href="/cookie-policy" className="underline decoration-[#00F0FF]">View Full Cookie Policy</a>
+          <a href="#/cookie-policy" className="underline decoration-[#00F0FF]">View Full Cookie Policy</a>
           <a href="/Public%20Documents/Privacy%20Policy.pdf" className="underline decoration-[#00F0FF]" target="_blank" rel="noopener noreferrer">View Privacy Policy</a>
           <a href="mailto:privacy@redmugsy.com" className="underline decoration-[#00F0FF]">Contact Us</a>
         </div>

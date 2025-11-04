@@ -260,7 +260,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
           >
             <div className="flex flex-col gap-2">
               <a
-                href="/mugsywebsite/contact"
+                href="#/contact"
                 className="relative inline-flex items-center justify-center rounded-lg px-4 py-3 font-extrabold text-black bg-[#00F0FF] hover:bg-[#ff1a4b] hover:text-white transition-colors"
                 onClick={() => setContactOpen(false)}
               >

@@ -61,7 +61,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
         <div className="hidden sm:flex items-center gap-3">
           <a href="#buy" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Buy $MUGSY">Buy $MUGSY</a>
           {FEATURE_CLAIM && (
-            <a href="/claim" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            <a href="#/claim" className={`${btnCyan} text-xl px-5 py-3`} aria-label="Claim $MUGSY">Claim $MUGSY</a>
           )}
         </div>
       </nav>
@@ -83,7 +83,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
               ))}
               {FEATURE_CLAIM && (
                 <a 
-                  href="/claim" 
+                  href="#/claim" 
                   className={`${btnCyan} text-center mt-3`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

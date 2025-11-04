@@ -29,7 +29,7 @@ export default function CookieBanner() {
       <div className="mx-auto max-w-5xl m-4 rounded-xl border-2 border-[#00F0FF] bg-black/95 backdrop-blur px-5 py-4 text-white shadow-[0_-10px_30px_rgba(0,240,255,0.15)]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-sm leading-relaxed">
-            We use cookies to improve your experience and analyze site traffic. Essential cookies are required for the site to function. Optional cookies help us understand how you use the site. <a href="/cookie-policy" className="underline decoration-[#00F0FF] text-[#00F0FF] hover:brightness-110">Learn more</a>
+            We use cookies to improve your experience and analyze site traffic. Essential cookies are required for the site to function. Optional cookies help us understand how you use the site. <a href="#/cookie-policy" className="underline decoration-[#00F0FF] text-[#00F0FF] hover:brightness-110">Learn more</a>
           </p>
           <div className="flex flex-col sm:flex-row gap-2 sm:shrink-0">
             <button onClick={acceptAll} className="uppercase text-sm font-bold rounded-md px-4 py-2 bg-[#00F0FF] text-black hover:brightness-110">

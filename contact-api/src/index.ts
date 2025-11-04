@@ -4,6 +4,10 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import nodemailer from 'nodemailer';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import hpp from 'hpp';
+import slowDown from 'express-slow-down';
+import compression from 'compression';
 import { z } from 'zod';
 import fetch from 'node-fetch';
 import fs from 'fs';
@@ -15,10 +19,33 @@ import { getDb } from './db';
 dotenv.config();
 
 const app = express();
+// Trust proxy headers so rate-limiters and IP detection work behind CDNs/proxies
+app.set('trust proxy', true);
+app.disable('x-powered-by');
+
+// Security headers (API-safe)
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    referrerPolicy: { policy: 'no-referrer-when-downgrade' },
+    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
+  })
+);
+// Parameter pollution protection
+app.use(hpp() as any);
+// Basic compression
+app.use(compression() as any);
+
 const ADMIN_UI_ENABLED = String(process.env.ADMIN_UI_ENABLED || '').toLowerCase() === 'true';
 
 // Basic JSON body parsing for non-multipart routes
 app.use(express.json({ limit: '1mb' }));
+// Apply a reasonable timeout to responses to avoid resource hogging
+app.use((req, res, next) => {
+  try { res.setTimeout(Number(process.env.REQUEST_TIMEOUT_MS || 15000)); } catch {}
+  next();
+});
 
 // CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
@@ -36,9 +63,72 @@ app.use(
   })
 );
 
-// Rate limit: 5 requests/hour per IP
-const limiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false });
-app.use('/contact', limiter);
+// Optional: only allow requests that come through edge (e.g., Cloudflare) by checking a shared header
+const EDGE_AUTH_SECRET = process.env.EDGE_AUTH_SECRET || '';
+function requireEdgeAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!EDGE_AUTH_SECRET) return next();
+  const hdr = (req.headers['x-edge-auth'] || req.headers['cf-edge-auth']) as string | undefined;
+  if (hdr && hdr === EDGE_AUTH_SECRET) return next();
+  return res.status(403).json({ error: 'forbidden' });
+}
+
+// Global and route-specific rate limits / slow-downs
+const GLOBAL_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000);
+const GLOBAL_MAX = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 120);
+const globalLimiter = rateLimit({
+  windowMs: GLOBAL_WINDOW_MS,
+  max: GLOBAL_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req: any, res: any) => {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    console.warn(`[rate-limit] global limit reached ip=${ip} path=${req.originalUrl}`);
+    return res.status(429).json({ error: 'Too many requests' });
+  },
+});
+
+// Fine-grained route controls
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: Number(process.env.CONTACT_MAX_PER_HOUR || 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req: any, res: any) => {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    console.warn(`[rate-limit] contact limit reached ip=${ip} path=${req.originalUrl}`);
+    return res.status(429).json({ error: 'Too many requests' });
+  },
+});
+const contactSlowdown = slowDown({ windowMs: 15 * 60 * 1000, delayAfter: 3, delayMs: 500 });
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.AUTH_MAX_PER_WINDOW || 20),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req: any, res: any) => {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    console.warn(`[rate-limit] auth limit reached ip=${ip} path=${req.originalUrl}`);
+    return res.status(429).json({ error: 'Too many requests' });
+  },
+});
+const authSlowdown = slowDown({ windowMs: 15 * 60 * 1000, delayAfter: 5, delayMs: 750 });
+const turnstileLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: Number(process.env.TURNSTILE_VERIFY_MAX_PER_MIN || 30),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req: any, res: any) => {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+    console.warn(`[rate-limit] turnstile limit reached ip=${ip} path=${req.originalUrl}`);
+    return res.status(429).json({ error: 'Too many requests' });
+  },
+});
+
+// Apply to sensitive paths
+app.use(['/contact', '/api/contact'], contactLimiter as any, contactSlowdown as any, requireEdgeAuth);
+app.use('/oauth/token', authLimiter as any, authSlowdown as any, requireEdgeAuth);
+app.use('/api/claim/turnstile-verify', turnstileLimiter);
+app.use(['/api/claim'], globalLimiter);
 
 // Multer for file upload (memory for email attachment)
 const upload = multer({
@@ -478,9 +568,17 @@ app.post('/oauth/token', express.urlencoded({ extended: true }), async (req, res
     const password = (req.body?.password || '').toString();
     const prisma = getDb();
     const user = await prisma.adminUser.findUnique({ where: { username } });
-    if (!user) return res.status(400).json({ error: 'invalid_grant' });
+    if (!user) {
+      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+      console.warn(`[auth] invalid_grant (no user) username=${username} ip=${ip}`);
+      return res.status(400).json({ error: 'invalid_grant' });
+    }
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(400).json({ error: 'invalid_grant' });
+    if (!ok) {
+      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+      console.warn(`[auth] invalid_grant (bad password) username=${username} ip=${ip}`);
+      return res.status(400).json({ error: 'invalid_grant' });
+    }
     const role = (user as any).role || 'MASTER';
     const access_token = jwt.sign({ sub: user.id, username, role }, JWT_SECRET, { expiresIn: '1h' });
     return res.json({ token_type: 'Bearer', access_token, expires_in: 3600, role });

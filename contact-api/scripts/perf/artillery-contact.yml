@@ -1,0 +1,28 @@
+config:
+  target: "http://localhost:8787"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: warm
+    - duration: 30
+      arrivalRate: 30
+      name: spike
+  plugins:
+    ensure: {}
+  ensure:
+    thresholds:
+      - http.response_time.p95: 800
+      - http.response_time.p99: 1500
+      - http.codes.429: max 20%
+scenarios:
+  - name: contact-json
+    flow:
+      - post:
+          url: "/api/contact"
+          json:
+            name: "Artillery User"
+            email: "artillery@example.com"
+            purpose: "Support"
+            subject: "Load test"
+            message: "Hello world from artillery load test. This is a longer message to pass validation."
+

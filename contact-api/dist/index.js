@@ -9,6 +9,10 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const multer_1 = __importDefault(require("multer"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const helmet_1 = __importDefault(require("helmet"));
+const hpp_1 = __importDefault(require("hpp"));
+const express_slow_down_1 = __importDefault(require("express-slow-down"));
+const compression_1 = __importDefault(require("compression"));
 const zod_1 = require("zod");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const fs_1 = __importDefault(require("fs"));
@@ -18,9 +22,31 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("./db");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+// Trust proxy headers so rate-limiters and IP detection work behind CDNs/proxies
+app.set('trust proxy', true);
+app.disable('x-powered-by');
+// Security headers (API-safe)
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    referrerPolicy: { policy: 'no-referrer-when-downgrade' },
+    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
+}));
+// Parameter pollution protection
+app.use((0, hpp_1.default)());
+// Basic compression
+app.use((0, compression_1.default)());
 const ADMIN_UI_ENABLED = String(process.env.ADMIN_UI_ENABLED || '').toLowerCase() === 'true';
 // Basic JSON body parsing for non-multipart routes
 app.use(express_1.default.json({ limit: '1mb' }));
+// Apply a reasonable timeout to responses to avoid resource hogging
+app.use((req, res, next) => {
+    try {
+        res.setTimeout(Number(process.env.REQUEST_TIMEOUT_MS || 15000));
+    }
+    catch { }
+    next();
+});
 // CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
     .split(',')
@@ -34,9 +60,71 @@ app.use((0, cors_1.default)({
     },
     credentials: true,
 }));
-// Rate limit: 5 requests/hour per IP
-const limiter = (0, express_rate_limit_1.default)({ windowMs: 60 * 60 * 1000, max: 5, standardHeaders: true, legacyHeaders: false });
-app.use('/contact', limiter);
+// Optional: only allow requests that come through edge (e.g., Cloudflare) by checking a shared header
+const EDGE_AUTH_SECRET = process.env.EDGE_AUTH_SECRET || '';
+function requireEdgeAuth(req, res, next) {
+    if (!EDGE_AUTH_SECRET)
+        return next();
+    const hdr = (req.headers['x-edge-auth'] || req.headers['cf-edge-auth']);
+    if (hdr && hdr === EDGE_AUTH_SECRET)
+        return next();
+    return res.status(403).json({ error: 'forbidden' });
+}
+// Global and route-specific rate limits / slow-downs
+const GLOBAL_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60000);
+const GLOBAL_MAX = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 120);
+const globalLimiter = (0, express_rate_limit_1.default)({
+    windowMs: GLOBAL_WINDOW_MS,
+    max: GLOBAL_MAX,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.warn(`[rate-limit] global limit reached ip=${ip} path=${req.originalUrl}`);
+        return res.status(429).json({ error: 'Too many requests' });
+    },
+});
+// Fine-grained route controls
+const contactLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 60 * 60 * 1000,
+    max: Number(process.env.CONTACT_MAX_PER_HOUR || 10),
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.warn(`[rate-limit] contact limit reached ip=${ip} path=${req.originalUrl}`);
+        return res.status(429).json({ error: 'Too many requests' });
+    },
+});
+const contactSlowdown = (0, express_slow_down_1.default)({ windowMs: 15 * 60 * 1000, delayAfter: 3, delayMs: 500 });
+const authLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000,
+    max: Number(process.env.AUTH_MAX_PER_WINDOW || 20),
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.warn(`[rate-limit] auth limit reached ip=${ip} path=${req.originalUrl}`);
+        return res.status(429).json({ error: 'Too many requests' });
+    },
+});
+const authSlowdown = (0, express_slow_down_1.default)({ windowMs: 15 * 60 * 1000, delayAfter: 5, delayMs: 750 });
+const turnstileLimiter = (0, express_rate_limit_1.default)({
+    windowMs: 60 * 1000,
+    max: Number(process.env.TURNSTILE_VERIFY_MAX_PER_MIN || 30),
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        console.warn(`[rate-limit] turnstile limit reached ip=${ip} path=${req.originalUrl}`);
+        return res.status(429).json({ error: 'Too many requests' });
+    },
+});
+// Apply to sensitive paths
+app.use(['/contact', '/api/contact'], contactLimiter, contactSlowdown, requireEdgeAuth);
+app.use('/oauth/token', authLimiter, authSlowdown, requireEdgeAuth);
+app.use('/api/claim/turnstile-verify', turnstileLimiter);
+app.use(['/api/claim'], globalLimiter);
 // Multer for file upload (memory for email attachment)
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
@@ -473,11 +561,17 @@ app.post('/oauth/token', express_1.default.urlencoded({ extended: true }), async
         const password = (req.body?.password || '').toString();
         const prisma = (0, db_1.getDb)();
         const user = await prisma.adminUser.findUnique({ where: { username } });
-        if (!user)
+        if (!user) {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            console.warn(`[auth] invalid_grant (no user) username=${username} ip=${ip}`);
             return res.status(400).json({ error: 'invalid_grant' });
+        }
         const ok = await bcryptjs_1.default.compare(password, user.passwordHash);
-        if (!ok)
+        if (!ok) {
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            console.warn(`[auth] invalid_grant (bad password) username=${username} ip=${ip}`);
             return res.status(400).json({ error: 'invalid_grant' });
+        }
         const role = user.role || 'MASTER';
         const access_token = jsonwebtoken_1.default.sign({ sub: user.id, username, role }, JWT_SECRET, { expiresIn: '1h' });
         return res.json({ token_type: 'Bearer', access_token, expires_in: 3600, role });

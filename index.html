@@ -11,74 +11,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Self-hosted flag-icons CSS from repo folder -->
     <title>Red Mugsy - The Crypto Comedian</title>
-    <script>
-    // Debug logging and dynamic path adjustment
-    console.log('Loading from:', window.location.href);
-    console.log('Host:', window.location.hostname);
     
-    // Dynamic path resolution
-    const isCustomDomain = window.location.hostname === 'redmugsy.com';
-    const basePath = isCustomDomain ? '/' : '/mugsywebsite/';
-    console.log('Using base path:', basePath);
-    
-    // Try multiple CSS file versions (fallback for deployment delays)
-    const cssFiles = ['index-C2sngRY_.css', 'index-BgGdCzTo.css', 'index-CLMzvWKz.css'];
-    const jsFiles = ['index-CcPUvB_A.js', 'index-CeR8eDuo.js', 'index-BczedQQI.js'];
-    
-    // Function to try loading assets with fallbacks
-    function loadAssetWithFallback(files, type, callback) {
-        let index = 0;
-        function tryNext() {
-            if (index >= files.length) {
-                console.error(`Failed to load ${type} after trying all options:`, files);
-                return;
-            }
-            
-            const file = files[index];
-            const path = basePath + 'assets/' + file;
-            console.log(`Trying to load ${type}:`, path);
-            
-            if (type === 'css') {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.crossOrigin = '';
-                link.href = path;
-                link.onload = () => {
-                    console.log(`✅ Successfully loaded CSS:`, path);
-                    if (callback) callback();
-                };
-                link.onerror = () => {
-                    console.log(`❌ Failed to load CSS:`, path);
-                    index++;
-                    tryNext();
-                };
-                document.head.appendChild(link);
-            } else if (type === 'js') {
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.crossOrigin = '';
-                script.src = path;
-                script.onload = () => {
-                    console.log(`✅ Successfully loaded JS:`, path);
-                    if (callback) callback();
-                };
-                script.onerror = () => {
-                    console.log(`❌ Failed to load JS:`, path);
-                    index++;
-                    tryNext();
-                };
-                document.head.appendChild(script);
-            }
-        }
-        tryNext();
-    }
-    
-    // Load CSS with fallbacks
-    loadAssetWithFallback(cssFiles, 'css');
-    
-    // Load JS with fallbacks  
-    loadAssetWithFallback(jsFiles, 'js');
-    </script>
+    <!-- Direct asset loading for custom domain -->
+    <script type="module" crossorigin src="/assets/index-CcPUvB_A.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-C2sngRY_.css">
+
   </head>
   <body>
     <div id="root"></div>

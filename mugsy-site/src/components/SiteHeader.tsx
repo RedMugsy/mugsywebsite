@@ -23,16 +23,16 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
         { label: t('nav.security').toUpperCase(), href: '#security' },
         { label: t('nav.roadmap').toUpperCase(), href: '#roadmap' },
         { label: t('nav.faq').toUpperCase(), href: '#faq' },
-        { label: t('nav.contact').toUpperCase(), href: '/mugsywebsite/contact' },
+        { label: t('nav.contact').toUpperCase(), href: '#/contact' },
       ]
     : [
-        { label: t('nav.home').toUpperCase(), href: '/mugsywebsite/' },
-        { label: t('nav.about').toUpperCase(), href: '/mugsywebsite/#about' },
-        { label: t('nav.tokenomics').toUpperCase(), href: '/mugsywebsite/#tokenomics' },
-        { label: t('nav.security').toUpperCase(), href: '/mugsywebsite/#security' },
-        { label: t('nav.roadmap').toUpperCase(), href: '/mugsywebsite/#roadmap' },
-        { label: t('nav.faq').toUpperCase(), href: '/mugsywebsite/#faq' },
-        { label: t('nav.contact').toUpperCase(), href: '/mugsywebsite/contact' },
+        { label: t('nav.home').toUpperCase(), href: '/' },
+        { label: t('nav.about').toUpperCase(), href: '/#about' },
+        { label: t('nav.tokenomics').toUpperCase(), href: '/#tokenomics' },
+        { label: t('nav.security').toUpperCase(), href: '/#security' },
+        { label: t('nav.roadmap').toUpperCase(), href: '/#roadmap' },
+        { label: t('nav.faq').toUpperCase(), href: '/#faq' },
+        { label: t('nav.contact').toUpperCase(), href: '/#/contact' },
       ]
 
   return (
@@ -88,4 +88,3 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
     </header>
   )
 }
-

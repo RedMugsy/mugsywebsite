@@ -15,8 +15,21 @@ import i18n from './i18n/config'
 
 function RootRouter() {
   // Use hash for routing to avoid 404 issues on GitHub Pages
-  const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
-  const path = hash || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  const getPath = () => {
+    const h = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
+    return h || (typeof window !== 'undefined' ? window.location.pathname : '/')
+  }
+  const [path, setPath] = useState<string>(getPath())
+  useEffect(() => {
+    const onHash = () => setPath(getPath())
+    const onPop = () => setPath(getPath())
+    window.addEventListener('hashchange', onHash)
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('hashchange', onHash)
+      window.removeEventListener('popstate', onPop)
+    }
+  }, [])
   const FEATURE_CLAIM = ((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true'
   const [ClaimComp, setClaimComp] = useState<React.ComponentType | null>(null)
   useEffect(()=>{
@@ -26,7 +39,7 @@ function RootRouter() {
       )))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+  },[path])
   if (path === '/mugsywebsite/cookie-preferences' || path === '/mugsywebsite/cookie-preferences/' || path === '/cookie-preferences' || path === '/cookie-preferences/') {
     return <CookiePreferences />
   }

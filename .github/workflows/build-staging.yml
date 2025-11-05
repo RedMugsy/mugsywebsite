@@ -1,0 +1,45 @@
+name: Build Staging Site
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'mugsy-site/**'
+
+jobs:
+  build-staging:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: mugsy-site/package-lock.json
+
+      - name: Install deps
+        working-directory: mugsy-site
+        run: npm ci
+
+      - name: Build staging
+        working-directory: mugsy-site
+        run: npm run build:staging
+
+      - name: Commit staging output
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: update staging build'
+          file_pattern: 'staging/**'
+
+      - name: Upload artifact (staging)
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-site
+          path: staging
+

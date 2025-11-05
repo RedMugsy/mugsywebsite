@@ -14,7 +14,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
     ["Security", "/#security"],
     ["Roadmap", "/#roadmap"],
     ["FAQ", "/#faq"],
-    ["Contact", "/contact"],
+    ["Contact", "#/contact"],
   ] as Array<[string,string]>
   
   return (
@@ -97,4 +97,3 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
     </header>
   )
 }
-

@@ -1,0 +1,37 @@
+name: Promote Staging to Live
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Safety check
+        run: |
+          test -d staging || { echo 'staging/ folder not found. Build staging first.'; exit 1; }
+
+      - name: Promote (copy staging/ to root)
+        run: |
+          shopt -s dotglob
+          rm -rf assets index.html 404.html img vendor flag-icons-main apple-touch-icon.png icon-192.png icon-512.png favicon.png site.webmanifest || true
+          cp -R staging/* .
+
+      - name: Commit live update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: promote staging to live'
+          file_pattern: |
+            *.html
+            assets/**
+            img/**
+            vendor/**
+            flag-icons-main/**
+            *.png
+            *.webmanifest
+

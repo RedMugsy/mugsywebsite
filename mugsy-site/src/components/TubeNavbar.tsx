@@ -52,7 +52,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
   }, [cancelClose]);
 
   const contactIdx = useMemo(
-    () => links.findIndex((l) => l.href === '/contact' || l.href?.startsWith('/contact') || l.href === '/mugsywebsite/contact' || l.href?.startsWith('/mugsywebsite/contact')),
+    () => links.findIndex((l) => l.href === '#/contact' || l.href === '/#/contact' || l.href === '/contact' || l.href?.startsWith('/contact') || l.href === '/mugsywebsite/contact' || l.href?.startsWith('/mugsywebsite/contact')),
     [links]
   );
 

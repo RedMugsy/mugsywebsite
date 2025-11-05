@@ -26,7 +26,7 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
         { label: t('nav.contact').toUpperCase(), href: '#/contact' },
       ]
     : [
-        { label: t('nav.home').toUpperCase(), href: '/' },
+        { label: t('nav.home').toUpperCase(), href: '/#' },
         { label: t('nav.about').toUpperCase(), href: '/#about' },
         { label: t('nav.tokenomics').toUpperCase(), href: '/#tokenomics' },
         { label: t('nav.security').toUpperCase(), href: '/#security' },
@@ -38,7 +38,7 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
   return (
     <header className={`sticky top-0 z-[60] transition-all header-rabbit backdrop-blur supports-[backdrop-filter]:bg-white/5 border-b border-white/10 ${className}`}>
       <nav className="max-w-7xl mx-auto flex items-center justify-between py-3 px-6">
-        <a href={onHome ? '#hero' : '/'} className="flex items-center gap-2 font-extrabold text-white tracking-tight text-lg">
+        <a href={onHome ? '#hero' : '/#'} className="flex items-center gap-2 font-extrabold text-white tracking-tight text-lg">
           <img src="img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-28 w-auto" />
           <span><span className="text-[#ff1a4b]">RED</span> $MUGSY</span>
         </a>

@@ -14,17 +14,17 @@ COPY package*.json ./
 # Install root dependencies
 RUN npm ci --production
 
-# Install contact-api dependencies and copy prisma schema
+# Install contact-api dependencies and copy build files
 WORKDIR /app/contact-api
 COPY contact-api/prisma ./prisma/
+COPY contact-api/tsconfig.json ./
 RUN npm ci
 
 # Generate Prisma client with proper permissions
 RUN npx prisma generate
 
-# Copy the rest of the application
+# Copy the source code
 COPY contact-api/src ./src/
-COPY contact-api/tsconfig.json ./
 
 # Build the application
 RUN npm run build

@@ -26,8 +26,8 @@ RUN npx prisma generate
 # Copy the source code
 COPY contact-api/src ./src/
 
-# Build the application
-RUN npm run build
+# Build the application directly
+RUN npx tsc -p .
 
 # Clean up dev dependencies after build
 RUN npm ci --production

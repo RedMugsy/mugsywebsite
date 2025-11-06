@@ -17,7 +17,7 @@ RUN npm ci --production
 # Install contact-api dependencies and copy prisma schema
 WORKDIR /app/contact-api
 COPY contact-api/prisma ./prisma/
-RUN npm ci --production
+RUN npm ci
 
 # Generate Prisma client with proper permissions
 RUN npx prisma generate
@@ -28,6 +28,9 @@ COPY contact-api/tsconfig.json ./
 
 # Build the application
 RUN npm run build
+
+# Clean up dev dependencies after build
+RUN npm ci --production
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001

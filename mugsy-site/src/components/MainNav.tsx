@@ -23,7 +23,7 @@ export default function MainNav({ showBackHome = false }: { showBackHome?: boole
         <div>
           <a href="/" className="flex items-center gap-2 font-extrabold text-white tracking-tight text-lg">
             <img src="img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-28 w-auto" />
-            <span><span className="text-[#ff1a4b]">RED</span> $MUGSY</span>
+            <span><span className="text-white">RED</span> <span className="text-[#ff1a4b]">$MUGSY</span></span>
           </a>
           {showBackHome && (
             <div className="mt-2">

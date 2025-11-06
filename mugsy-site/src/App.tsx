@@ -464,7 +464,7 @@ export default function App() {
 
         {/* About CTA centered at the bottom */}
         <div className="mt-10 flex justify-center">
-          <a href="#social-links" className="btn-claim" aria-label="Join our Community">Join our Community</a>
+          <a href="#/community" className="btn-claim" aria-label="Join our Community">Join our Community</a>
         </div>
       </Section>
 
@@ -762,7 +762,7 @@ export default function App() {
         </div>
       </section>
 
-      <SiteFooter onHome />
+      <SiteFooter />
 
       <BackToTop />
     </div>

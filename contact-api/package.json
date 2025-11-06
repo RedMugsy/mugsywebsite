@@ -6,11 +6,11 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
-    "build": "tsc -p . && npx prisma generate",
+    "build": "tsc -p . && chmod +x node_modules/.bin/prisma && npx prisma generate",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "railway:start": "npx prisma db push && npm start",
-    "postinstall": "npx prisma generate"
+    "postinstall": "chmod +x node_modules/.bin/prisma 2>/dev/null || true; npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",

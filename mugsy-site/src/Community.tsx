@@ -55,7 +55,7 @@ export default function Community() {
       
       <main className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-4">
+          <h1 className="text-7xl sm:text-9xl font-extrabold text-white mb-4">
             <span className="text-white">Join Our</span> <span className="text-[#ff1a4b]">Community</span>
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">

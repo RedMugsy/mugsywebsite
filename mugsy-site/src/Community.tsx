@@ -24,13 +24,29 @@ export default function Community() {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
+      // Use contact API for now until newsletter endpoint is deployed
+      const response = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email,
-          turnstileToken,
-          source: 'community-page'
+          name: 'Newsletter Subscriber',
+          email: email,
+          purpose: 'Newsletter Subscription',
+          subject: 'Newsletter Subscription Request',
+          message: `Newsletter subscription request from community page.
+
+Email: ${email}
+Source: community-page
+Timestamp: ${new Date().toISOString()}
+
+This is an automated subscription request from the Red Mugsy community page.`,
+          captcha: {
+            type: 'turnstile',
+            token: turnstileToken
+          },
+          website: '', // honeypot field
+          issuedAt: Date.now(),
+          issuedSig: 'community-form'
         })
       })
 
@@ -40,7 +56,7 @@ export default function Community() {
         setTurnstileToken('')
       } else {
         const data = await response.json()
-        setError(data.message || 'Failed to subscribe. Please try again.')
+        setError(data.error === 'Human check failed' ? 'Please verify you are human' : 'Failed to subscribe. Please try again.')
       }
     } catch (err) {
       setError('Network error. Please try again.')

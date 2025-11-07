@@ -415,6 +415,75 @@ app.post('/contact', upload.single('file'), async (req, res) => {
   }
 });
 
+// Newsletter subscription endpoint
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  try {
+    const body = req.body || {};
+    const schema = z.object({
+      email: z.string().email(),
+      turnstileToken: z.string().optional(),
+      source: z.string().optional(),
+    });
+    
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
+    }
+    
+    const data = parsed.data;
+    
+    // Verify Turnstile if token provided
+    const turnstileOk = await verifyTurnstile(data.turnstileToken);
+    if (!turnstileOk) {
+      return res.status(400).json({ ok: false, error: 'Human verification failed' });
+    }
+    
+    // Save subscription to database
+    const prisma = getDb();
+    try {
+      await prisma.newsletterSubscription.create({
+        data: {
+          email: data.email,
+          source: data.source || 'unknown',
+          ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || undefined,
+          userAgent: req.headers['user-agent'],
+        }
+      });
+    } catch (dbError: any) {
+      // Handle duplicate email gracefully
+      if (dbError.code === 'P2002') {
+        return res.status(400).json({ ok: false, error: 'Email already subscribed' });
+      }
+      throw dbError;
+    }
+    
+    // Send notification email to admin
+    try {
+      const from = process.env.MAIL_FROM || 'no-reply@redmugsy.com';
+      const to = process.env.MAIL_TO || 'contact@redmugsy.com';
+      const smtpConfigured = !!(process.env.SMTP_HOST && (process.env.SMTP_USER || process.env.SMTP_PASS));
+      
+      if (smtpConfigured) {
+        const transporter = makeTransport();
+        await transporter.sendMail({
+          from,
+          to,
+          subject: '[Red Mugsy] New Newsletter Subscription',
+          text: `New newsletter subscription:\n\nEmail: ${data.email}\nSource: ${data.source || 'unknown'}\nTimestamp: ${new Date().toISOString()}`
+        });
+      }
+    } catch (emailError) {
+      console.warn('Failed to send newsletter notification email:', emailError);
+      // Don't fail the subscription if email fails
+    }
+    
+    return res.json({ ok: true, message: 'Successfully subscribed to newsletter' });
+  } catch (err) {
+    console.error('Newsletter subscription error:', err);
+    return res.status(500).json({ ok: false, error: 'ServerError' });
+  }
+});
+
 // JSON submission path used by current frontend (no file upload)
 app.post('/api/contact', async (req, res) => {
   try {

@@ -24,7 +24,7 @@ export default function Community() {
     setError('')
 
     try {
-      // Use contact API for now until newsletter endpoint is deployed
+      // Try the contact API approach as a workaround
       const response = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,10 +56,10 @@ This is an automated subscription request from the Red Mugsy community page.`,
         setTurnstileToken('')
       } else {
         const data = await response.json()
-        setError(data.error === 'Human check failed' ? 'Please verify you are human' : 'Failed to subscribe. Please try again.')
+        setError(data.error === 'Human check failed' ? 'Please verify you are human' : 'Subscription service temporarily unavailable. Please follow us on social media or email us directly at contact@redmugsy.com')
       }
     } catch (err) {
-      setError('Network error. Please try again.')
+      setError('Subscription service temporarily unavailable. Please follow us on social media below or email us directly at contact@redmugsy.com')
     } finally {
       setIsSubmitting(false)
     }

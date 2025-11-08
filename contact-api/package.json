@@ -9,7 +9,6 @@
     "build": "tsc -p . && npx prisma generate",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "railway:start": "npx prisma db push && npm start",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {

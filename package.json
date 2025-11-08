@@ -1,10 +1,10 @@
 {
   "name": "mugsywebsite-root",
   "private": true,
+  "workspaces": ["contact-api"],
   "scripts": {
-    "install": "cd contact-api && npm ci",
-    "build": "cd contact-api && npm run build",
-    "start": "cd contact-api && npm start"
+    "build": "npm run build --workspace=contact-api",
+    "start": "npm run start --workspace=contact-api"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

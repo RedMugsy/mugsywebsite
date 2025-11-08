@@ -1,0 +1,7 @@
+mugsy-site/
+staging/
+.git/
+*.md
+README*
+Dockerfile
+.env*

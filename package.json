@@ -1,11 +1,4 @@
 {
-  "name": "mugsywebsite-root",
-  "private": true,
-  "workspaces": ["contact-api"],
-  "scripts": {
-    "build": "npm run build --workspace=contact-api",
-    "start": "npm run start --workspace=contact-api"
-  },
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/express-slow-down": "^1.3.5",

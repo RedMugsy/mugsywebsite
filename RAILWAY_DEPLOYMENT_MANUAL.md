@@ -19,7 +19,7 @@
 3. Connect your GitHub account if not already connected
 4. Select the repository: `RedMugsy/mugsywebsite`
 5. **Important**: Set the root directory to `contact-api/`
-6. Railway will auto-detect it as a Node.js project
+6. In the build settings, choose **Dockerfile** and set the path to `contact-api/Dockerfile`
 7. Click "Deploy"
 
 ### 3. Configure Environment Variables

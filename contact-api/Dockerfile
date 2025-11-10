@@ -15,16 +15,16 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV NPM_CONFIG_PRODUCTION=false
 
 # Copy manifests and Prisma schema before installing so postinstall scripts can run
-COPY contact-api/package*.json ./
-COPY contact-api/prisma ./prisma/
+COPY package*.json ./
+COPY prisma ./prisma/
 
 # Install dependencies (includes dev deps because of NPM_CONFIG_PRODUCTION=false)
 RUN npm ci --verbose
 
 # Copy application source
-COPY contact-api/tsconfig.json ./
-COPY contact-api/src ./src/
-COPY contact-api/public ./public/
+COPY tsconfig.json ./
+COPY src ./src/
+COPY public ./public/
 
 # Compile TypeScript (runs prisma generate as part of the build script)
 RUN npm run build

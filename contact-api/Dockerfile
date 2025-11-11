@@ -16,8 +16,7 @@ ENV NPM_CONFIG_PRODUCTION=false
 
 # Copy manifests and Prisma schema before installing so postinstall scripts can run
 COPY package*.json ./
-COPY prisma ./prisma/
-
+COPY prisma ./prisma/  # <-- moved before npm ci
 # Install dependencies (includes dev deps because of NPM_CONFIG_PRODUCTION=false)
 RUN npm ci --verbose
 
@@ -37,3 +36,4 @@ ENV NODE_ENV=production
 EXPOSE 8787
 
 CMD ["npm", "start"]
+

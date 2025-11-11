@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "build": "tsc -p . && npx prisma generate",
-    "start": "node index.js",
+    "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "postinstall": "npx prisma generate"
   },

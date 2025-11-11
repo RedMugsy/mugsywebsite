@@ -126,7 +126,7 @@ export default function Contact() {
     
     if (nErr) return nErr
     if (eErr) return eErr
-    if (pRes.error) return 'Phone must be digits only (optionally starting with +) and 6–15 digits long.'
+    if (pRes.error) return 'Phone must be digits only (optionally starting with +) and 6ï¿½15 digits long.'
     if (!purpose) return t('Please select a purpose','?????? ?????? ?????')
     if (purpose === 'Other' && !otherReason.trim()) return t('Please provide a reason for Other','???? ????? ??? ?????? ????')
     if (message.trim().length < 50 || message.trim().length > 3000) return t('Message must be 50-3000 characters','??? ?? ???? ??????? ??? 50 ? 3000 ???')
@@ -255,7 +255,7 @@ export default function Contact() {
               />
               {nameErr && nameTouched && (
                 <p id="contact-name-error" role="alert" className="mt-1 text-xs text-[#ff8fa0]">
-                  Name must be letters only (spaces, ’ and - allowed) and contain at least 3 letters.
+                  Name must be letters only (spaces, ï¿½ and - allowed) and contain at least 3 letters.
                 </p>
               )}
             </div>
@@ -303,7 +303,7 @@ export default function Contact() {
               <div className="sr-only" aria-live="polite">{phoneErr ? 'Phone invalid' : ''}</div>
               {phoneErr && phoneTouched && (
                 <p id="contact-phone-error" role="alert" className="mt-1 text-xs text-[#ff8fa0]">
-                  Phone must be digits only (optionally starting with +) and 6–15 digits long.
+                  Phone must be digits only (optionally starting with +) and 6ï¿½15 digits long.
                 </p>
               )}
             </div>
@@ -352,7 +352,7 @@ export default function Contact() {
                 <div role="status" className="mt-2 text-xs text-slate-400">
                   {file ? `${file.name} (${Math.ceil(file.size/1024)} KB)` : t('No file selected','?? ???? ?????')}
                   {file && (
-                    <button type="button" className="ml-2 text-[#ff8fa0] underline" onClick={()=>setFile(null)}>× {t('Remove','????')}</button>
+                    <button type="button" className="ml-2 text-[#ff8fa0] underline" onClick={()=>setFile(null)}>ï¿½ {t('Remove','????')}</button>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">PDF/PNG/JPG/WEBP/TXT, = {(import.meta as any).env?.VITE_MAX_UPLOAD_MB || 10}MB</p>
@@ -421,7 +421,7 @@ function HumanCheck({ apiBase, onReady }:{ apiBase: string; onReady: (v:{ csrf: 
       const isPow = ctype === 'pow' || ctype === 'altcha-pow'
       const isTurn = ctype === 'turnstile'
       if (isPow && typeof (a.captcha as any).difficulty === 'number' && (a.captcha as any).prefix) {
-        setState('solving'); setMsg('Verifying…')
+        setState('solving'); setMsg('Verifyingï¿½')
         const start = performance.now()
         // Solve on main thread (worker optional)
         const { solvePow } = await import('./lib/pow')

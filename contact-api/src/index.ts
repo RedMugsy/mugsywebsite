@@ -47,18 +47,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
-  .split(',')
-  .map(s => s.trim())
-  .filter(Boolean);
-
+// CORS - temporarily allow all origins for debugging
 app.use(
   cors({
-    origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error('Not allowed by CORS'));
-    },
+    origin: true,  // Allow all origins for testing
     credentials: true,
   })
 );

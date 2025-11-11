@@ -23,6 +23,8 @@ RUN npm ci --verbose
 # Copy application source
 COPY tsconfig.json ./
 COPY src ./src/
+
+# Copy public directory (ensure directory structure exists)
 COPY public ./public/
 
 # Compile TypeScript (runs prisma generate as part of the build script)

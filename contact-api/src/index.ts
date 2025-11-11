@@ -597,17 +597,31 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+console.log('='.repeat(50));
+console.log('🚀 CONTACT API STARTING UP...');
+console.log('='.repeat(50));
+
 const port = Number(process.env.PORT || 8787);
 
 console.log(`Starting Contact API on port ${port}...`);
 console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
+console.log(`Working Directory: ${process.cwd()}`);
+console.log(`App files in current dir:`, require('fs').readdirSync('.').join(', '));
+
+console.log('='.repeat(50));
+console.log('🌐 STARTING SERVER...');
+console.log('='.repeat(50));
 
 app.listen(port, '0.0.0.0', () => {
+  console.log('='.repeat(50));
   console.log(`✅ Contact API successfully listening on http://0.0.0.0:${port}`);
   console.log(`🏥 Health check available at http://0.0.0.0:${port}/health`);
+  console.log('='.repeat(50));
 }).on('error', (err) => {
+  console.log('='.repeat(50));
   console.error('❌ Failed to start server:', err);
+  console.log('='.repeat(50));
   process.exit(1);
 });
 

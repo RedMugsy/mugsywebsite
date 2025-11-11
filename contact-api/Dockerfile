@@ -14,17 +14,17 @@ ENV DATABASE_URL=$DATABASE_URL
 # Ensure dev dependencies stay available during the build even when NODE_ENV=production
 ENV NPM_CONFIG_PRODUCTION=false
 
-# Copy manifests and Prisma schema before installing so postinstall scripts can run
-COPY package*.json ./
-COPY prisma ./prisma/  # <-- moved before npm ci
+# Copy manifests and Prisma schema from contact-api subdirectory
+COPY contact-api/package*.json ./
+COPY contact-api/prisma ./prisma/
 # Install dependencies (includes dev deps because of NPM_CONFIG_PRODUCTION=false)
 RUN npm ci --verbose
 
-# Copy application source
-COPY tsconfig.json ./
-COPY src ./src/
+# Copy application source from contact-api subdirectory
+COPY contact-api/tsconfig.json ./
+COPY contact-api/src ./src/
 
-# Copy public directory (ensure directory structure exists)
+# Copy public directory from repo root
 COPY public ./public/
 
 # Compile TypeScript (runs prisma generate as part of the build script)

@@ -33,53 +33,54 @@ This document explains the architecture of the `mugsywebsite` repository to help
 
 ## 🚂 Railway Apps Architecture
 
-### App 1: `contact-api` ✅ Working
+### App 1: `mugsywebsite` ✅ Working
 - **Purpose**: Handles Contact Us and Claims forms
 - **Status**: Deployed and functioning
-- **Location**: `/contact-api/` directory
+- **Location**: `/contact-api/` directory in this repository
 - **Configuration**: 
   - `nixpacks.toml`
   - `railway.json` 
   - `Dockerfile`
-- **⚠️ DO NOT MODIFY** - This is working correctly
+- **✅ WORKING CORRECTLY** - Contact and Claims forms
 
-### App 2: `Hospitable-forgiveness` ⚠️ Needs Work
-- **Purpose**: Handles Subscription form submissions
-- **Status**: Has deployment/runtime issues
-- **Railway Project Name**: "Hospitable-forgiveness"
+### App 2: `perfect-integrity` ⚠️ Current Focus
+- **Purpose**: Handles Subscription/Registration form submissions
+- **Status**: Currently being set up (replaced hospitable-forgiveness)
+- **Railway Project Name**: "perfect-integrity"
 - **Technology**: Node.js/TypeScript backend
-- **Current Issues**: Unknown - needs investigation
+- **Previous**: Was called "hospitable-forgiveness" (deleted and replaced)
+- **Current Issues**: Needs configuration and testing
 
 ## 🎯 Current Development Focus
 
 ### ✅ What's Working (Don't Touch)
 1. Main website (GitHub Pages deployment)
-2. Contact Us form + `contact-api` backend
-3. Claims form + `contact-api` backend
+2. Contact Us form + `mugsywebsite` Railway app
+3. Claims form + `mugsywebsite` Railway app
 4. Git repository (recently cleaned up node_modules issue)
 
 ### ⚠️ What Needs Attention
-1. **Subscription Form Backend** (`Hospitable-forgiveness` Railway app)
-   - May have deployment issues
-   - May have runtime errors
-   - May have configuration problems
-   - This is the ONLY thing that needs fixing
+1. **Subscription/Registration Form Backend** (`perfect-integrity` Railway app)
+   - New deployment replacing old hospitable-forgiveness
+   - May need configuration setup
+   - May need environment variables
+   - This is what needs to be configured and tested
 
 ## 📝 Instructions for AI Agents
 
 ### ✅ DO:
-- Focus on the `Hospitable-forgiveness` Railway app
-- Investigate subscription form backend issues
-- Check deployment logs for the subscription service
-- Test subscription form endpoints
-- Verify subscription form configuration
+- Focus on the `perfect-integrity` Railway app for subscription functionality
+- Set up subscription/registration form backend configuration
+- Test subscription form endpoints in perfect-integrity
+- Configure environment variables for subscription service
+- Connect subscription forms to perfect-integrity URL
 
 ### ❌ DON'T:
-- Modify the working `contact-api` 
+- Modify the working `mugsywebsite` Railway app (contact + claims)
 - Change Contact Us or Claims form functionality
 - Modify working parts of the main website
-- Touch the `/contact-api/` directory unless specifically asked
-- Make changes to resolved components
+- Touch the contact/claims functionality
+- Look for hospitable-forgiveness (it was deleted and replaced)
 
 ## 🔍 Debugging Priority
 
@@ -99,9 +100,9 @@ This document explains the architecture of the `mugsywebsite` repository to help
 | Component | Status | Railway App | Action Needed |
 |-----------|--------|-------------|---------------|
 | Main Website | ✅ Working | N/A (GitHub Pages) | None |
-| Contact Form | ✅ Working | `contact-api` | None |
-| Claims Form | ✅ Working | `contact-api` | None |
-| Subscription Form | ⚠️ Issues | `Hospitable-forgiveness` | **Fix This** |
+| Contact Form | ✅ Working | `mugsywebsite` | None |
+| Claims Form | ✅ Working | `mugsywebsite` | None |
+| Subscription Form | ⚠️ Setup Needed | `perfect-integrity` | **Configure This** |
 
 ## 🚨 Important Notes
 
@@ -114,4 +115,4 @@ This document explains the architecture of the `mugsywebsite` repository to help
 ---
 
 **TL;DR for AI Agents**: 
-Focus on the subscription form backend (`Hospitable-forgiveness` Railway app). Everything else is working correctly and should not be modified.
+Focus on setting up the subscription form backend (`perfect-integrity` Railway app). Contact and Claims functionality is working correctly on the `mugsywebsite` Railway app. The old `hospitable-forgiveness` was deleted and replaced.

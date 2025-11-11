@@ -579,8 +579,8 @@ app.post('/api/contact', async (req, res) => {
 });
 
 const port = Number(process.env.PORT || 8787);
-app.listen(port, () => {
-  console.log(`Contact API listening on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Contact API listening on http://0.0.0.0:${port}`);
 });
 
 // Global error handler

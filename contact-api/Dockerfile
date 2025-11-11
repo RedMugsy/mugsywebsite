@@ -24,8 +24,8 @@ RUN npm ci --verbose
 COPY contact-api/tsconfig.json ./
 COPY contact-api/src ./src/
 
-# Copy public directory from repo root
-COPY public ./public/
+# Copy public directory from contact-api subdirectory (where it actually exists)
+COPY contact-api/public ./public/
 
 # Compile TypeScript (runs prisma generate as part of the build script)
 RUN npm run build

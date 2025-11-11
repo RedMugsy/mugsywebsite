@@ -248,7 +248,26 @@ function makeTransport() {
   });
 }
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', async (_req, res) => {
+  try {
+    // Test database connection
+    const db = getDb();
+    await db.$queryRaw`SELECT 1`;
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      database: 'connected'
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({ 
+      status: 'error', 
+      timestamp: new Date().toISOString(),
+      database: 'disconnected',
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
 app.post('/api/ping', (_req, res) => res.json({ ok: true }));
 app.get('/api/ping', (_req, res) => res.json({ ok: true }));
 
@@ -579,8 +598,17 @@ app.post('/api/contact', async (req, res) => {
 });
 
 const port = Number(process.env.PORT || 8787);
+
+console.log(`Starting Contact API on port ${port}...`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
+
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Contact API listening on http://0.0.0.0:${port}`);
+  console.log(`✅ Contact API successfully listening on http://0.0.0.0:${port}`);
+  console.log(`🏥 Health check available at http://0.0.0.0:${port}/health`);
+}).on('error', (err) => {
+  console.error('❌ Failed to start server:', err);
+  process.exit(1);
 });
 
 // Global error handler

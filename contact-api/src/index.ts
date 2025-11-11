@@ -494,6 +494,14 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
 // JSON submission path used by current frontend (no file upload)
 app.post('/api/contact', async (req, res) => {
   try {
+    console.log('📨 Contact API received request:', {
+      body: req.body,
+      headers: {
+        'content-type': req.headers['content-type'],
+        'origin': req.headers.origin
+      }
+    });
+
     if (process.env.MOCK_CONTACT === '1') {
       const requestId = Math.random().toString(36).slice(2, 10);
       return res.json({ ok: true, requestId, mocked: true });

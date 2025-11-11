@@ -399,11 +399,26 @@ app.post('/contact', upload.single('file'), async (req, res) => {
       attachments.push({ filename: file.originalname, content: file.buffer, contentType: file.mimetype });
     }
 
+    // For debugging - skip email if no SMTP configured
+    if (!process.env.SMTP_HOST) {
+      console.log('📧 SMTP not configured, skipping email. Contact data:', { 
+        from, to, subject: `[Contact] ${subject}`, 
+        messageLength: lines.length, 
+        attachments: attachments.length 
+      });
+      return res.json({ ok: true, message: 'Contact received (email disabled)' });
+    }
+
     await transporter.sendMail({ from, to, subject: `[Contact] ${subject}`, text: lines, attachments });
     return res.json({ ok: true });
   } catch (err: any) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: 'ServerError' });
+    console.error('Contact API Error:', err);
+    console.error('Error details:', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name
+    });
+    return res.status(500).json({ ok: false, error: 'ServerError', details: process.env.NODE_ENV === 'development' ? err.message : undefined });
   }
 });
 

@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
           cache-dependency-path: 'mugsy-site/package-lock.json'
       
@@ -45,21 +45,29 @@ jobs:
           cd mugsy-site
           npm ci
       
-      - name: Build
+      - name: Build with cache busting
         run: |
           cd mugsy-site
-          cp .env.production .env
+          # Generate build timestamp and version
+          echo "BUILD_TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_ENV
+          echo "BUILD_VERSION=$(date -u +"%Y%m%d-%H%M%S")" >> $GITHUB_ENV
+          # Build the project
           npm run build
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
-      
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the built dist directory
           path: './mugsy-site/dist'
-      
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: Verify Deployment
+        run: |
+          echo "Deployment completed at: $BUILD_TIMESTAMP"
+          echo "Build version: $BUILD_VERSION"
+          echo "Site URL: ${{ steps.deployment.outputs.page_url }}"

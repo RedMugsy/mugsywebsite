@@ -6,21 +6,23 @@ export default defineConfig({
   plugins: [react()],
   base: '/',
   build: {
-    // Enable cache busting with content hashes
+    // AGGRESSIVE cache busting - forces new files every build
     rollupOptions: {
       output: {
-        // Add hash to JS/CSS files to prevent caching issues
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        // Use timestamp + hash for maximum cache busting
+        entryFileNames: `assets/[name]-${Date.now()}-[hash].js`,
+        chunkFileNames: `assets/[name]-${Date.now()}-[hash].js`, 
+        assetFileNames: `assets/[name]-${Date.now()}-[hash].[ext]`
       }
     },
-    // Generate manifest for cache invalidation
-    manifest: true,
-    // Clean output directory
+    // Force rebuild of everything
     emptyOutDir: true,
-    // Optimize for production
-    minify: 'esbuild'
+    manifest: true,
+    minify: 'esbuild',
+    // Add version to build
+    define: {
+      __BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString())
+    }
   },
   server: {
     host: true,

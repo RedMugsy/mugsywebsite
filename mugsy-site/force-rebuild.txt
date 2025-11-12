@@ -1,0 +1,2 @@
+Force rebuild triggered: Wed 11/12/2025
+API confirmed working, forcing frontend redeploy

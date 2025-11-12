@@ -25,7 +25,7 @@ export default function Community() {
 
     try {
       // Try the contact API approach as a workaround
-      const response = await fetch(`${API_BASE}/api/contact`, {
+      const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

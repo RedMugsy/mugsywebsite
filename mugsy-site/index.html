@@ -19,7 +19,24 @@
     <!-- Self-hosted flag-icons CSS from repo folder -->
     <link rel="stylesheet" href="/flag-icons-main/css/flag-icons.min.css">
     <title>mugsy-site</title>
-  </head>
+      <!-- CACHE MANIFEST REFERENCE -->
+    <link rel="manifest" href="/cache-manifest.json">
+    <meta name="deployment-id" content="20251112195036">
+    <script>
+      // Force reload if cache version mismatch
+      fetch('/cache-manifest.json?' + Date.now())
+        .then(r => r.json())
+        .then(data => {
+          const stored = localStorage.getItem('deployment-id');
+          if (stored && stored !== data.deploymentId) {
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload(true);
+          }
+          localStorage.setItem('deployment-id', data.deploymentId);
+        });
+    </script>
+    </head>
   <body>
     <div id="root"></div>
     

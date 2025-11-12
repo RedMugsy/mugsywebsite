@@ -1,897 +1,319 @@
 import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import multer from 'multer';
+import { getDb } from './db.js';
 import nodemailer from 'nodemailer';
-import rateLimit from 'express-rate-limit';
+import { randomBytes } from 'crypto';
+import cors from 'cors';
 import helmet from 'helmet';
-import hpp from 'hpp';
-import slowDown from 'express-slow-down';
-import compression from 'compression';
-import { z } from 'zod';
-import fetch from 'node-fetch';
-import fs from 'fs';
-import path from 'path';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { getDb } from './db';
-
-dotenv.config();
-
-// Email validation regex
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import rateLimit from 'express-rate-limit';
 
 const app = express();
-// Trust proxy headers so rate-limiters and IP detection work behind CDNs/proxies
-app.set('trust proxy', true);
-app.disable('x-powered-by');
 
-// Security headers (API-safe)
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-    referrerPolicy: { policy: 'no-referrer-when-downgrade' },
-    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
-  })
-);
-// Parameter pollution protection
-app.use(hpp() as any);
-// Basic compression
-app.use(compression() as any);
-
-const ADMIN_UI_ENABLED = String(process.env.ADMIN_UI_ENABLED || '').toLowerCase() === 'true';
-
-// Basic JSON body parsing for non-multipart routes
-app.use(express.json({ limit: '1mb' }));
-// Apply a reasonable timeout to responses to avoid resource hogging
-app.use((req, res, next) => {
-  try { res.setTimeout(Number(process.env.REQUEST_TIMEOUT_MS || 15000)); } catch {}
-  next();
-});
-
-// CORS - temporarily allow all origins for debugging
-app.use(
-  cors({
-    origin: true,  // Allow all origins for testing
-    credentials: true,
-  })
-);
-
-// Optional: only allow requests that come through edge (e.g., Cloudflare) by checking a shared header
-const EDGE_AUTH_SECRET = process.env.EDGE_AUTH_SECRET || '';
-function requireEdgeAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
-  if (!EDGE_AUTH_SECRET) return next();
-  const hdr = (req.headers['x-edge-auth'] || req.headers['cf-edge-auth']) as string | undefined;
-  if (hdr && hdr === EDGE_AUTH_SECRET) return next();
-  return res.status(403).json({ error: 'forbidden' });
-}
-
-// Global and route-specific rate limits / slow-downs
-const GLOBAL_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000);
-const GLOBAL_MAX = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 120);
-const globalLimiter = rateLimit({
-  windowMs: GLOBAL_WINDOW_MS,
-  max: GLOBAL_MAX,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req: any, res: any) => {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-    console.warn(`[rate-limit] global limit reached ip=${ip} path=${req.originalUrl}`);
-    return res.status(429).json({ error: 'Too many requests' });
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
   },
+}));
+
+// CORS configuration
+app.use(cors({
+  origin: [
+    'https://redmugsy.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
 });
+app.use(limiter);
 
-// Fine-grained route controls
-const contactLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: Number(process.env.CONTACT_MAX_PER_HOUR || 10),
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req: any, res: any) => {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-    console.warn(`[rate-limit] contact limit reached ip=${ip} path=${req.originalUrl}`);
-    return res.status(429).json({ error: 'Too many requests' });
-  },
-});
-const contactSlowdown = slowDown({ windowMs: 15 * 60 * 1000, delayAfter: 3, delayMs: 500 });
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: Number(process.env.AUTH_MAX_PER_WINDOW || 20),
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req: any, res: any) => {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-    console.warn(`[rate-limit] auth limit reached ip=${ip} path=${req.originalUrl}`);
-    return res.status(429).json({ error: 'Too many requests' });
-  },
-});
-const authSlowdown = slowDown({ windowMs: 15 * 60 * 1000, delayAfter: 5, delayMs: 750 });
-const turnstileLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: Number(process.env.TURNSTILE_VERIFY_MAX_PER_MIN || 30),
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req: any, res: any) => {
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-    console.warn(`[rate-limit] turnstile limit reached ip=${ip} path=${req.originalUrl}`);
-    return res.status(429).json({ error: 'Too many requests' });
-  },
-});
-
-// Apply to sensitive paths
-app.use(['/contact', '/api/contact'], contactLimiter as any, contactSlowdown as any, requireEdgeAuth);
-app.use('/oauth/token', authLimiter as any, authSlowdown as any, requireEdgeAuth);
-app.use('/api/claim/turnstile-verify', turnstileLimiter);
-app.use(['/api/claim'], globalLimiter);
-
-// Multer for file upload (memory for email attachment)
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req, file, cb) => {
-    const ok = [
-      'application/pdf',
-      'image/png',
-      'image/jpeg',
-      'image/webp',
-      'text/plain',
-    ];
-    if (ok.includes(file.mimetype)) cb(null, true);
-    else cb(new Error('Invalid file type'));
-  },
-});
-
-const PurposeEnum = z.enum([
-  'General',
-  'Partnership',
-  'Support',
-  'Bug Report',
-  'Feedback',
-  'Other',
-]);
-
-const contactSchema = z.object({
-  name: z.string().min(2).max(100),
-  email: z.string().email(),
-  company: z.string().max(120).optional().or(z.literal('')),
-  phoneCountry: z.string().max(2).optional().or(z.literal('')),
-  phoneCode: z.string().max(6).optional().or(z.literal('')),
-  phoneNumber: z.string().max(32).optional().or(z.literal('')),
-  purpose: PurposeEnum,
-  subject: z.string().max(140).optional().or(z.literal('')),
-  message: z.string().min(50).max(3000),
-  walletAddress: z
-    .string()
-    .regex(/^0x[a-fA-F0-9]{40}$/)
-    .optional()
-    .or(z.literal('')),
-  agreePolicy: z.literal(true),
-  human: z.boolean().optional(),
-  cfTurnstileToken: z.string().optional(),
-});
-
-function suggestSubject(purpose: z.infer<typeof PurposeEnum>): string {
-  switch (purpose) {
-    case 'Partnership':
-      return 'Partnership inquiry';
-    case 'Support':
-      return 'Support request';
-    case 'Bug Report':
-      return 'Bug report';
-    case 'Feedback':
-      return 'User feedback';
-    case 'General':
-      return 'General inquiry';
-    case 'Other':
-    default:
-      return 'Contact request';
-  }
-}
-
-async function verifyHuman(token?: string, fallbackHuman?: boolean): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET;
-  if (secret && token) {
-    try {
-      const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ secret, response: token }),
-      });
-      const data = (await resp.json()) as any;
-      return !!data?.success;
-    } catch {
-      return false;
+// Email configuration
+const createEmailTransporter = () => {
+  return nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
     }
-  }
-  // fallback to checkbox
-  return !!fallbackHuman;
-}
-
-async function verifyTurnstile(token?: string, secretOverride?: string): Promise<boolean> {
-  const secret = secretOverride || process.env.TURNSTILE_SECRET;
-  // If Turnstile is not configured, allow (dev mode)
-  if (!secret) return true;
-  // If configured, require a token
-  if (!token) return false;
-  try {
-    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ secret, response: token }),
-    });
-    const data = (await resp.json()) as any;
-    return !!data?.success;
-  } catch {
-    return false;
-  }
-}
-
-function makeTransport() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT || '587');
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!host || !user || !pass) {
-    console.warn('SMTP not fully configured. Set SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS');
-  }
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: user && pass ? { user, pass } : undefined,
   });
-}
+};
 
-app.get('/health', (_req, res) => res.status(200).send('ok'));
-app.post('/api/ping', (_req, res) => res.json({ ok: true }));
-app.get('/api/ping', (_req, res) => res.json({ ok: true }));
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Claim flow helper: verify Turnstile token directly
-app.post('/api/claim/turnstile-verify', express.json(), async (req, res) => {
-  try {
-    const token = req.body?.token as string | undefined;
-    const ok = await verifyTurnstile(token, process.env.TURNSTILE_SECRET_CLAIM);
-    return res.json({ ok });
-  } catch {
-    return res.status(500).json({ ok: false });
-  }
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    ok: true, 
+    timestamp: new Date().toISOString(),
+    message: 'Newsletter API with email verification is running',
+    features: ['email_verification', 'subscription_completion', 'admin_panel']
+  });
 });
 
-// Claim event logging (used by Claim UI)
-app.post('/api/claim/log', express.json(), async (req, res) => {
+// Step 1: Initial email subscription (sends verification email)
+app.post('/api/newsletter/subscribe', async (req, res) => {
   try {
-    const prisma = getDb();
-    const body = req.body || {};
-    const item = await prisma.claimEvent.create({
-      data: {
-        type: String(body.type || 'other'),
-        address: body.address || null,
-        chainId: body.chainId != null ? Number(body.chainId) : null,
-        contract: body.contract || null,
-        txHash: body.txHash || null,
-        amount: body.amount != null ? String(body.amount) : null,
-        status: body.status || null,
-        payload: body && Object.keys(body).length ? JSON.stringify(body) : null,
-        ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || undefined,
-        userAgent: req.headers['user-agent'],
+    const email = (req.body?.email || "").trim().toLowerCase();
+    
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ ok: false, error: "invalid_email" });
+    }
+
+    const db = await getDb();
+    const verificationToken = randomBytes(32).toString('hex');
+    
+    // Create or update subscription record
+    const subscription = await db.newsletterSubscription.upsert({
+      where: { email },
+      update: {
+        verificationToken,
+        verificationSentAt: new Date(),
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+      },
+      create: {
+        email,
+        source: 'website',
+        active: false, // Will be true after verification
+        verificationToken,
+        verificationSentAt: new Date(),
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
       },
     });
-    res.json({ ok: true, id: item.id });
-  } catch (e) {
-    res.status(500).json({ ok: false });
-  }
-});
 
-// Claim eligibility (hybrid: merkle or voucher)
-app.get('/api/claim/eligibility', async (req, res) => {
-  try {
-    const addressRaw = String(req.query.address || '').toLowerCase();
-    if (!/^0x[0-9a-f]{40}$/i.test(addressRaw)) return res.json({ method: 'none' });
-    const dir = process.env.CLAIM_DATA_DIR || path.join(process.cwd(), 'public', 'claim-data');
-    const fp = path.join(dir, 'eligibility.json');
-    if (!fs.existsSync(fp)) return res.json({ method: 'none' });
-    const map = JSON.parse(fs.readFileSync(fp, 'utf8')) as Record<string, any>;
-    const e = map[addressRaw] || map[addressRaw.toLowerCase()] || map['*'];
-    if (!e) return res.json({ method: 'none' });
-    return res.json(e);
-  } catch {
-    return res.json({ method: 'none' });
-  }
-});
+    // Send verification email
+    try {
+      const transporter = createEmailTransporter();
+      const verificationUrl = `${process.env.FRONTEND_URL || 'https://redmugsy.com'}/verify-email?token=${verificationToken}`;
+      
+      const mailOptions = {
+        from: process.env.MAIL_FROM || 'noreply@redmugsy.com',
+        to: email,
+        subject: 'Verify Your Email - Red Mugsy Newsletter',
+        html: `
+          <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="background: linear-gradient(135deg, #ff0000, #cc0000); padding: 40px 30px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Welcome to Red Mugsy!</h1>
+              <p style="color: #ffcccc; margin: 10px 0 0 0; font-size: 16px;">The revolutionary meme coin</p>
+            </div>
+            <div style="padding: 40px 30px; background: #f9f9f9;">
+              <h2 style="color: #333; margin: 0 0 20px 0; font-size: 24px;">Verify Your Email Address</h2>
+              <p style="color: #666; line-height: 1.8; font-size: 16px; margin: 0 0 30px 0;">
+                Thank you for subscribing to the Red Mugsy newsletter! To complete your subscription and access exclusive content, 
+                please verify your email address by clicking the button below:
+              </p>
+              <div style="text-align: center; margin: 40px 0;">
+                <a href="${verificationUrl}" 
+                   style="background: linear-gradient(135deg, #ff0000, #cc0000); color: white; padding: 18px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(255,0,0,0.3); transition: all 0.3s ease;">
+                  ✓ Verify Email Address
+                </a>
+              </div>
+              <div style="background: #fff; padding: 20px; border-radius: 8px; border-left: 4px solid #ff0000; margin: 30px 0;">
+                <p style="color: #666; font-size: 14px; margin: 0; line-height: 1.6;">
+                  <strong>Can't click the button?</strong><br>
+                  Copy and paste this link into your browser:<br>
+                  <a href="${verificationUrl}" style="color: #ff0000; word-break: break-all;">${verificationUrl}</a>
+                </p>
+              </div>
+              <div style="text-align: center; margin: 30px 0 0 0;">
+                <p style="color: #999; font-size: 12px; margin: 0;">This verification link expires in 24 hours</p>
+                <p style="color: #999; font-size: 12px; margin: 5px 0 0 0;">Having trouble? Reply to this email for support</p>
+              </div>
+            </div>
+            <div style="background: #333; padding: 20px; text-align: center;">
+              <p style="color: #999; margin: 0; font-size: 12px;">&copy; ${new Date().getFullYear()} Red Mugsy. All rights reserved.</p>
+            </div>
+          </div>
+        `
+      };
 
-// Compatibility endpoints expected by the existing frontend antiSpam util
-app.get('/api/contact/csrf', (_req, res) => {
-  const token = Math.random().toString(36).slice(2);
-  res.json({ token });
-});
-
-app.get('/api/contact/timestamp', (_req, res) => {
-  const issuedAt = Date.now();
-  const issuedSig = 'dev';
-  res.json({ issuedAt, issuedSig });
-});
-
-app.get('/api/contact/captcha', (_req, res) => {
-  // If Turnstile is configured, advertise Turnstile so the frontend renders the widget
-  if (process.env.TURNSTILE_SECRET) {
-    return res.json({ type: 'turnstile', expiresAt: new Date(Date.now() + 5 * 60_000).toISOString() });
-  }
-  // Fallback: trivial placeholder
-  res.json({ type: 'image', nonce: Math.random().toString(36).slice(2), expiresAt: new Date(Date.now() + 5 * 60_000).toISOString() });
-});
-
-app.post('/contact', upload.single('file'), async (req, res) => {
-  try {
-    const fieldsRaw = {
-      ...req.body,
-      purpose: req.body?.purpose,
-      agreePolicy: req.body?.agreePolicy === 'true' || req.body?.agreePolicy === true,
-      human: req.body?.human === 'true' || req.body?.human === true,
-    };
-    const parsed = contactSchema.safeParse(fieldsRaw);
-    if (!parsed.success) {
-      return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
-    }
-    const data = parsed.data;
-
-    // Verify human
-    const humanOk = await verifyHuman(data.cfTurnstileToken, data.human);
-    if (!humanOk) return res.status(400).json({ ok: false, error: 'Human check failed' });
-
-    // Subject
-    const subject = data.subject && data.subject.trim().length > 0 ? data.subject : suggestSubject(data.purpose);
-
-    // Persist submission
-    const prisma = getDb();
-    let savedPath: string | undefined;
-    let savedName: string | undefined;
-    let savedMime: string | undefined;
-    const uploadDir = path.join(process.cwd(), 'uploads');
-    try { if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true }); } catch {}
-    const file = (req as any).file as Express.Multer.File | undefined;
-    if (file && file.buffer) {
-      const fname = `${Date.now()}_${file.originalname}`.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const fpath = path.join(uploadDir, fname);
-      fs.writeFileSync(fpath, file.buffer);
-      savedPath = fpath; savedName = file.originalname; savedMime = file.mimetype;
+      await transporter.sendMail(mailOptions);
+      console.log('Verification email sent to:', email);
+      
+    } catch (emailError) {
+      console.error('Email send failed:', emailError);
+      // Continue anyway - they can try subscribing again
     }
 
-    await prisma.submission.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        company: data.company || null,
-        phoneDialCode: data.phoneCode || null,
-        phoneNational: data.phoneNumber || null,
-        purpose: data.purpose,
-        subject,
-        message: data.message,
-        walletAddress: data.walletAddress || null,
-        attachmentPath: savedPath,
-        attachmentMime: savedMime,
-        attachmentName: savedName,
-        ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || undefined,
-        userAgent: req.headers['user-agent'],
-      }
+    res.json({ 
+      ok: true, 
+      message: 'Verification email sent! Please check your inbox and spam folder.',
+      requiresVerification: true,
+      email: email
     });
 
-    // Compose email
-    const transporter = makeTransport();
-    const from = process.env.MAIL_FROM || 'no-reply@example.com';
-    const to = process.env.MAIL_TO || 'support@example.com';
-
-    const lines = [
-      `Name: ${data.name}`,
-      `Email: ${data.email}`,
-      data.company ? `Company: ${data.company}` : undefined,
-      data.phoneCode || data.phoneNumber
-        ? `Phone: ${data.phoneCode || ''} ${data.phoneNumber || ''}`
-        : undefined,
-      `Purpose: ${data.purpose}`,
-      data.walletAddress ? `Wallet: ${data.walletAddress}` : undefined,
-      '',
-      'Message:',
-      data.message,
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    const attachments: Array<{ filename: string; content: Buffer; contentType: string }> = [];
-    if (file && file.buffer) {
-      attachments.push({ filename: file.originalname, content: file.buffer, contentType: file.mimetype });
-    }
-
-    // For debugging - skip email if no SMTP configured
-    if (!process.env.SMTP_HOST) {
-      console.log('📧 SMTP not configured, skipping email. Contact data:', { 
-        from, to, subject: `[Contact] ${subject}`, 
-        messageLength: lines.length, 
-        attachments: attachments.length 
-      });
-      return res.json({ ok: true, message: 'Contact received (email disabled)' });
-    }
-
-    await transporter.sendMail({ from, to, subject: `[Contact] ${subject}`, text: lines, attachments });
-    return res.json({ ok: true });
-  } catch (err: any) {
-    console.error('Contact API Error:', err);
-    console.error('Error details:', {
-      message: err.message,
-      stack: err.stack,
-      name: err.name
-    });
-    return res.status(500).json({ ok: false, error: 'ServerError', details: process.env.NODE_ENV === 'development' ? err.message : undefined });
-  }
-});
-
-// Newsletter subscription endpoint
-// Newsletter subscription endpoint - resilient version
-app.post('/api/newsletter/subscribe', async (req, res) => {
-  const email = (req.body?.email || "").trim().toLowerCase();
-  
-  if (!EMAIL_RE.test(email)) {
-    return res.status(400).json({ ok: false, error: "invalid_email" });
-  }
-
-  const db = getDb();
-  
-  try {
-    // Set a timeout for the database operation
-    const result = await Promise.race([
-      db.newsletterSubscription.upsert({
-        where: { email },
-        update: { active: true }, // Reactivate if exists
-        create: {
-          email,
-          source: 'website',
-          active: true,
-          ip: req.ip || req.connection.remoteAddress,
-          userAgent: req.get('User-Agent')
-        }
-      }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database timeout')), 10000)
-      )
-    ]);
-
-    return res.status(200).json({ ok: true });
-    
   } catch (error) {
-    console.error("NEWSLETTER_SUBSCRIBE_ERROR:", error);
+    console.error('Newsletter subscription error:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'subscription_failed',
+      message: 'Please try again later'
+    });
+  }
+});
+
+// Step 2: Email verification endpoint
+app.get('/api/newsletter/verify', async (req, res) => {
+  try {
+    const { token } = req.query;
     
-    // Don't punish the user for database issues - return success
-    // You could add email notification here to not lose leads
-    return res.status(200).json({ ok: true, deferred: true });
-  }
-});
-
-// JSON submission path used by current frontend (no file upload)
-app.post('/api/contact', async (req, res) => {
-  try {
-    console.log('📨 Contact API received request:', {
-      body: req.body,
-      headers: {
-        'content-type': req.headers['content-type'],
-        'origin': req.headers.origin
-      }
-    });
-
-    if (process.env.MOCK_CONTACT === '1') {
-      const requestId = Math.random().toString(36).slice(2, 10);
-      return res.json({ ok: true, requestId, mocked: true });
+    if (!token) {
+      return res.status(400).json({ ok: false, error: 'missing_token' });
     }
-    const body = req.body || {};
-    const jsonSchema = z.object({
-      locale: z.string().optional(),
-      name: z.string().min(2).max(100),
-      email: z.string().email(),
-      company: z.string().max(120).optional().or(z.literal('')),
-      phoneCountry: z.string().max(3).optional().or(z.literal('')),
-      phoneDialCode: z.string().max(8).optional().or(z.literal('')),
-      phoneNational: z.string().max(32).optional().or(z.literal('')),
-      phoneE164: z.string().max(32).optional().or(z.literal('')),
-      purpose: z.string().min(2).max(64),
-      otherReason: z.string().max(200).optional().or(z.literal('')),
-      subject: z.string().max(140).optional().or(z.literal('')),
-      message: z.string().min(50).max(3000),
-      walletAddress: z.string().optional().or(z.literal('')),
-      issuedAt: z.number().optional(),
-      issuedSig: z.string().optional(),
-      website: z.string().optional(), // honeypot
-      captcha: z.any().optional(),
+
+    const db = await getDb();
+    
+    // Find subscription by verification token
+    const subscription = await db.newsletterSubscription.findUnique({
+      where: { verificationToken: token }
     });
-    const parsed = jsonSchema.safeParse(body);
-    if (!parsed.success) return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
-    const data = parsed.data as any;
-    if (data.website) return res.status(400).json({ ok: false, error: 'Spam detected' });
 
-    // Optional Turnstile verification if token is present
-    const turnstileToken: string | undefined = data?.captcha?.type === 'turnstile' ? data.captcha.token : undefined;
-    const turnstileOk = await verifyTurnstile(turnstileToken);
-    if (!turnstileOk) return res.status(400).json({ ok: false, error: 'Human check failed' });
+    if (!subscription) {
+      return res.status(404).json({ ok: false, error: 'invalid_token' });
+    }
 
-    const subject = data.subject && data.subject.trim().length > 0 ? data.subject : suggestSubject('General');
-    const lines = [
-      `Name: ${data.name}`,
-      `Email: ${data.email}`,
-      data.company ? `Company: ${data.company}` : undefined,
-      (data.phoneE164 || data.phoneDialCode || data.phoneNational)
-        ? `Phone: ${data.phoneE164 || `${data.phoneDialCode || ''} ${data.phoneNational || ''}`}`
-        : undefined,
-      `Purpose: ${data.purpose}${data.otherReason ? ` (${data.otherReason})` : ''}`,
-      data.walletAddress ? `Wallet: ${data.walletAddress}` : undefined,
-      '',
-      'Message:',
-      data.message,
-    ].filter(Boolean).join('\n');
+    // Check if token is expired (24 hours)
+    const tokenAge = Date.now() - subscription.verificationSentAt.getTime();
+    if (tokenAge > 24 * 60 * 60 * 1000) {
+      return res.status(410).json({ ok: false, error: 'token_expired' });
+    }
 
-    // Persist to DB
-    const prisma = getDb();
-    await prisma.submission.create({
+    // Mark as verified
+    await db.newsletterSubscription.update({
+      where: { id: subscription.id },
       data: {
-        name: data.name,
-        email: data.email,
-        company: data.company || null,
-        phoneE164: data.phoneE164 || null,
-        phoneDialCode: data.phoneDialCode || null,
-        phoneNational: data.phoneNational || null,
-        purpose: data.purpose,
-        subject,
-        message: data.message,
-        walletAddress: data.walletAddress || null,
-        ip: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || undefined,
-        userAgent: req.headers['user-agent'],
+        active: true,
+        verifiedAt: new Date(),
+        verificationToken: null // Clear token after use
       }
     });
 
-    const from = process.env.MAIL_FROM || 'no-reply@example.com';
-    const to = process.env.MAIL_TO || 'support@example.com';
-    const smtpConfigured = !!(process.env.SMTP_HOST && (process.env.SMTP_USER || process.env.SMTP_PASS));
-    if (smtpConfigured) {
-      const transporter = makeTransport();
-      await transporter.sendMail({ from, to, subject: `[Contact] ${subject}`, text: lines });
-    }
+    // Redirect to subscription completion form
+    const formUrl = `${process.env.FRONTEND_URL || 'https://redmugsy.com'}/complete-subscription?email=${encodeURIComponent(subscription.email)}`;
+    res.redirect(formUrl);
 
-    const requestId = Math.random().toString(36).slice(2, 10);
-    return res.json({ ok: true, requestId });
-  } catch (err) {
-    try {
-      const dir = path.join(process.cwd(), 'tmp');
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-      const fp = path.join(dir, 'server-error.log');
-      const msg = `[${new Date().toISOString()}] /api/contact error: ${String((err as any)?.message || err)}\n${(err as any)?.stack || ''}\n`;
-      fs.appendFileSync(fp, msg);
-    } catch {}
-    console.error(err);
-    return res.status(500).json({ ok: false, error: 'ServerError' });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({ ok: false, error: 'verification_failed' });
   }
 });
 
-const port = Number(process.env.PORT) || 8787;
-console.log(`Starting Contact API on port ${port}...`);
-
-app.listen(port, "0.0.0.0", () => {
-  console.log(`✅ Contact API listening on 0.0.0.0:${port}`);
-  console.log(`Health check at /health`);
-}).on('error', (err) => {
-  console.error('❌ Server startup error:', err);
-  process.exit(1);
-});
-
-// Global error handler
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+// Step 3: Complete subscription with additional details
+app.post('/api/newsletter/complete', async (req, res) => {
   try {
-    const dir = path.join(process.cwd(), 'tmp');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    const fp = path.join(dir, 'server-error.log');
-    const msg = `[${new Date().toISOString()}] Global error: ${String(err?.message || err)}\n${err?.stack || ''}\n`;
-    fs.appendFileSync(fp, msg);
-  } catch {}
-  res.status(500).json({ ok: false, error: 'ServerError' });
-});
-
-process.on('unhandledRejection', (reason: any) => {
-  try {
-    const dir = path.join(process.cwd(), 'tmp');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    const fp = path.join(dir, 'server-error.log');
-    const msg = `[${new Date().toISOString()}] UnhandledRejection: ${String(reason?.message || reason)}\n${reason?.stack || ''}\n`;
-    fs.appendFileSync(fp, msg);
-  } catch {}
-});
-
-process.on('uncaughtException', (err: any) => {
-  try {
-    const dir = path.join(process.cwd(), 'tmp');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    const fp = path.join(dir, 'server-error.log');
-    const msg = `[${new Date().toISOString()}] UncaughtException: ${String(err?.message || err)}\n${err?.stack || ''}\n`;
-    fs.appendFileSync(fp, msg);
-  } catch {}
-});
-
-// --- OAuth2-style admin auth and APIs ---
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'devsecret';
-
-async function ensureAdminSeed() {
-  const prisma = getDb();
-  const count = await prisma.adminUser.count();
-  if (count === 0 && process.env.ADMIN_USER && process.env.ADMIN_PASS) {
-    const hash = await bcrypt.hash(process.env.ADMIN_PASS, 10);
-    await prisma.adminUser.create({ data: { username: process.env.ADMIN_USER, passwordHash: hash, role: 'MASTER', fullName: process.env.ADMIN_NAME || 'Admin' } });
-    console.log('Admin user created:', process.env.ADMIN_USER);
-  }
-}
-ensureAdminSeed().catch(()=>{});
-
-app.post('/oauth/token', express.urlencoded({ extended: true }), async (req, res) => {
-  try {
-    const grant = (req.body?.grant_type || '').toString();
-    if (grant !== 'password') return res.status(400).json({ error: 'unsupported_grant_type' });
-    const username = (req.body?.username || '').toString();
-    const password = (req.body?.password || '').toString();
-    const prisma = getDb();
-    const user = await prisma.adminUser.findUnique({ where: { username } });
-    if (!user) {
-      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-      console.warn(`[auth] invalid_grant (no user) username=${username} ip=${ip}`);
-      return res.status(400).json({ error: 'invalid_grant' });
+    const { email, firstName, lastName, gender, dateOfBirth, hearAboutUs } = req.body;
+    
+    if (!EMAIL_RE.test(email)) {
+      return res.status(400).json({ ok: false, error: 'invalid_email' });
     }
-    const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) {
-      const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
-      console.warn(`[auth] invalid_grant (bad password) username=${username} ip=${ip}`);
-      return res.status(400).json({ error: 'invalid_grant' });
-    }
-    const role = (user as any).role || 'MASTER';
-    const access_token = jwt.sign({ sub: user.id, username, role }, JWT_SECRET, { expiresIn: '1h' });
-    return res.json({ token_type: 'Bearer', access_token, expires_in: 3600, role });
-  } catch (e) {
-    return res.status(500).json({ error: 'server_error' });
-  }
-});
 
-function authRequired(req: express.Request, res: express.Response, next: express.NextFunction) {
-  try {
-    const header = req.headers['authorization'] || '';
-    const m = /^Bearer\s+(.+)$/i.exec(header);
-    if (!m) return res.status(401).json({ error: 'unauthorized' });
-    const token = m[1];
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    (req as any).admin = { id: payload.sub, username: payload.username, role: payload.role || 'MASTER' };
-    next();
-  } catch {
-    return res.status(401).json({ error: 'unauthorized' });
-  }
-}
+    const db = await getDb();
+    
+    // Find verified subscription
+    const subscription = await db.newsletterSubscription.findUnique({
+      where: { email }
+    });
 
-function requireRole(roles: string[]) {
-  return function(req: express.Request, res: express.Response, next: express.NextFunction) {
-    const r = (req as any).admin?.role || 'MASTER';
-    if (!roles.includes(r)) return res.status(403).json({ error: 'forbidden' });
-    next();
-  }
-}
-
-// Current user info
-app.get('/api/admin/me', authRequired, async (req, res) => {
-  const prisma = getDb();
-  const me = await prisma.adminUser.findUnique({ where: { id: (req as any).admin.id }, select: { id: true, username: true, role: true, createdAt: true } });
-  if (!me) return res.status(404).json({ error: 'not_found' });
-  res.json(me);
-});
-
-app.get('/api/admin/submissions', authRequired, requireRole(['MASTER','ENGAGEMENT']), async (req, res) => {
-  const prisma = getDb();
-  const take = Math.min(Number(req.query.take || 50), 200);
-  const skip = Math.max(Number(req.query.skip || 0), 0);
-  const q = (req.query.q as string | undefined)?.trim() || '';
-  const sortByRaw = (req.query.sortBy as string | undefined)?.toLowerCase() || 'date';
-  const sortDirRaw = (req.query.sortDir as string | undefined)?.toLowerCase() || 'desc';
-  const sortDir = sortDirRaw === 'asc' ? 'asc' as const : 'desc' as const;
-
-  const sortField = (() => {
-    switch (sortByRaw) {
-      case 'name': return 'name' as const;
-      case 'email': return 'email' as const;
-      case 'purpose': return 'purpose' as const;
-      case 'subject': return 'subject' as const;
-      case 'date':
-      default: return 'createdAt' as const;
-    }
-  })();
-
-  // Build where clause
-  let where: any = undefined;
-  if (q) {
-    // If q looks like YYYY-MM-DD, filter by that date range
-    const m = /^\d{4}-\d{2}-\d{2}$/.exec(q);
-    if (m) {
-      const start = new Date(q + 'T00:00:00.000Z');
-      const end = new Date(new Date(q + 'T00:00:00.000Z').getTime() + 24*60*60*1000);
-      where = { createdAt: { gte: start, lt: end } };
-    } else {
-      where = {
-        OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { email: { contains: q, mode: 'insensitive' } },
-          { purpose: { contains: q, mode: 'insensitive' } },
-          { subject: { contains: q, mode: 'insensitive' } },
-        ],
-      };
-    }
-  }
-
-  const [items, total] = await Promise.all([
-    prisma.submission.findMany({ where, orderBy: { [sortField]: sortDir }, take, skip }),
-    prisma.submission.count({ where }),
-  ]);
-  res.json({ total, items });
-});
-
-app.get('/api/admin/claims', authRequired, requireRole(['MASTER','CLAIM_MANAGER']), async (req, res) => {
-  const prisma = getDb();
-  const take = Math.min(Number(req.query.take || 50), 200);
-  const skip = Math.max(Number(req.query.skip || 0), 0);
-  const q = (req.query.q as string | undefined)?.trim() || '';
-  const sortByRaw = (req.query.sortBy as string | undefined)?.toLowerCase() || 'date';
-  const sortDirRaw = (req.query.sortDir as string | undefined)?.toLowerCase() || 'desc';
-  const sortDir = sortDirRaw === 'asc' ? 'asc' as const : 'desc' as const;
-
-  const sortField = (() => {
-    switch (sortByRaw) {
-      case 'address': return 'address' as const;
-      case 'chain': return 'chainId' as const;
-      case 'contract': return 'contract' as const;
-      case 'type': return 'type' as const;
-      case 'status': return 'status' as const;
-      case 'amount': return 'amount' as const;
-      case 'date':
-      default: return 'createdAt' as const;
-    }
-  })();
-
-  let where: any = undefined;
-  if (q) {
-    const m = /^\d{4}-\d{2}-\d{2}$/.exec(q);
-    if (m) {
-      const start = new Date(q + 'T00:00:00.000Z');
-      const end = new Date(new Date(q + 'T00:00:00.000Z').getTime() + 24*60*60*1000);
-      where = { createdAt: { gte: start, lt: end } };
-    } else {
-      where = {
-        OR: [
-          { address: { contains: q, mode: 'insensitive' } },
-          { contract: { contains: q, mode: 'insensitive' } },
-          { type: { contains: q, mode: 'insensitive' } },
-          { status: { contains: q, mode: 'insensitive' } },
-          { txHash: { contains: q, mode: 'insensitive' } },
-        ],
-      };
-    }
-  }
-
-  const [items, total] = await Promise.all([
-    prisma.claimEvent.findMany({ where, orderBy: { [sortField]: sortDir }, take, skip }),
-    prisma.claimEvent.count({ where }),
-  ]);
-  res.json({ total, items });
-});
-
-app.get('/api/admin/claims/:id', authRequired, requireRole(['MASTER','CLAIM_MANAGER']), async (req, res) => {
-  const prisma = getDb();
-  const item = await prisma.claimEvent.findUnique({ where: { id: String(req.params.id) } });
-  if (!item) return res.status(404).json({ error: 'not_found' });
-  res.json(item);
-});
-
-app.get('/api/admin/submissions/:id', authRequired, requireRole(['MASTER','ENGAGEMENT']), async (req, res) => {
-  const prisma = getDb();
-  const item = await prisma.submission.findUnique({ where: { id: String(req.params.id) } });
-  if (!item) return res.status(404).json({ error: 'not_found' });
-  res.json(item);
-});
-
-app.get('/api/admin/attachments/:id', authRequired, requireRole(['MASTER','ENGAGEMENT']), async (req, res) => {
-  const prisma = getDb();
-  const item = await prisma.submission.findUnique({ where: { id: String(req.params.id) } });
-  if (!item || !item.attachmentPath) return res.status(404).end();
-  res.setHeader('Content-Type', item.attachmentMime || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `attachment; filename="${item.attachmentName || 'file'}"`);
-fs.createReadStream(item.attachmentPath).pipe(res);
-});
-
-// User management (MASTER only)
-app.get('/api/admin/users', authRequired, requireRole(['MASTER']), async (_req, res) => {
-  const prisma = getDb();
-  const users = await prisma.adminUser.findMany({ select: { id: true, username: true, fullName: true, role: true, createdAt: true } });
-  res.json({ items: users });
-});
-
-app.post('/api/admin/users', authRequired, requireRole(['MASTER']), express.json(), async (req, res) => {
-  try {
-    const username = String(req.body?.username || '').trim();
-    const password = String(req.body?.password || '').trim();
-    const role = String(req.body?.role || 'ENGAGEMENT').toUpperCase();
-    const fullName = (req.body?.fullName ? String(req.body.fullName) : undefined);
-    if (!username || !password) return res.status(400).json({ error: 'missing_fields' });
-    if (!['MASTER','ENGAGEMENT','CLAIM_MANAGER'].includes(role)) return res.status(400).json({ error: 'invalid_role' });
-    const prisma = getDb();
-    const hash = await bcrypt.hash(password, 10);
-    const user = await prisma.adminUser.create({ data: { username, passwordHash: hash, role, fullName } });
-
-    // Send welcome email
-    try {
-      const transport = makeTransport();
-      const admin = await prisma.adminUser.findUnique({ where: { id: (req as any).admin.id } });
-      const adminName = admin?.fullName || admin?.username || 'Admin';
-      const toName = user.fullName || user.username;
-      const portalUrl = process.env.ADMIN_PORTAL_URL || `${req.protocol}://${req.get('host')}/admin/`;
-      const text = `Welcome ${toName} to Red Mugsy squad. The Admin ${adminName} has added you to the list of users.
-
-You have been assigned the profile of ${role === 'MASTER' ? 'Master' : role === 'ENGAGEMENT' ? 'Engagement' : 'Claim Manager'}.
-
-Your access credentials are:
-User Name: ${user.username}
-Password: ${password}
-
-To access the portal, click on the link below
-${portalUrl}
-
-We wish you luck down the rabbit hole :-).
-
-Regards,
-
-Red Mugsy Squad`;
-      await transport.sendMail({
-        to: user.username,
-        from: process.env.MAIL_FROM || 'no-reply@redmugsy.com',
-        subject: 'Your Red Mugsy Admin Access',
-        text,
+    if (!subscription || !subscription.active || !subscription.verifiedAt) {
+      return res.status(400).json({ 
+        ok: false, 
+        error: 'unverified_email',
+        message: 'Please verify your email first'
       });
-    } catch (e) {
-      console.warn('Send welcome mail failed:', (e as any)?.message || e);
     }
 
-    res.json({ ok: true, id: user.id });
-  } catch (e) {
-    res.status(500).json({ error: 'server_error' });
+    // Update with additional details
+    await db.newsletterSubscription.update({
+      where: { email },
+      data: {
+        firstName: firstName?.trim(),
+        lastName: lastName?.trim(),
+        gender,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        hearAboutUs: hearAboutUs?.trim(),
+        subscriptionCompletedAt: new Date()
+      }
+    });
+
+    res.json({ 
+      ok: true, 
+      message: 'Subscription completed successfully!',
+      welcomeMessage: `Welcome to Red Mugsy, ${firstName || 'subscriber'}! You'll receive our latest updates and exclusive content.`
+    });
+
+  } catch (error) {
+    console.error('Subscription completion error:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'completion_failed',
+      message: 'Please try again'
+    });
   }
 });
 
-app.patch('/api/admin/users/:id', authRequired, requireRole(['MASTER']), express.json(), async (req, res) => {
+// Admin endpoint to view subscriptions
+app.get('/api/admin/subscriptions', async (req, res) => {
   try {
-    const id = String(req.params.id);
-    const data: any = {};
-    if (req.body?.username) data.username = String(req.body.username);
-    if (req.body?.fullName != null) data.fullName = req.body.fullName ? String(req.body.fullName) : null;
-    if (req.body?.password) data.passwordHash = await bcrypt.hash(String(req.body.password), 10);
-    if (req.body?.role) {
-      const role = String(req.body.role).toUpperCase();
-      if (!['MASTER','ENGAGEMENT','CLAIM_MANAGER'].includes(role)) return res.status(400).json({ error: 'invalid_role' });
-      data.role = role;
-    }
-    const prisma = getDb();
-    const u = await prisma.adminUser.update({ where: { id }, data });
-    res.json({ ok: true, id: u.id });
-  } catch (e) {
-    res.status(500).json({ error: 'server_error' });
+    const db = await getDb();
+    const subscriptions = await db.newsletterSubscription.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100 // Limit to last 100
+    });
+
+    const safeSubscriptions = subscriptions.map(sub => ({
+      id: sub.id,
+      email: sub.email,
+      firstName: sub.firstName,
+      lastName: sub.lastName,
+      gender: sub.gender,
+      hearAboutUs: sub.hearAboutUs,
+      active: sub.active,
+      verified: !!sub.verifiedAt,
+      completed: !!sub.subscriptionCompletedAt,
+      createdAt: sub.createdAt,
+      verifiedAt: sub.verifiedAt,
+      completedAt: sub.subscriptionCompletedAt
+    }));
+
+    res.json({ 
+      ok: true, 
+      subscriptions: safeSubscriptions, 
+      total: subscriptions.length,
+      stats: {
+        verified: safeSubscriptions.filter(s => s.verified).length,
+        completed: safeSubscriptions.filter(s => s.completed).length,
+        pending: safeSubscriptions.filter(s => !s.verified).length
+      }
+    });
+  } catch (error) {
+    console.error('Admin subscriptions error:', error);
+    res.status(500).json({ ok: false, error: 'fetch_failed' });
   }
 });
 
-app.delete('/api/admin/users/:id', authRequired, requireRole(['MASTER']), async (req, res) => {
-  try {
-    const id = String(req.params.id);
-    const prisma = getDb();
-    await prisma.adminUser.delete({ where: { id } });
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'server_error' });
-  }
+const PORT = process.env.PORT || 8788;
+app.listen(PORT, () => {
+  console.log(`Red Mugsy Newsletter API with Email Verification running on port ${PORT}`);
+  console.log('Features: Email verification, subscription completion, admin panel');
 });
-
-// Minimal static admin UI (opt-in via ADMIN_UI_ENABLED=true)
-if (ADMIN_UI_ENABLED) {
-  app.use('/admin', express.static(path.join(process.cwd(), 'public', 'admin')));
-}

@@ -1,0 +1,4 @@
+Frontend deployment triggered: 2025-11-12 12:05:15
+Reason: Newsletter API fixed and backend deployed
+API URL: https://mugsywebsite-production-b065.up.railway.app
+Expected result: Newsletter subscription should work

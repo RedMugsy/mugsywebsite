@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# Install curl for health check
+RUN apk add --no-cache curl
+
 # Set working directory
 WORKDIR /app
 
@@ -7,7 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install all dependencies (including dev deps for build)
+# Install dependencies
 RUN npm ci
 
 # Copy source code
@@ -16,9 +19,6 @@ COPY prisma/ ./prisma/
 
 # Build the application
 RUN npm run build
-
-# Remove dev dependencies to reduce image size
-RUN npm ci --only=production && npm cache clean --force
 
 # Expose port
 EXPOSE 8788

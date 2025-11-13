@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import fetch from 'node-fetch';
 
 const app = express();
 

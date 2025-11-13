@@ -67,7 +67,7 @@ export default function Contact() {
         if (typeof a.powSolution === 'number') setPowSolution(a.powSolution)
       } catch {}
     })()
-  }, [API_BASE])
+  }, [CONTACT_API])
 
   // Low-CPU path removed (not used)
 

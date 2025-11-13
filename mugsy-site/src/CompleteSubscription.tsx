@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 
 const CompleteSubscription: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState('');
 
-  const email = searchParams.get('email') || '';
+  // Get email from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const email = urlParams.get('email') || '';
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -62,7 +61,7 @@ const CompleteSubscription: React.FC = () => {
         <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Invalid Link</h2>
           <p className="text-gray-600 mb-4">This subscription link is invalid or has expired.</p>
-          <button onClick={() => navigate('/')} className="btn-neo px-6 py-2">
+          <button onClick={() => window.location.href = '/'} className="btn-neo px-6 py-2">
             Return to Home
           </button>
         </div>
@@ -79,7 +78,7 @@ const CompleteSubscription: React.FC = () => {
           <p className="text-gray-600 mb-4">
             Thank you {formData.firstName} for completing your subscription. You'll receive our latest updates and exclusive content!
           </p>
-          <button onClick={() => navigate('/')} className="btn-neo px-6 py-2">
+          <button onClick={() => window.location.href = '/'} className="btn-neo px-6 py-2">
             Explore Red Mugsy
           </button>
         </div>

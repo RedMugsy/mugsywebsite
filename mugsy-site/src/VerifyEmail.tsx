@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const VerifyEmail: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'expired'>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    // Get token from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
     
     if (!token) {
       setStatus('error');
@@ -42,7 +41,7 @@ const VerifyEmail: React.FC = () => {
         setStatus('error');
         setMessage('Something went wrong. Please try again.');
       });
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-gray-900 flex items-center justify-center p-4">
@@ -72,7 +71,7 @@ const VerifyEmail: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-2">Verification Failed</h2>
               <p className="text-gray-600 mb-4">{message}</p>
               <button
-                onClick={() => navigate('/')}
+                onClick={() => window.location.href = '/'}
                 className="btn-neo px-6 py-2"
               >
                 Return to Home
@@ -86,7 +85,7 @@ const VerifyEmail: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-2">Link Expired</h2>
               <p className="text-gray-600 mb-4">{message}</p>
               <button
-                onClick={() => navigate('/#community')}
+                onClick={() => window.location.href = '/#community'}
                 className="btn-neo px-6 py-2"
               >
                 Subscribe Again

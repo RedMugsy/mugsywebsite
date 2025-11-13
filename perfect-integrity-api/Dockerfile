@@ -7,8 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev deps for build)
+RUN npm ci
 
 # Copy source code
 COPY src/ ./src/
@@ -16,6 +16,9 @@ COPY prisma/ ./prisma/
 
 # Build the application
 RUN npm run build
+
+# Remove dev dependencies to reduce image size
+RUN npm ci --only=production && npm cache clean --force
 
 # Expose port
 EXPOSE 8788

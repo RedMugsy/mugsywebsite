@@ -3,13 +3,14 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: '/', // Keep base as root
   build: {
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js', 
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        // Make every file completely unique
+        entryFileNames: 'v20251113/[name]-[hash].js',
+        chunkFileNames: 'v20251113/[name]-[hash].js', 
+        assetFileNames: 'v20251113/[name]-[hash].[ext]'
       }
     },
     emptyOutDir: true,

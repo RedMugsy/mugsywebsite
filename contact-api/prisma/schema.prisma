@@ -10,29 +10,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model NewsletterSubscription {
-  id                    String   @id @default(cuid())
-  email                 String   @unique
-  source                String   @default("website")
-  active                Boolean  @default(false) // Changed: starts false until verified
-  ip                    String?
-  userAgent             String?
+model ContactSubmission {
+  id              String   @id @default(cuid())
+  requestId       String   @unique
+  locale          String   @default("en")
+  name            String
+  email           String
+  company         String?
+  phoneCountry    String?
+  phoneDialCode   String?
+  phoneNational   String?
+  phoneE164       String?
+  purpose         String
+  otherReason     String?
+  subject         String
+  message         String
+  walletAddress   String?
+  fileName        String?
+  fileSize        Int?
+  fileMimeType    String?
+  ip              String?
+  userAgent       String?
+  status          String   @default("new")
+  notes           String?
+  adminResponse   String?
+  respondedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  // Email verification fields
-  verificationToken     String?  @unique
-  verifiedAt           DateTime?
-  verificationSentAt   DateTime?
+  @@map("contact_submissions")
+}
+
+// Keep basic claims model for future claims app
+model ClaimSubmission {
+  id              String   @id @default(cuid())
+  requestId       String   @unique
+  name            String
+  email           String
+  claimType       String   // "defect", "warranty", "damage", "other"
+  productModel    String?
+  purchaseDate    DateTime?
+  issueDescription String
+  images          String[] // Array of image URLs/paths
+  status          String   @default("submitted")
+  resolution      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  // Extended subscription data (filled after verification)
-  firstName            String?
-  lastName             String?
-  gender               String?  // "male", "female", "private"
-  dateOfBirth          DateTime?
-  hearAboutUs          String?  // How they heard about Red Mugsy
-  subscriptionCompletedAt DateTime?
-  
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  
-  @@map("newsletter_subscriptions")
+  @@map("claim_submissions")
 }

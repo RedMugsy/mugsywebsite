@@ -207,7 +207,7 @@
         const q = encodeURIComponent(document.getElementById('q').value || '')
         const sortBy = document.getElementById('sortBy').value
         const sortDir = document.getElementById('sortDir').value
-        const url = api + `/api/admin/submissions?take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
+        const url = api + `/api/admin/submissions?type=contact&take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
         const r = await fetch(url, { headers:{ Authorization: 'Bearer '+token }})
         const j = await r.json()
         document.getElementById('count').textContent = `Total: ${j.total}`
@@ -237,7 +237,7 @@
         const q = encodeURIComponent(document.getElementById('qClaims').value || '')
         const sortBy = document.getElementById('sortByClaims').value
         const sortDir = document.getElementById('sortDirClaims').value
-        const url = api + `/api/admin/claims?take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
+        const url = api + `/api/admin/submissions?type=claims&take=50&q=${q}&sortBy=${sortBy}&sortDir=${sortDir}`
         const r = await fetch(url, { headers:{ Authorization: 'Bearer '+token }})
         const j = await r.json()
         document.getElementById('countClaims').textContent = `Total: ${j.total}`

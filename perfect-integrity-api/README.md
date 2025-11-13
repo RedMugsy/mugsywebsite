@@ -2,7 +2,8 @@
 
 **Service Purpose:** Community newsletter subscription with email verification  
 **Railway App:** Perfect Integrity  
-**Handles:** Newsletter subscriptions from Community page
+**Handles:** Newsletter subscriptions from Community page  
+**Deploy Status:** Force rebuild trigger v3
 
 ## ✨ Features
 

@@ -60,6 +60,32 @@ const createEmailTransporter = () => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Turnstile verification function
+async function verifyTurnstile(token: string, secret: string): Promise<boolean> {
+  if (!secret || !token) {
+    return false; // Fail if not configured
+  }
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        secret: secret,
+        response: token
+      })
+    });
+
+    const data = await response.json() as { success: boolean };
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
+    return false;
+  }
+}
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -82,13 +108,30 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Community subscription captcha endpoint
+app.get('/api/newsletter/captcha', (req, res) => {
+  res.json({
+    type: 'turnstile',
+    sitekey: process.env.TURNSTILE_SITEKEY_COMMUNITY || '0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo'
+  });
+});
+
 // Step 1: Initial email subscription (sends verification email)
 app.post('/api/newsletter/subscribe', async (req, res) => {
   try {
-    const email = (req.body?.email || "").trim().toLowerCase();
+    const { email: rawEmail, turnstileToken } = req.body;
+    const email = (rawEmail || "").trim().toLowerCase();
     
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ ok: false, error: "invalid_email" });
+    }
+
+    // Verify Turnstile token for Community Subscription
+    if (process.env.TURNSTILE_SECRET_COMMUNITY && turnstileToken) {
+      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_COMMUNITY);
+      if (!turnstileValid) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
     }
 
     const db = await getDb();

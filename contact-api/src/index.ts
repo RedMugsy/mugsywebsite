@@ -127,16 +127,45 @@ app.get('/api/contact/timestamp', (req, res) => {
   });
 });
 
-// Captcha endpoint (simple implementation)
+// Turnstile verification function
+async function verifyTurnstile(token: string, secret: string): Promise<boolean> {
+  if (!secret || !token) {
+    return false; // Fail if not configured
+  }
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        secret: secret,
+        response: token
+      })
+    });
+
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
+    return false;
+  }
+}
+
+// Contact form captcha endpoint
 app.get('/api/contact/captcha', (req, res) => {
-  // For now, return a simple verification token
-  // In production, integrate with Cloudflare Turnstile or similar
-  const token = randomBytes(16).toString('hex');
-  
   res.json({
     type: 'turnstile',
-    token: token,
-    sitekey: process.env.TURNSTILE_SITEKEY || ''
+    sitekey: process.env.TURNSTILE_SITEKEY_CONTACT || '0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q'
+  });
+});
+
+// Claims form captcha endpoint
+app.get('/api/claims/captcha', (req, res) => {
+  res.json({
+    type: 'turnstile',
+    sitekey: process.env.TURNSTILE_SITEKEY_CLAIMS || '0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4'
   });
 });
 
@@ -167,8 +196,17 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
       website = '', // honeypot
       issuedAt,
       issuedSig,
-      captcha
+      captcha,
+      turnstileToken
     } = req.body;
+
+    // Verify Turnstile token for Contact Us form
+    if (process.env.TURNSTILE_SECRET_CONTACT && turnstileToken) {
+      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
+      if (!turnstileValid) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
+    }
 
     // Honeypot check
     if (website) {
@@ -364,11 +402,20 @@ app.post('/api/claims', upload.array('images', 5), async (req, res) => {
       claimType,
       productModel,
       purchaseDate,
-      issueDescription
+      issueDescription,
+      turnstileToken
     } = req.body;
 
     if (!name || !email || !claimType || !issueDescription) {
       return res.status(400).json({ ok: false, error: 'missing_required_fields' });
+    }
+
+    // Verify Turnstile token for Claims form
+    if (process.env.TURNSTILE_SECRET_CLAIMS && turnstileToken) {
+      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_CLAIMS);
+      if (!turnstileValid) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
     }
 
     const requestId = randomBytes(8).toString('hex').toUpperCase();

@@ -2,40 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Content Security Policy: keep 'unsafe-eval' for Vite dev; remove in prod if using CF header CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.railway.app https://*.infura.io; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'none'; form-action 'self' https://*.railway.app;" />
-    <link rel="icon" type="image/png" href="img/mugsy-logo-red.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/staging/apple-touch-icon.png" />
-    <link rel="manifest" href="/staging/site.webmanifest" />
-    <meta name="theme-color" content="#0b0c10" />
+    <link rel="icon" type="image/svg+xml" href="/staging/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Self-hosted flag-icons CSS from repo folder -->
-    <title>mugsy-site</title>
-    <script type="module" crossorigin src="/staging/assets/index-BlEQEcfj.js"></script>
-    <link rel="stylesheet" crossorigin href="/staging/assets/index-CB2lO63X.css">
+    
+    <!-- ULTIMATE CACHE KILLER -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="cache-buster" content="2025-11-13T11:07:38.000000">
+    <meta name="site-version" content="v20251113110738">
+    
+    <!-- Force reload on version mismatch -->
+    <script>
+      const CURRENT_VERSION = 'v20251113110738';
+      const stored = localStorage.getItem('site-version');
+      if (stored && stored !== CURRENT_VERSION) {
+        localStorage.clear();
+        sessionStorage.clear();
+        if (window.caches) {
+          caches.keys().then(names => names.forEach(name => caches.delete(name)));
+        }
+        // Force reload without using cache
+        window.location.reload(true);
+      }
+      localStorage.setItem('site-version', CURRENT_VERSION);
+    </script>
+    
+    <title>Red Mugsy</title>
+    <script type="module" crossorigin src="/staging/assets/index--eJkA1OV.js"></script>
+    <link rel="stylesheet" crossorigin href="/staging/assets/index-DqGrPbwp.css">
   </head>
   <body>
     <div id="root"></div>
-    
-    <!-- Single Page Apps for GitHub Pages -->
-    <!-- Start SPA redirect script -->
-    <script>
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-      }(window.location))
-    </script>
-    <!-- End SPA redirect script -->
-    
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </body>
 </html>

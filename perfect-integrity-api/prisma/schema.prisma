@@ -1,0 +1,38 @@
+// Perfect Integrity - Red Mugsy Community Newsletter Database Schema
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NewsletterSubscription {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  source                String   @default("community-page") // Updated default for community
+  active                Boolean  @default(false) // Starts false until verified
+  ip                    String?
+  userAgent             String?
+  
+  // Email verification fields
+  verificationToken     String?  @unique
+  verifiedAt           DateTime?
+  verificationSentAt   DateTime?
+  
+  // Community member details (filled after verification)
+  firstName            String?
+  lastName             String?
+  gender               String?  // "male", "female", "private"
+  dateOfBirth          DateTime?
+  hearAboutUs          String?  // How they heard about Red Mugsy
+  subscriptionCompletedAt DateTime?
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  
+  @@map("community_newsletter_subscriptions")
+}

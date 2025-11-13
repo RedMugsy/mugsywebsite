@@ -80,6 +80,16 @@ const csrfTokens = new Set();
 const sessions = new Map();
 
 // Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    ok: true, 
+    timestamp: new Date().toISOString(),
+    message: 'Contact Us API is running',
+    features: ['contact_form', 'file_uploads', 'admin_panel']
+  });
+});
+
+// Also keep /api/health for backwards compatibility
 app.get('/api/health', (req, res) => {
   res.json({ 
     ok: true, 

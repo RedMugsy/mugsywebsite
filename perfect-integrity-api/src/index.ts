@@ -61,6 +61,17 @@ const createEmailTransporter = () => {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    ok: true, 
+    timestamp: new Date().toISOString(),
+    message: 'Perfect Integrity - Red Mugsy Community Newsletter API',
+    features: ['email_verification', 'subscription_completion', 'admin_panel'],
+    service: 'community-newsletter'
+  });
+});
+
+// Also keep /api/health for backwards compatibility
 app.get('/api/health', (req, res) => {
   res.json({ 
     ok: true, 

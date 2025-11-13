@@ -17,7 +17,7 @@ const VerifyEmail: React.FC = () => {
     }
 
     // Call verification API
-    fetch(`${import.meta.env.VITE_API_BASE || 'https://mugsywebsite-production-b065.up.railway.app'}/api/newsletter/verify?token=${token}`)
+    fetch(`${import.meta.env.VITE_NEWSLETTER_API || 'https://perfect-integrity-production.up.railway.app'}/api/newsletter/verify?token=${token}`)
       .then(response => {
         if (response.redirected) {
           // Successful verification, redirect to completion form

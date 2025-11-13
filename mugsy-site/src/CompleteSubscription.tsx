@@ -31,7 +31,7 @@ const CompleteSubscription: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'https://mugsywebsite-production-b065.up.railway.app'}/api/newsletter/complete`, {
+      const response = await fetch(`${import.meta.env.VITE_NEWSLETTER_API || 'https://perfect-integrity-production.up.railway.app'}/api/newsletter/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

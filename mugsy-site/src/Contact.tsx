@@ -49,7 +49,8 @@ export default function Contact() {
   const honeypotRef = useRef<HTMLInputElement | null>(null)
   useEffect(()=>{ setTs(String(Date.now())) },[])
 
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || ''
+  // Use mugsywebsite Railway app for contact forms
+  const CONTACT_API = (import.meta as any).env?.VITE_CONTACT_API || 'https://mugsywebsite-production-b065.up.railway.app'
   const [csrf, setCsrf] = useState('')
   const [captcha, setCaptcha] = useState<any>(null)
   // PoW solution state
@@ -58,7 +59,7 @@ export default function Contact() {
   useEffect(()=>{
     (async () => {
       try {
-        const a = await initAntiSpam(API_BASE, { computePow: false })
+        const a = await initAntiSpam(CONTACT_API, { computePow: false })
         setCsrf(a.csrf)
         setTs(String(a.issuedAt))
         setIssuedSig(String(a.issuedSig))
@@ -189,7 +190,7 @@ export default function Contact() {
             ? { type: 'turnstile', token: (captcha as any)?.token }
             : { type: 'image', nonce: (captcha as any)?.nonce, solution: '' },
       }
-      const post = fetch(`${API_BASE}/api/contact`, {
+      const post = fetch(`${CONTACT_API}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
         credentials: 'include',
@@ -368,7 +369,7 @@ export default function Contact() {
           </div>
 
           <HumanCheck
-            apiBase={API_BASE}
+            apiBase={CONTACT_API}
             onReady={({ csrf, captcha, nonce })=>{ setCsrf(csrf); setCaptcha(captcha); setPowSolution(nonce) }}
           />
 

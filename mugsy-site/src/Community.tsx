@@ -4,7 +4,8 @@ import SiteFooter from './components/SiteFooter'
 import { Turnstile } from './claim/turnstile'
 
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY as string)
-const API_BASE = ((import.meta as any).env?.VITE_API_BASE as string) || ''
+// Use Perfect Integrity API for newsletter subscriptions
+const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
 
 export default function Community() {
   const [email, setEmail] = useState('')
@@ -24,8 +25,8 @@ export default function Community() {
     setError('')
 
     try {
-      // Try the contact API approach as a workaround
-      const response = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
+      // Call Perfect Integrity API for newsletter subscription
+      const response = await fetch(`${NEWSLETTER_API}/api/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -3,7 +3,8 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 
 export default function Admin() {
-  const API_BASE = (import.meta as any).env?.VITE_API_BASE || ''
+  // Use contact API for admin panel
+  const CONTACT_API = (import.meta as any).env?.VITE_CONTACT_API || 'https://mugsywebsite-production-b065.up.railway.app'
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'loading'|'need-auth'|'ok'>('loading')
   const [rows, setRows] = useState<any[]>([])
@@ -31,7 +32,7 @@ export default function Admin() {
       if (filterStatus) params.set('status', filterStatus)
       if (filterPurpose) params.set('purpose', filterPurpose)
       if (query) params.set('q', query)
-      const r = await fetch(`${API_BASE}/api/admin/submissions?`+params.toString(), { credentials: 'include' })
+      const r = await fetch(`${CONTACT_API}/api/admin/submissions?`+params.toString(), { credentials: 'include' })
       if (r.status === 401) { setStatus('need-auth'); return }
       const data = await r.json()
       setRows(data.rows || [])
@@ -63,7 +64,7 @@ export default function Admin() {
         (async () => {
           setDetail({ loading: true, data: null })
           try {
-            const resp = await fetch(`${API_BASE}/api/admin/submissions/${id}`, { credentials: 'include' })
+            const resp = await fetch(`${CONTACT_API}/api/admin/submissions/${id}`, { credentials: 'include' })
             const data = await resp.json()
             setDetail({ loading: false, data })
           } catch { setDetail({ loading: false, data: null }) }
@@ -101,7 +102,7 @@ export default function Admin() {
   async function requestMagic() {
     setError('')
     try {
-      await fetch(`${API_BASE}/api/auth/magic-link/request`, { method: 'POST', headers: { 'Content-Type':'application/json' }, credentials: 'include', body: JSON.stringify({ email }) })
+      await fetch(`${CONTACT_API}/api/auth/magic-link/request`, { method: 'POST', headers: { 'Content-Type':'application/json' }, credentials: 'include', body: JSON.stringify({ email }) })
       alert('Magic link sent (check email). After clicking it, reload this page.')
     } catch (e:any) { setError(e?.message||'Failed to request magic link') }
   }
@@ -197,7 +198,7 @@ export default function Admin() {
                           cur.set('id', r.id)
                           const qs = cur.toString()
                           window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname)
-                          const resp = await fetch(`${API_BASE}/api/admin/submissions/${r.id}`, { credentials: 'include' })
+                          const resp = await fetch(`${CONTACT_API}/api/admin/submissions/${r.id}`, { credentials: 'include' })
                           const data = await resp.json()
                           setDetail({ loading: false, data })
                         } catch { setDetail({ loading: false, data: null }) }
@@ -208,7 +209,7 @@ export default function Admin() {
                     <td className="px-3 py-2">{r.purpose}</td>
                     <td className="px-3 py-2">
                       <select className="rounded bg-black/50 border border-white/10 px-2 py-1" defaultValue={r.status} onChange={async e=>{
-                        await fetch(`${API_BASE}/api/admin/submissions/${r.id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ status: e.target.value }) });
+                        await fetch(`${CONTACT_API}/api/admin/submissions/${r.id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ status: e.target.value }) });
                         load()
                       }}>
                         {['NEW','IN_REVIEW','CLOSED','SPAM'].map(s => <option key={s} value={s}>{s}</option>)}
@@ -289,7 +290,7 @@ export default function Admin() {
             <textarea className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={4} value={noteBody} onChange={e=>setNoteBody(e.target.value)} />
             <div className="mt-2 flex gap-2">
               <button className="rounded-md px-3 py-2 bg-[#00F0FF] text-black font-semibold" onClick={async ()=>{
-                await fetch(`${API_BASE}/api/admin/submissions/${noteFor}/notes`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ body: noteBody }) })
+                await fetch(`${CONTACT_API}/api/admin/submissions/${noteFor}/notes`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ body: noteBody }) })
                 setNoteFor(null); setNoteBody(''); load()
               }}>Save Note</button>
               <button className="rounded-md px-3 py-2 border border-white/10" onClick={()=>{ setNoteFor(null); setNoteBody('') }}>Cancel</button>
@@ -304,7 +305,7 @@ export default function Admin() {
             <textarea className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={6} value={replyBody} onChange={e=>setReplyBody(e.target.value)} />
             <div className="mt-2 flex gap-2">
               <button className="rounded-md px-3 py-2 bg-[#00F0FF] text-black font-semibold" onClick={async ()=>{
-                await fetch(`${API_BASE}/api/admin/submissions/${replyFor.id}/reply`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ subject: replySubject, message: replyBody }) })
+                await fetch(`${CONTACT_API}/api/admin/submissions/${replyFor.id}/reply`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ subject: replySubject, message: replyBody }) })
                 setReplyFor(null); setReplySubject(''); setReplyBody('')
               }}>Send Reply</button>
               <button className="rounded-md px-3 py-2 border border-white/10" onClick={()=>{ setReplyFor(null); }}>Cancel</button>

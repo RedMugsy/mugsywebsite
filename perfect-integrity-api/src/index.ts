@@ -340,7 +340,7 @@ app.get('/api/admin/subscriptions', async (req, res) => {
       take: 100 // Limit to last 100
     });
 
-    const safeSubscriptions = subscriptions.map(sub => ({
+    const safeSubscriptions = subscriptions.map((sub: any) => ({
       id: sub.id,
       email: sub.email,
       firstName: sub.firstName,
@@ -361,10 +361,10 @@ app.get('/api/admin/subscriptions', async (req, res) => {
       subscriptions: safeSubscriptions, 
       total: subscriptions.length,
       stats: {
-        verified: safeSubscriptions.filter(s => s.verified).length,
-        completed: safeSubscriptions.filter(s => s.completed).length,
-        pending: safeSubscriptions.filter(s => !s.verified).length,
-        community: safeSubscriptions.filter(s => s.source === 'community-page').length
+        verified: safeSubscriptions.filter((s: any) => s.verified).length,
+        completed: safeSubscriptions.filter((s: any) => s.completed).length,
+        pending: safeSubscriptions.filter((s: any) => !s.verified).length,
+        community: safeSubscriptions.filter((s: any) => s.source === 'community-page').length
       }
     });
   } catch (error) {

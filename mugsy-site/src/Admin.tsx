@@ -130,8 +130,8 @@ export default function Admin() {
         {status === 'ok' && (
           <div className="mt-4 flex flex-wrap gap-2 items-end">
             <div>
-              <label className="block text-xs text-slate-400">Status</label>
-              <select className="rounded bg-black/50 border border-white/10 px-2 py-1" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}>
+              <label htmlFor="filter-status" className="block text-xs text-slate-400">Status</label>
+              <select id="filter-status" className="rounded bg-black/50 border border-white/10 px-2 py-1" value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}>
                 <option value="">All</option>
                 {['NEW','IN_REVIEW','CLOSED','SPAM'].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -150,8 +150,9 @@ export default function Admin() {
         {status === 'ok' && (
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
             <button className="rounded-md px-3 py-1 border border-white/10 disabled:opacity-50" disabled={page<=1} onClick={()=>setPage(Math.max(1, page-1))}>Prev</button>
+            <label htmlFor="page-input" className="sr-only">Page number</label>
             <span>Page</span>
-            <input type="number" min={1} className="w-16 rounded bg-black/50 border border-white/10 px-2 py-1" value={pageInput} onChange={e=>setPageInput(e.target.value)} />
+            <input id="page-input" type="number" min={1} className="w-16 rounded bg-black/50 border border-white/10 px-2 py-1" value={pageInput} onChange={e=>setPageInput(e.target.value)} aria-label="Page number" />
             <button className="rounded-md px-2 py-1 border border-white/10" onClick={()=>{
               const n = parseInt(pageInput,10)
               const max = Math.max(1, Math.ceil(total / limit))
@@ -159,8 +160,8 @@ export default function Admin() {
               setPage(next)
             }}>Go</button>
             <span>of {Math.max(1, Math.ceil(total/limit))}</span>
-            <span className="ml-4">Limit</span>
-            <select className="rounded bg-black/50 border border-white/10 px-2 py-1" value={limit} onChange={e=>{ const v = parseInt(e.target.value,10); setLimit([10,25,50,100].includes(v)?v:25); setPage(1); }}>
+            <label htmlFor="limit-select" className="ml-4">Limit</label>
+            <select id="limit-select" className="rounded bg-black/50 border border-white/10 px-2 py-1" value={limit} onChange={e=>{ const v = parseInt(e.target.value,10); setLimit([10,25,50,100].includes(v)?v:25); setPage(1); }}>
               {[10,25,50,100].map(x => <option key={x} value={x}>{x}</option>)}
             </select>
             <button className="rounded-md px-3 py-1 border border-white/10 disabled:opacity-50" disabled={page >= Math.max(1, Math.ceil(total/limit))} onClick={()=>{
@@ -287,7 +288,8 @@ export default function Admin() {
         {noteFor && (
           <div className="mt-6 rounded-xl border border-white/10 bg-black/60 p-4 max-w-xl">
             <h3 className="text-lg font-bold text-white mb-2">Add Note</h3>
-            <textarea className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={4} value={noteBody} onChange={e=>setNoteBody(e.target.value)} />
+            <label htmlFor="note-body" className="sr-only">Note content</label>
+            <textarea id="note-body" className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={4} value={noteBody} onChange={e=>setNoteBody(e.target.value)} placeholder="Enter your note here..." />
             <div className="mt-2 flex gap-2">
               <button className="rounded-md px-3 py-2 bg-[#00F0FF] text-black font-semibold" onClick={async ()=>{
                 await fetch(`${CONTACT_API}/api/admin/submissions/${noteFor}/notes`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ body: noteBody }) })
@@ -301,8 +303,10 @@ export default function Admin() {
         {replyFor && (
           <div className="mt-6 rounded-xl border border-white/10 bg-black/60 p-4 max-w-xl">
             <h3 className="text-lg font-bold text-white mb-2">Reply to {replyFor.email}</h3>
-            <input className="w-full rounded bg-black/50 border border-white/10 px-3 py-2 mb-2" value={replySubject} onChange={e=>setReplySubject(e.target.value)} />
-            <textarea className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={6} value={replyBody} onChange={e=>setReplyBody(e.target.value)} />
+            <label htmlFor="reply-subject" className="sr-only">Reply subject</label>
+            <input id="reply-subject" className="w-full rounded bg-black/50 border border-white/10 px-3 py-2 mb-2" value={replySubject} onChange={e=>setReplySubject(e.target.value)} placeholder="Reply subject" />
+            <label htmlFor="reply-body" className="sr-only">Reply message</label>
+            <textarea id="reply-body" className="w-full rounded bg-black/50 border border-white/10 px-3 py-2" rows={6} value={replyBody} onChange={e=>setReplyBody(e.target.value)} placeholder="Your reply message..." />
             <div className="mt-2 flex gap-2">
               <button className="rounded-md px-3 py-2 bg-[#00F0FF] text-black font-semibold" onClick={async ()=>{
                 await fetch(`${CONTACT_API}/api/admin/submissions/${replyFor.id}/reply`, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ subject: replySubject, message: replyBody }) })

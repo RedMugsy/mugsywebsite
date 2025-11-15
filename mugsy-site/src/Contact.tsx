@@ -236,7 +236,7 @@ export default function Contact() {
         )}
 
         <form className="mt-6 space-y-6" onSubmit={onSubmit} noValidate>
-          <input type="text" name="website" ref={honeypotRef} className="hidden" tabIndex={-1} aria-hidden defaultValue="" />
+          <input type="text" name="website" ref={honeypotRef} className="hidden" tabIndex={-1} aria-hidden="true" defaultValue="" />
           <input type="hidden" name="ts" value={ts} />
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -249,7 +249,7 @@ export default function Contact() {
                 value={name}
                 onChange={e=>{ setName(e.target.value); if (nameTouched) setNameErr(validateName(e.target.value) || '') }}
                 onBlur={e=>{ setNameTouched(true); setNameErr(validateName(e.target.value) || '') }}
-                aria-invalid={!!nameErr}
+                aria-invalid={nameErr ? 'true' : 'false'}
                 aria-describedby={nameErr ? 'contact-name-error' : undefined}
                 autoComplete="name"
                 required
@@ -272,7 +272,7 @@ export default function Contact() {
                 value={email}
                 onChange={e=>{ setEmail(e.target.value); if (emailTouched) setEmailErr(validateEmail(e.target.value) || '') }}
                 onBlur={e=>{ setEmailTouched(true); setEmailErr(validateEmail(e.target.value) || '') }}
-                aria-invalid={!!emailErr}
+                aria-invalid={emailErr ? 'true' : 'false'}
                 aria-describedby={emailErr ? 'contact-email-error' : undefined}
                 required
               />
@@ -283,8 +283,8 @@ export default function Contact() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold">{t('Company/Project (optional)','??????/??????? (???????)')}</label>
-              <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={company} onChange={e=>setCompany(e.target.value)} />
+              <label htmlFor="contact-company" className="block text-sm font-semibold">{t('Company/Project (optional)','??????/??????? (???????)')}</label>
+              <input id="contact-company" className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={company} onChange={e=>setCompany(e.target.value)} placeholder={t('Enter company or project name','????? ??? ??????? ?? ???????')} autoComplete="organization" />
             </div>
             <div ref={phoneAnchorRef}>
               <label className="block text-sm font-semibold">{t('Phone (optional)','?????? (???????)')}</label>
@@ -312,8 +312,8 @@ export default function Contact() {
 
           <div className="grid sm:grid-cols-2 gap-4 items-end">
             <div>
-              <label className="block text-sm font-semibold">{t('Purpose','?????')}</label>
-              <select className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={purpose} onChange={e=>setPurpose(e.target.value as any)} required>
+              <label htmlFor="contact-purpose" className="block text-sm font-semibold">{t('Purpose','?????')}</label>
+              <select id="contact-purpose" className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={purpose} onChange={e=>setPurpose(e.target.value as any)} required>
                 <option value="">{t('Select...','????...')}</option>
                 {PURPOSES.map(p=> <option key={p} value={p}>{t(p,p)}</option>)}
               </select>
@@ -346,9 +346,9 @@ export default function Contact() {
               <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={wallet} onChange={e=>setWallet(e.target.value)} placeholder="0x..." />
             </div>
             <div>
-              <label className="block text-sm font-semibold">{t('File Attachment (optional)','???? (???????)')}</label>
+              <label htmlFor="fileHidden" className="block text-sm font-semibold">{t('File Attachment (optional)','???? (???????)')}</label>
               <div className="mt-1">
-                <input id="fileHidden" type="file" accept=".pdf,image/png,image/jpeg,image/webp,text/plain" className="hidden" onChange={e=>setFile(e.target.files?.[0] || null)} />
+                <input id="fileHidden" type="file" accept=".pdf,image/png,image/jpeg,image/webp,text/plain" className="hidden" onChange={e=>setFile(e.target.files?.[0] || null)} aria-describedby="file-help" />
                 <button type="button" onClick={()=>document.getElementById('fileHidden')?.click()} className="rounded-md px-4 py-2 bg-[#00F0FF] text-black font-semibold disabled:opacity-60">{t('Upload document','????? ?????')}</button>
                 <div role="status" className="mt-2 text-xs text-slate-400">
                   {file ? `${file.name} (${Math.ceil(file.size/1024)} KB)` : t('No file selected','?? ???? ?????')}

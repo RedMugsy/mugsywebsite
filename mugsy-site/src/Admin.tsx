@@ -212,7 +212,7 @@ export default function Admin() {
                       <select className="rounded bg-black/50 border border-white/10 px-2 py-1" defaultValue={r.status} onChange={async e=>{
                         await fetch(`${CONTACT_API}/api/admin/submissions/${r.id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify({ status: e.target.value }) });
                         load()
-                      }}>
+                      }} aria-label={`Change status for submission ${r.id}`}>
                         {['NEW','IN_REVIEW','CLOSED','SPAM'].map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </td>

@@ -375,7 +375,7 @@ app.get('/api/admin/subscriptions', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 8788;
-// Deploy trigger: ensure latest commit builds correctly
+// Deploy trigger: PERFECT INTEGRITY REDEPLOY v20251115151500
 app.listen(PORT, () => {
   console.log(`🔥 Red Mugsy Community Newsletter API running on port ${PORT}`);
   console.log('✨ Perfect Integrity Service - Email verification and subscription management');

@@ -1,0 +1,12 @@
+{
+  "deploymentId": "20251112195036",
+  "timestamp": "2025-11-12T19:50:36.687543",
+  "cacheVersion": "v20251112-195036",
+  "forceReload": true,
+  "buildInfo": {
+    "nodeVersion": "18.x",
+    "viteVersion": "latest",
+    "cacheStrategy": "aggressive-bust",
+    "deploymentTrigger": "manual-cache-fix"
+  }
+}

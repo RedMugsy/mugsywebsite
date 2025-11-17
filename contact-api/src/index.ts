@@ -175,14 +175,14 @@ app.get('/api/claims/captcha', (req, res) => {
 
 // Main contact form submission
 app.post('/api/contact', upload.single('file'), async (req, res) => {
-  const requestId = `req_${randomBytes(8).toString('hex')}`;
-  console.log(`📝 [${requestId}] Contact form submission started`);
+  const contactRequestId = `req_${randomBytes(8).toString('hex')}`;
+  console.log(`📝 [${contactRequestId}] Contact form submission started`);
   
   try {
     // CSRF validation
     const csrfToken = req.headers['x-csrf-token'];
     if (!csrfToken || !csrfTokens.has(csrfToken)) {
-      console.log(`❌ [${requestId}] CSRF validation failed`);
+      console.log(`❌ [${contactRequestId}] CSRF validation failed`);
       return res.status(403).json({ ok: false, error: 'invalid_csrf' });
     }
 
@@ -214,15 +214,15 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
 
     if (process.env.TURNSTILE_SECRET_CONTACT) {
       if (!contactTurnstileToken) {
-        console.log(`❌ [${requestId}] Missing Turnstile token`);
+        console.log(`❌ [${contactRequestId}] Missing Turnstile token`);
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }
       const turnstileValid = await verifyTurnstile(contactTurnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
       if (!turnstileValid) {
-        console.log(`❌ [${requestId}] Turnstile verification failed`);
+        console.log(`❌ [${contactRequestId}] Turnstile verification failed`);
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }
-      console.log(`✅ [${requestId}] Turnstile verification successful`);
+      console.log(`✅ [${contactRequestId}] Turnstile verification successful`);
     }
 
     // Honeypot check
@@ -244,13 +244,13 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
     }
 
     // Generate request ID
-    const requestId = randomBytes(8).toString('hex').toUpperCase();
+    const dbRequestId = randomBytes(8).toString('hex').toUpperCase();
 
     // Save to database
     const db = await getDb();
     const submission = await db.contactSubmission.create({
       data: {
-        requestId,
+        requestId: dbRequestId,
         locale,
         name: name.trim(),
         email: email.toLowerCase().trim(),
@@ -280,12 +280,12 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
       const adminEmail = {
         from: process.env.MAIL_FROM || 'noreply@redmugsy.com',
         to: process.env.MAIL_TO || 'support@redmugsy.com',
-        subject: `New Contact Form: ${subject} [${requestId}]`,
+        subject: `New Contact Form: ${subject} [${dbRequestId}]`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="color: #333; margin: 0;">New Contact Form Submission</h2>
-              <p style="color: #666; margin: 5px 0 0 0;">Request ID: <strong>${requestId}</strong></p>
+              <p style="color: #666; margin: 5px 0 0 0;">Request ID: <strong>${dbRequestId}</strong></p>
             </div>
             
             <table style="width: 100%; border-collapse: collapse;">
@@ -309,7 +309,7 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
       };
 
       await transporter.sendMail(adminEmail);
-      console.log('Admin notification sent for:', requestId);
+      console.log('Admin notification sent for:', dbRequestId);
       
     } catch (emailError) {
       console.error('Failed to send admin notification:', emailError);
@@ -318,7 +318,7 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
 
     res.json({ 
       ok: true, 
-      requestId,
+      requestId: dbRequestId,
       message: 'Your message has been submitted successfully. We will respond within 2-3 business days.'
     });
 
@@ -442,13 +442,13 @@ app.post('/api/claims', upload.array('images', 5), async (req, res) => {
       }
     }
 
-    const requestId = randomBytes(8).toString('hex').toUpperCase();
+    const claimRequestId = randomBytes(8).toString('hex').toUpperCase();
     const images = (req.files as Express.Multer.File[])?.map(file => file.path) || [];
 
     const db = await getDb();
     const claim = await db.claimSubmission.create({
       data: {
-        requestId,
+        requestId: claimRequestId,
         name: name.trim(),
         email: email.toLowerCase().trim(),
         claimType,
@@ -462,7 +462,7 @@ app.post('/api/claims', upload.array('images', 5), async (req, res) => {
 
     res.json({ 
       ok: true, 
-      requestId,
+      requestId: claimRequestId,
       message: 'Claim submitted successfully. We will review and respond within 5-7 business days.'
     });
 

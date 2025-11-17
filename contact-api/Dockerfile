@@ -8,7 +8,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Provide defaults for build-time Prisma needs; Railway runtime values override these
-ARG DATABASE_URL=file:./data/dev.db
+ARG DATABASE_URL=postgresql://localhost:5432/redmugsy_dev
 ENV DATABASE_URL=$DATABASE_URL
 
 # Ensure dev dependencies stay available during the build even when NODE_ENV=production
@@ -30,8 +30,8 @@ COPY contact-api/public ./public/
 # Compile TypeScript (runs prisma generate as part of the build script)
 RUN npm run build
 
-# Ensure the SQLite directory exists for DATABASE_URL=file:./data/...
-RUN mkdir -p ./data
+# PostgreSQL doesn't need local data directory like SQLite
+# Database is managed by Railway's PostgreSQL service
 
 ENV NODE_ENV=production
 

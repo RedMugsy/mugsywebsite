@@ -18,7 +18,7 @@ In Railway's project dashboard, go to "Variables" tab and add:
 
 **Required Variables:**
 ```
-DATABASE_URL=file:./data.db
+DATABASE_URL=postgresql://postgres:QZsYUThavYpYpKJuZjijlYWOFOtbyGvS@maglev.proxy.rlwy.net:17550/railway
 PORT=8787
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -53,9 +53,10 @@ Update your frontend to use the Railway API URL instead of localhost.
 4. Use this app password (not your regular Gmail password) for `SMTP_PASS`
 
 ## Database
-- Railway automatically handles SQLite database persistence
-- The database file will be stored in Railway's volume storage
-- No additional database setup required
+- Using Railway's managed PostgreSQL database
+- Automatic backups and scaling handled by Railway
+- Connection string provided in DATABASE_URL environment variable
+- No additional database setup required - Prisma handles migrations automatically
 
 ## Admin Panel
 Once deployed, access your admin panel at:

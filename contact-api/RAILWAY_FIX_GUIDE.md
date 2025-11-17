@@ -15,6 +15,7 @@ Go to your Railway project dashboard → Variables tab and set these **EXACTLY**
 ```
 PORT=3000
 NODE_ENV=production
+# Contact-Us Form Database
 DATABASE_URL=postgresql://postgres:QZsYUThavYpYpKJuZjijlYWOFOtbyGvS@maglev.proxy.rlwy.net:17550/railway
 ALLOWED_ORIGINS=https://redmugsy.github.io,https://www.redmugsy.com,https://redmugsy.com,https://your-frontend-domain.com
 

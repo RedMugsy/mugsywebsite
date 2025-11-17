@@ -18,6 +18,7 @@ In Railway's project dashboard, go to "Variables" tab and add:
 
 **Required Variables:**
 ```
+# Contact-Us Form Database
 DATABASE_URL=postgresql://postgres:QZsYUThavYpYpKJuZjijlYWOFOtbyGvS@maglev.proxy.rlwy.net:17550/railway
 PORT=8787
 SMTP_HOST=smtp.gmail.com

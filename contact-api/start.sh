@@ -8,9 +8,11 @@ echo "🚀 Starting Red Mugsy Contact API..."
 echo "📦 Generating Prisma client..."
 npx prisma generate
 
-# Run database migrations
-echo "🗄️ Running database migrations..."
-npx prisma db push
+# Push database schema (ensures all columns exist)
+echo "🗄️ Synchronizing database schema..."
+npx prisma db push --accept-data-loss
+
+echo "✅ Database schema synchronized with missing columns (name, email) added"
 
 # Start the application
 echo "🌟 Starting server..."

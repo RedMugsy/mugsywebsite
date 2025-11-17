@@ -34,96 +34,15 @@ export default function Community() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    let timeoutId: NodeJS.Timeout
+    // Simplified sitekey resolution - use environment variable directly
+    const envSitekey = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string)
+    const resolved = envSitekey || DEFAULT_SITEKEY
     
-    async function fetchSitekey() {
-      setSitekeyStatus('loading')
-      
-      try {
-        // Try newsletter API first
-        const controller = new AbortController()
-        timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-        
-        const res = await fetch(`${NEWSLETTER_API}/api/newsletter/captcha`, {
-          credentials: 'include',
-          signal: controller.signal,
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        
-        clearTimeout(timeoutId)
-        
-        if (res.ok) {
-          const contentType = res.headers.get('content-type')
-          if (contentType?.includes('application/json')) {
-            const data = await res.json()
-            if (cancelled) return
-            
-            const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
-            setSitekey(resolved)
-            setSitekeyStatus('ready')
-            setCaptchaNotice('')
-            return
-          }
-        }
-        
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-        
-      } catch (err: any) {
-        clearTimeout(timeoutId)
-        console.warn('Newsletter API sitekey fetch failed, trying contact API:', err.message)
-        
-        // Fallback to contact API
-        try {
-          const controller2 = new AbortController()
-          const timeoutId2 = setTimeout(() => controller2.abort(), 5000)
-          
-          const fallbackRes = await fetch(`${CONTACT_API}/api/contact/captcha`, {
-            credentials: 'include',
-            signal: controller2.signal,
-            headers: {
-              'Accept': 'application/json'
-            }
-          })
-          
-          clearTimeout(timeoutId2)
-          
-          if (fallbackRes.ok) {
-            const data = await fallbackRes.json()
-            if (cancelled) return
-            
-            const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
-            setSitekey(resolved)
-            setSitekeyStatus('ready')
-            setCaptchaNotice('Using backup verification system.')
-            return
-          }
-        } catch (fallbackErr) {
-          console.warn('Contact API fallback also failed:', fallbackErr)
-        }
-        
-        if (cancelled) return
-        
-        // Use hardcoded sitekey as last resort
-        setSitekey(SITEKEY || DEFAULT_SITEKEY)
-        setSitekeyStatus('ready')
-        
-        if (err.name === 'AbortError') {
-          setCaptchaNotice('Verification service timeout. Using backup verification.')
-        } else {
-          setCaptchaNotice('Verification service unreachable. Using backup key.')
-        }
-      }
-    }
-    
-    fetchSitekey()
-    
-    return () => { 
-      cancelled = true
-      clearTimeout(timeoutId)
-    }
+    console.log('Using Community sitekey:', resolved)
+    setSitekey(resolved)
+    setSitekeyStatus('ready')
+    setCaptchaNotice('')
+  }, [])
   }, [NEWSLETTER_API])
 
   function resetWidget() {

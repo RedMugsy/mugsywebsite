@@ -12,7 +12,9 @@
     "postinstall": "npx prisma generate",
     "db:push": "npx prisma db push",
     "db:verify": "ts-node src/verify-schema.ts",
-    "db:sync": "npx prisma db push --accept-data-loss && npx prisma generate"
+    "db:sync": "npx prisma db push --accept-data-loss && npx prisma generate",
+    "db:ensure": "ts-node src/ensure-table.ts",
+    "db:emergency-fix": "npx prisma db push --force-reset --accept-data-loss"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",

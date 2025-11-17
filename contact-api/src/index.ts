@@ -1,5 +1,6 @@
 import express from 'express';
 import { getDb } from './db.js';
+import { ensureTableExists } from './ensure-table.js';
 import nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
 import cors from 'cors';
@@ -467,7 +468,16 @@ app.post('/api/claims', upload.array('images', 5), async (req, res) => {
 });
 
 const PORT = process.env.PORT || 8787;
-app.listen(PORT, () => {
-  console.log(`Red Mugsy Contact API running on port ${PORT}`);
-  console.log('Features: Contact forms, file uploads, admin panel');
+
+// Ensure database table exists before starting server
+ensureTableExists().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Red Mugsy Contact API running on port ${PORT}`);
+    console.log('Features: Contact forms, file uploads, admin panel');
+    console.log('Database: Contact_us table verified and ready');
+  });
+}).catch(error => {
+  console.error('❌ Failed to ensure database table exists:', error);
+  console.error('🚨 Server startup aborted due to database issues');
+  process.exit(1);
 });

@@ -47,6 +47,10 @@ jobs:
           VITE_CLAIM_SUCCESS_URL: ${{ secrets.VITE_CLAIM_SUCCESS_URL }}
           VITE_CLAIM_ERROR_URL: ${{ secrets.VITE_CLAIM_ERROR_URL }}
           VITE_CLAIM_CONTACT_EMAIL: ${{ secrets.VITE_CLAIM_CONTACT_EMAIL }}
+          VITE_CLAIM_CONTRACT: ${{ secrets.VITE_CLAIM_CONTRACT }}
+          VITE_CLAIM_CHAIN_ID: ${{ secrets.VITE_CLAIM_CHAIN_ID }}
+          VITE_CLAIM_RPC_URL: ${{ secrets.VITE_CLAIM_RPC_URL }}
+          VITE_FEATURE_CLAIM: ${{ secrets.VITE_FEATURE_CLAIM || 'true' }}
         run: npm run build
 
       - name: Setup Pages

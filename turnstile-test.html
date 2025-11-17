@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnstile Test</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body style="background: #0b0c10; color: white; padding: 20px;">
+    <h1>Turnstile Test Page</h1>
+    
+    <h2>Contact Form Sitekey Test</h2>
+    <div id="contact-turnstile"></div>
+    <p>Contact Sitekey: 0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo</p>
+    
+    <h2>Community Form Sitekey Test</h2>
+    <div id="community-turnstile"></div>
+    <p>Community Sitekey: 0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo</p>
+    
+    <h2>Claims Form Sitekey Test</h2>
+    <div id="claims-turnstile"></div>
+    <p>Claims Sitekey: 0x4AAAAAAB0dLCxl1gKR6FSl0dQPXvdvMo</p>
+
+    <script>
+        window.addEventListener('load', function() {
+            console.log('Page loaded, checking Turnstile...');
+            
+            function checkTurnstile() {
+                if (window.turnstile && window.turnstile.render) {
+                    console.log('Turnstile API loaded successfully');
+                    
+                    // Test Contact sitekey
+                    try {
+                        window.turnstile.render('#contact-turnstile', {
+                            sitekey: '0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo',
+                            theme: 'dark',
+                            callback: function(token) {
+                                console.log('Contact Turnstile success:', token);
+                            },
+                            'error-callback': function(error) {
+                                console.error('Contact Turnstile error:', error);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Contact Turnstile render error:', e);
+                    }
+                    
+                    // Test Community sitekey (same as contact)
+                    try {
+                        window.turnstile.render('#community-turnstile', {
+                            sitekey: '0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo',
+                            theme: 'dark',
+                            callback: function(token) {
+                                console.log('Community Turnstile success:', token);
+                            },
+                            'error-callback': function(error) {
+                                console.error('Community Turnstile error:', error);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Community Turnstile render error:', e);
+                    }
+                    
+                    // Test Claims sitekey
+                    try {
+                        window.turnstile.render('#claims-turnstile', {
+                            sitekey: '0x4AAAAAAB0dLCxl1gKR6FSl0dQPXvdvMo',
+                            theme: 'dark',
+                            callback: function(token) {
+                                console.log('Claims Turnstile success:', token);
+                            },
+                            'error-callback': function(error) {
+                                console.error('Claims Turnstile error:', error);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Claims Turnstile render error:', e);
+                    }
+                } else {
+                    console.log('Turnstile API not yet loaded, retrying...');
+                    setTimeout(checkTurnstile, 500);
+                }
+            }
+            
+            checkTurnstile();
+        });
+    </script>
+</body>
+</html>

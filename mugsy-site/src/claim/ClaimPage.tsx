@@ -9,7 +9,11 @@ import SiteHeader from '../components/SiteHeader'
 import SiteFooter from '../components/SiteFooter'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_CLAIM as string) || ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY as string)
+const SITEKEY = (
+  (import.meta as any).env?.VITE_TURNSTILE_SITEKEY_CLAIM as string
+) || (
+  (import.meta as any).env?.VITE_TURNSTILE_SITEKEY as string
+) || '0x4AAAAAAB-gYLApRvUyjKDX'
 const CONTRACT = (import.meta as any).env?.VITE_CLAIM_CONTRACT as `0x${string}`
 const FEATURE = ((import.meta as any).env?.VITE_FEATURE_CLAIM || 'false') === 'true'
 const TARGET_CHAIN_ID = Number((import.meta as any).env?.VITE_CLAIM_CHAIN_ID || 1)
@@ -233,5 +237,4 @@ export default function ClaimPage() {
     </WagmiProvider>
   )
 }
-
 

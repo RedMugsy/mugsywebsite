@@ -412,7 +412,7 @@ function HumanCheck({ apiBase, onReady }:{ apiBase: string; onReady: (v:{ csrf: 
   const [checked, setChecked] = useState(false)
   const widgetRef = useRef<HTMLDivElement | null>(null)
   const widgetIdRef = useRef<any>(null)
-  const sitekey = (import.meta as any).env?.VITE_TURNSTILE_SITEKEY || ''
+  const fallbackSitekey = (import.meta as any).env?.VITE_TURNSTILE_SITEKEY || '0x4AAAAAAB-gWCHhZ_cF2uz9'
 
   async function begin() {
     setState('issuing'); setMsg('Issuing challenge...')
@@ -440,19 +440,24 @@ function HumanCheck({ apiBase, onReady }:{ apiBase: string; onReady: (v:{ csrf: 
           return ensureTurnstile()
         }
         const t = await ensureTurnstile()
+        const widgetSitekey = (a.captcha as any)?.sitekey || fallbackSitekey
+        if (!widgetSitekey) {
+          setState('error'); setMsg('Captcha misconfigured. Please contact support.')
+          return
+        }
         if (widgetIdRef.current) {
           try { t.reset(widgetIdRef.current) } catch {}
         }
         const id = t.render(widgetRef.current!, {
-          sitekey,
+          sitekey: widgetSitekey,
           theme: 'dark',
           callback: (token: string) => {
             setState('verified'); setMsg('Verified')
-            onReady({ csrf: a.csrf, captcha: { type: 'turnstile', token }, nonce: null })
+            onReady({ csrf: a.csrf, captcha: { type: 'turnstile', token, sitekey: widgetSitekey }, nonce: null })
           },
           'expired-callback': () => {
             setState('expired'); setMsg('Expired. Please verify again.')
-            onReady({ csrf: a.csrf, captcha: { type: 'turnstile' }, nonce: null })
+            onReady({ csrf: a.csrf, captcha: { type: 'turnstile', sitekey: widgetSitekey }, nonce: null })
           },
           'error-callback': () => {
             setState('error'); setMsg('Captcha error. Please retry.')
@@ -493,9 +498,6 @@ function HumanCheck({ apiBase, onReady }:{ apiBase: string; onReady: (v:{ csrf: 
     </div>
   )
 }
-
-
-
 
 
 

@@ -33,6 +33,8 @@ app.use(cors({
   origin: [
     'https://redmugsy.com',
     'https://redmugsy.github.io',
+    'https://redmugsy.github.io/mugsywebsite',
+    /^https:\/\/.*\.github\.io$/,  // Allow all GitHub Pages domains
     'http://localhost:5173',
     'http://localhost:3000'
   ],
@@ -173,10 +175,14 @@ app.get('/api/claims/captcha', (req, res) => {
 
 // Main contact form submission
 app.post('/api/contact', upload.single('file'), async (req, res) => {
+  const requestId = `req_${randomBytes(8).toString('hex')}`;
+  console.log(`📝 [${requestId}] Contact form submission started`);
+  
   try {
     // CSRF validation
     const csrfToken = req.headers['x-csrf-token'];
     if (!csrfToken || !csrfTokens.has(csrfToken)) {
+      console.log(`❌ [${requestId}] CSRF validation failed`);
       return res.status(403).json({ ok: false, error: 'invalid_csrf' });
     }
 
@@ -208,12 +214,15 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
 
     if (process.env.TURNSTILE_SECRET_CONTACT) {
       if (!contactTurnstileToken) {
+        console.log(`❌ [${requestId}] Missing Turnstile token`);
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }
       const turnstileValid = await verifyTurnstile(contactTurnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
       if (!turnstileValid) {
+        console.log(`❌ [${requestId}] Turnstile verification failed`);
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }
+      console.log(`✅ [${requestId}] Turnstile verification successful`);
     }
 
     // Honeypot check

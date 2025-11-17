@@ -69,7 +69,7 @@ async function verifyAndRepairSchema() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   verifyAndRepairSchema().catch(console.error);
 }
 

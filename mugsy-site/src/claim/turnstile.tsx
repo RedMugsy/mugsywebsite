@@ -23,23 +23,50 @@ export function Turnstile({
     if (!el.current || !sitekey) return
     let cancelled = false
     let widgetId: any = null
+    let retryCount = 0
+    const maxRetries = 3
 
     const waitForScript = () => {
       if (cancelled) return
+      
       if (window.turnstile?.render) {
-        widgetId = window.turnstile.render(el.current!, {
-          sitekey,
-          theme,
-          callback: (token: string) => onToken(token),
-          'expired-callback': () => {
-            onExpire?.()
-          },
-          'error-callback': () => {
+        try {
+          widgetId = window.turnstile.render(el.current!, {
+            sitekey,
+            theme,
+            callback: (token: string) => {
+              if (!cancelled) {
+                onToken(token)
+              }
+            },
+            'expired-callback': () => {
+              if (!cancelled) {
+                onExpire?.()
+              }
+            },
+            'error-callback': () => {
+              if (!cancelled) {
+                console.warn('Turnstile error callback triggered')
+                onError?.()
+              }
+            }
+          })
+        } catch (error) {
+          console.error('Failed to render Turnstile widget:', error)
+          if (!cancelled) {
             onError?.()
           }
-        })
+        }
       } else {
-        setTimeout(waitForScript, 150)
+        retryCount++
+        if (retryCount < maxRetries) {
+          setTimeout(waitForScript, 150 * retryCount) // Exponential backoff
+        } else {
+          console.error('Turnstile script failed to load after', maxRetries, 'attempts')
+          if (!cancelled) {
+            onError?.()
+          }
+        }
       }
     }
 

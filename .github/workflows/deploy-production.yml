@@ -1,0 +1,69 @@
+name: Deploy to GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'mugsy-site/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: mugsy-site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: mugsy-site
+        run: npm ci
+
+      - name: Build with environment variables
+        working-directory: mugsy-site
+        env:
+          VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
+          VITE_TURNSTILE_SITEKEY_CLAIM: ${{ secrets.VITE_TURNSTILE_SITEKEY_CLAIM }}
+          VITE_TURNSTILE_SITEKEY_COMMUNITY: ${{ secrets.VITE_TURNSTILE_SITEKEY_COMMUNITY }}
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://mugsywebsite-production-b065.up.railway.app' }}
+          VITE_NEWSLETTER_API: ${{ secrets.VITE_NEWSLETTER_API || 'https://perfect-integrity-production.up.railway.app' }}
+          VITE_CAPTCHA_PROVIDER: ${{ secrets.VITE_CAPTCHA_PROVIDER || 'turnstile' }}
+          VITE_CLAIM_API_URL: ${{ secrets.VITE_CLAIM_API_URL }}
+          VITE_CLAIM_SUCCESS_URL: ${{ secrets.VITE_CLAIM_SUCCESS_URL }}
+          VITE_CLAIM_ERROR_URL: ${{ secrets.VITE_CLAIM_ERROR_URL }}
+          VITE_CLAIM_CONTACT_EMAIL: ${{ secrets.VITE_CLAIM_CONTACT_EMAIL }}
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: mugsy-site/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

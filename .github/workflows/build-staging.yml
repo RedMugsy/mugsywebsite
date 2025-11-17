@@ -29,6 +29,13 @@ jobs:
 
       - name: Build staging
         working-directory: mugsy-site
+        env:
+          VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
+          VITE_TURNSTILE_SITEKEY_CLAIM: ${{ secrets.VITE_TURNSTILE_SITEKEY_CLAIM }}
+          VITE_TURNSTILE_SITEKEY_COMMUNITY: ${{ secrets.VITE_TURNSTILE_SITEKEY_COMMUNITY }}
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+          VITE_NEWSLETTER_API: ${{ secrets.VITE_NEWSLETTER_API }}
+          VITE_CAPTCHA_PROVIDER: ${{ secrets.VITE_CAPTCHA_PROVIDER }}
         run: npm run build:staging
 
       - name: Commit staging output

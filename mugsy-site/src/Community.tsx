@@ -7,6 +7,8 @@ const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_'
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
 // Use Perfect Integrity API for newsletter subscriptions
 const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
+// Fallback to main contact API if newsletter API fails
+const CONTACT_API = ((import.meta as any).env?.VITE_API_BASE as string) || 'https://mugsywebsite-production-b065.up.railway.app'
 
 export default function Community() {
   const [email, setEmail] = useState('')
@@ -21,28 +23,95 @@ export default function Community() {
 
   useEffect(() => {
     let cancelled = false
+    let timeoutId: NodeJS.Timeout
+    
     async function fetchSitekey() {
       setSitekeyStatus('loading')
+      
       try {
+        // Try newsletter API first
+        const controller = new AbortController()
+        timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+        
         const res = await fetch(`${NEWSLETTER_API}/api/newsletter/captcha`, {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json'
+          }
         })
-        if (!res.ok) throw new Error(`captcha_fetch_${res.status}`)
-        const data = await res.json()
+        
+        clearTimeout(timeoutId)
+        
+        if (res.ok) {
+          const contentType = res.headers.get('content-type')
+          if (contentType?.includes('application/json')) {
+            const data = await res.json()
+            if (cancelled) return
+            
+            const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
+            setSitekey(resolved)
+            setSitekeyStatus('ready')
+            setCaptchaNotice('')
+            return
+          }
+        }
+        
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        
+      } catch (err: any) {
+        clearTimeout(timeoutId)
+        console.warn('Newsletter API sitekey fetch failed, trying contact API:', err.message)
+        
+        // Fallback to contact API
+        try {
+          const controller2 = new AbortController()
+          const timeoutId2 = setTimeout(() => controller2.abort(), 5000)
+          
+          const fallbackRes = await fetch(`${CONTACT_API}/api/contact/captcha`, {
+            credentials: 'include',
+            signal: controller2.signal,
+            headers: {
+              'Accept': 'application/json'
+            }
+          })
+          
+          clearTimeout(timeoutId2)
+          
+          if (fallbackRes.ok) {
+            const data = await fallbackRes.json()
+            if (cancelled) return
+            
+            const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
+            setSitekey(resolved)
+            setSitekeyStatus('ready')
+            setCaptchaNotice('Using backup verification system.')
+            return
+          }
+        } catch (fallbackErr) {
+          console.warn('Contact API fallback also failed:', fallbackErr)
+        }
+        
         if (cancelled) return
-        const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
-        setSitekey(resolved)
-        setSitekeyStatus('ready')
-        setCaptchaNotice('')
-      } catch (err) {
-        if (cancelled) return
+        
+        // Use hardcoded sitekey as last resort
         setSitekey(SITEKEY || DEFAULT_SITEKEY)
-        setSitekeyStatus('error')
-        setCaptchaNotice('Verification service unreachable. Using backup key.')
+        setSitekeyStatus('ready')
+        
+        if (err.name === 'AbortError') {
+          setCaptchaNotice('Verification service timeout. Using backup verification.')
+        } else {
+          setCaptchaNotice('Verification service unreachable. Using backup key.')
+        }
       }
     }
+    
     fetchSitekey()
-    return () => { cancelled = true }
+    
+    return () => { 
+      cancelled = true
+      clearTimeout(timeoutId)
+    }
   }, [NEWSLETTER_API])
 
   function resetWidget() {
@@ -61,7 +130,7 @@ export default function Community() {
     setError('')
 
     try {
-      // Call Perfect Integrity API for newsletter subscription
+      // Try Perfect Integrity API first for newsletter subscription
       const response = await fetch(`${NEWSLETTER_API}/api/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,11 +161,54 @@ This is an automated subscription request from the Red Mugsy community page.`,
         setSubmitted(true)
         setEmail('')
         resetWidget()
+        return
+      }
+
+      // If newsletter API fails, try using contact API as fallback
+      console.warn('Newsletter API failed, trying contact API fallback:', response.status)
+      
+      const fallbackResponse = await fetch(`${CONTACT_API}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Community Newsletter Subscriber',
+          email: email,
+          company: '',
+          phoneCountry: 'US',
+          phoneDialCode: '+1',
+          phoneNational: '',
+          phoneE164: '',
+          purpose: 'Newsletter Subscription',
+          subject: 'Community Newsletter Subscription',
+          message: `Newsletter subscription request from community page.
+
+Email: ${email}
+Source: community-page-fallback
+Timestamp: ${new Date().toISOString()}
+
+This is a newsletter subscription request submitted through the community page.`,
+          walletAddress: '',
+          website: '', // honeypot field
+          issuedAt: Date.now(),
+          issuedSig: 'community-form-fallback',
+          turnstileToken,
+          captcha: {
+            type: 'turnstile',
+            token: turnstileToken
+          }
+        })
+      })
+
+      if (fallbackResponse.ok) {
+        setSubmitted(true)
+        setEmail('')
+        resetWidget()
       } else {
-        const data = await response.json()
-        setError(data.error === 'Human check failed' ? 'Please verify you are human' : 'Subscription service temporarily unavailable. Please follow us on social media or email us directly at contact@redmugsy.com')
+        const data = await fallbackResponse.json().catch(() => ({}))
+        setError(data.error === 'invalid_captcha' ? 'Please verify you are human' : 'Subscription service temporarily unavailable. Please follow us on social media or email us directly at contact@redmugsy.com')
       }
     } catch (err) {
+      console.error('Community form submission error:', err)
       setError('Subscription service temporarily unavailable. Please follow us on social media below or email us directly at contact@redmugsy.com')
     } finally {
       setIsSubmitting(false)
@@ -154,9 +266,22 @@ This is an automated subscription request from the Red Mugsy community page.`,
                     <Turnstile
                       key={`${sitekey}-${widgetResetKey}`}
                       sitekey={sitekey}
-                      onToken={(token) => { setTurnstileToken(token); setError('') }}
-                      onExpire={() => { setError('Verification expired. Please try again.'); resetWidget() }}
-                      onError={() => { setError('Verification widget failed to load. Please refresh.'); resetWidget() }}
+                      onToken={(token) => { 
+                        setTurnstileToken(token)
+                        setError('') 
+                        setCaptchaNotice('')
+                      }}
+                      onExpire={() => { 
+                        setError('Verification expired. Please try again.')
+                        setTurnstileToken('')
+                        resetWidget() 
+                      }}
+                      onError={() => { 
+                        setError('Verification widget failed to load. Please refresh the page.')
+                        setTurnstileToken('')
+                        setCaptchaNotice('If this problem persists, you can contact us directly at contact@redmugsy.com')
+                        resetWidget() 
+                      }}
                     />
                     {captchaNotice && (
                       <p className="text-xs text-amber-300">{captchaNotice}</p>
@@ -175,6 +300,7 @@ This is an automated subscription request from the Red Mugsy community page.`,
                   type="submit"
                   disabled={isSubmitting || !email || !turnstileToken || sitekeyStatus === 'loading'}
                   className="w-full bg-[#ff1a4b] hover:bg-[#cc1239] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                  title={!turnstileToken ? 'Please complete verification first' : ''}
                 >
                   {isSubmitting ? 'Subscribing...' : 'Subscribe'}
                 </button>

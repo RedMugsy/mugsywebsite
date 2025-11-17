@@ -1,3 +1,0 @@
-CAPTCHA_PROVIDER=turnstile
-TURNSTILE_SECRET_KEY=0x4AAAAAAB7Wub7hx3xpEclW0ai2B_3DDPY
-SESSION_SECRET=some-long-random-string-change-me

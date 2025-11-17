@@ -1,6 +1,6 @@
 /**
  * Database schema verification and repair script
- * Run this if you notice missing name/email columns in contact_submissions table
+ * Run this if you notice missing name/email columns in Contact_us table
  */
 
 import { PrismaClient } from '@prisma/client';

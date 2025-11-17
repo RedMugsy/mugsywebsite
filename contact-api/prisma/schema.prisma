@@ -38,7 +38,7 @@ model ContactSubmission {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
-  @@map("contact_submissions")
+  @@map("Contact_us")
 }
 
 // Keep basic claims model for future claims app

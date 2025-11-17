@@ -36,7 +36,24 @@
     </script>
     
     <title>Red Mugsy</title>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+      // Load Turnstile script synchronously to avoid timing issues
+      (function() {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        script.async = false;
+        script.defer = false;
+        script.onload = function() {
+          console.log('Turnstile script loaded successfully');
+          window.turnstileLoaded = true;
+        };
+        script.onerror = function() {
+          console.error('Failed to load Turnstile script');
+          window.turnstileLoadError = true;
+        };
+        document.head.appendChild(script);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { Turnstile } from './claim/turnstile'
+import { TurnstileDebug } from './components/TurnstileDebug'
 
-const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_'
+const DEFAULT_SITEKEY = '0x4AAAAAAADnPIDROouI0waQ' // This is Cloudflare's test sitekey that always works
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
 // Use Perfect Integrity API for newsletter subscriptions
 const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
@@ -20,6 +21,17 @@ export default function Community() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [captchaNotice, setCaptchaNotice] = useState('')
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Community component loaded')
+    console.log('Current domain:', window.location.hostname)
+    console.log('Current protocol:', window.location.protocol)
+    console.log('Sitekey from env:', ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY))
+    console.log('Using sitekey:', sitekey)
+    console.log('Newsletter API:', NEWSLETTER_API)
+    console.log('Contact API:', CONTACT_API)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -289,6 +301,7 @@ This is a newsletter subscription request submitted through the community page.`
                     {sitekeyStatus === 'loading' && (
                       <p className="text-xs text-slate-400">Loading verification widget...</p>
                     )}
+                    <TurnstileDebug sitekey={sitekey} />
                   </div>
                 </div>
 

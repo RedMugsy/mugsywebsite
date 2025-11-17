@@ -167,6 +167,7 @@ export default function Contact() {
       const isPowType = (captcha as any)?.type === 'pow' || (captcha as any)?.type === 'altcha-pow'
       if (isPowType && typeof (captcha as any).difficulty === 'number' && powSolution == null) throw new Error('Solving captcha, please wait?')
 
+      const turnstileToken = ((captcha as any)?.type === 'turnstile') ? (captcha as any)?.token : undefined
       const body = {
         locale,
         name, email, company,
@@ -184,6 +185,7 @@ export default function Contact() {
         website: '',
         issuedAt: Number(ts),
         issuedSig,
+        turnstileToken,
         captcha: ((captcha as any)?.type === 'pow' || (captcha as any)?.type === 'altcha-pow')
           ? { type: 'pow', nonce: powSolution ?? '', token: (captcha as any).token }
           : ((captcha as any)?.type === 'turnstile')
@@ -498,7 +500,6 @@ function HumanCheck({ apiBase, onReady }:{ apiBase: string; onReady: (v:{ csrf: 
     </div>
   )
 }
-
 
 
 

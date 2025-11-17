@@ -30,6 +30,7 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'https://redmugsy.com',
+    'https://redmugsy.github.io',
     'http://localhost:5173',
     'http://localhost:3000'
   ],
@@ -120,16 +121,20 @@ app.get('/api/newsletter/captcha', (req, res) => {
 // Step 1: Initial email subscription (sends verification email)
 app.post('/api/newsletter/subscribe', async (req, res) => {
   try {
-    const { email: rawEmail, turnstileToken } = req.body;
+    const { email: rawEmail, turnstileToken, captcha } = req.body as { email?: string; turnstileToken?: string; captcha?: { type?: string; token?: string } };
     const email = (rawEmail || "").trim().toLowerCase();
+    const newsletterTurnstileToken = turnstileToken || ((captcha?.type === 'turnstile') ? captcha.token : undefined);
     
     if (!EMAIL_RE.test(email)) {
       return res.status(400).json({ ok: false, error: "invalid_email" });
     }
 
     // Verify Turnstile token for Community Subscription
-    if (process.env.TURNSTILE_SECRET_COMMUNITY && turnstileToken) {
-      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_COMMUNITY);
+    if (process.env.TURNSTILE_SECRET_COMMUNITY) {
+      if (!newsletterTurnstileToken) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
+      const turnstileValid = await verifyTurnstile(newsletterTurnstileToken, process.env.TURNSTILE_SECRET_COMMUNITY);
       if (!turnstileValid) {
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }

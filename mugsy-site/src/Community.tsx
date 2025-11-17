@@ -1,18 +1,54 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { Turnstile } from './claim/turnstile'
 
-const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || '0x4AAAAAAB_cZo6l9Vt0npf_'
+const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_'
+const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
 // Use Perfect Integrity API for newsletter subscriptions
 const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
 
 export default function Community() {
   const [email, setEmail] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [sitekey, setSitekey] = useState(SITEKEY)
+  const [sitekeyStatus, setSitekeyStatus] = useState<'idle'|'loading'|'ready'|'error'>('idle')
+  const [widgetResetKey, setWidgetResetKey] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [captchaNotice, setCaptchaNotice] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    async function fetchSitekey() {
+      setSitekeyStatus('loading')
+      try {
+        const res = await fetch(`${NEWSLETTER_API}/api/newsletter/captcha`, {
+          credentials: 'include'
+        })
+        if (!res.ok) throw new Error(`captcha_fetch_${res.status}`)
+        const data = await res.json()
+        if (cancelled) return
+        const resolved = (data?.sitekey as string) || SITEKEY || DEFAULT_SITEKEY
+        setSitekey(resolved)
+        setSitekeyStatus('ready')
+        setCaptchaNotice('')
+      } catch (err) {
+        if (cancelled) return
+        setSitekey(SITEKEY || DEFAULT_SITEKEY)
+        setSitekeyStatus('error')
+        setCaptchaNotice('Verification service unreachable. Using backup key.')
+      }
+    }
+    fetchSitekey()
+    return () => { cancelled = true }
+  }, [NEWSLETTER_API])
+
+  function resetWidget() {
+    setWidgetResetKey((n) => n + 1)
+    setTurnstileToken('')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -45,6 +81,7 @@ This is an automated subscription request from the Red Mugsy community page.`,
             type: 'turnstile',
             token: turnstileToken
           },
+          turnstileToken,
           website: '', // honeypot field
           issuedAt: Date.now(),
           issuedSig: 'community-form'
@@ -54,7 +91,7 @@ This is an automated subscription request from the Red Mugsy community page.`,
       if (response.ok) {
         setSubmitted(true)
         setEmail('')
-        setTurnstileToken('')
+        resetWidget()
       } else {
         const data = await response.json()
         setError(data.error === 'Human check failed' ? 'Please verify you are human' : 'Subscription service temporarily unavailable. Please follow us on social media or email us directly at contact@redmugsy.com')
@@ -113,7 +150,21 @@ This is an automated subscription request from the Red Mugsy community page.`,
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Verify You're Human
                   </label>
-                  <Turnstile sitekey={SITEKEY} onToken={setTurnstileToken} />
+                  <div className="space-y-2">
+                    <Turnstile
+                      key={`${sitekey}-${widgetResetKey}`}
+                      sitekey={sitekey}
+                      onToken={(token) => { setTurnstileToken(token); setError('') }}
+                      onExpire={() => { setError('Verification expired. Please try again.'); resetWidget() }}
+                      onError={() => { setError('Verification widget failed to load. Please refresh.'); resetWidget() }}
+                    />
+                    {captchaNotice && (
+                      <p className="text-xs text-amber-300">{captchaNotice}</p>
+                    )}
+                    {sitekeyStatus === 'loading' && (
+                      <p className="text-xs text-slate-400">Loading verification widget...</p>
+                    )}
+                  </div>
                 </div>
 
                 {error && (
@@ -122,7 +173,7 @@ This is an automated subscription request from the Red Mugsy community page.`,
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || !email || !turnstileToken}
+                  disabled={isSubmitting || !email || !turnstileToken || sitekeyStatus === 'loading'}
                   className="w-full bg-[#ff1a4b] hover:bg-[#cc1239] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-colors"
                 >
                   {isSubmitting ? 'Subscribing...' : 'Subscribe'}

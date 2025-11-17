@@ -31,6 +31,7 @@ app.use(helmet({
 app.use(cors({
   origin: [
     'https://redmugsy.com',
+    'https://redmugsy.github.io',
     'http://localhost:5173',
     'http://localhost:3000'
   ],
@@ -200,9 +201,15 @@ app.post('/api/contact', upload.single('file'), async (req, res) => {
       turnstileToken
     } = req.body;
 
-    // Verify Turnstile token for Contact Us form
-    if (process.env.TURNSTILE_SECRET_CONTACT && turnstileToken) {
-      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
+    const contactTurnstileToken =
+      turnstileToken ||
+      ((captcha && typeof captcha === 'object' && captcha.type === 'turnstile') ? captcha.token : undefined);
+
+    if (process.env.TURNSTILE_SECRET_CONTACT) {
+      if (!contactTurnstileToken) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
+      const turnstileValid = await verifyTurnstile(contactTurnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
       if (!turnstileValid) {
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }
@@ -403,16 +410,23 @@ app.post('/api/claims', upload.array('images', 5), async (req, res) => {
       productModel,
       purchaseDate,
       issueDescription,
-      turnstileToken
+      turnstileToken,
+      captcha
     } = req.body;
 
     if (!name || !email || !claimType || !issueDescription) {
       return res.status(400).json({ ok: false, error: 'missing_required_fields' });
     }
 
-    // Verify Turnstile token for Claims form
-    if (process.env.TURNSTILE_SECRET_CLAIMS && turnstileToken) {
-      const turnstileValid = await verifyTurnstile(turnstileToken, process.env.TURNSTILE_SECRET_CLAIMS);
+    const claimTurnstileToken =
+      turnstileToken ||
+      ((captcha && typeof captcha === 'object' && captcha.type === 'turnstile') ? captcha.token : undefined);
+
+    if (process.env.TURNSTILE_SECRET_CLAIMS) {
+      if (!claimTurnstileToken) {
+        return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+      }
+      const turnstileValid = await verifyTurnstile(claimTurnstileToken, process.env.TURNSTILE_SECRET_CLAIMS);
       if (!turnstileValid) {
         return res.status(400).json({ ok: false, error: 'invalid_captcha' });
       }

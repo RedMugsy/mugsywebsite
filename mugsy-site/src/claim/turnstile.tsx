@@ -45,11 +45,16 @@ export function Turnstile({
       }
     }
 
+    // Also clear any existing widgets in the DOM element
+    if (el.current) {
+      el.current.innerHTML = ''
+    }
+
     const renderWidget = () => {
       if (cancelled || !el.current || !window.turnstile?.render) return
       
       try {
-        // Clear the element before rendering
+        // Double-check element is clean before rendering
         if (el.current) {
           el.current.innerHTML = ''
         }
@@ -193,6 +198,8 @@ export function Turnstile({
       ref={el} 
       className="inline-block min-h-[65px] min-w-[300px]"
       data-testid="turnstile-widget"
+      data-sitekey={sitekey}
+      key={sitekey} // Ensure remount when sitekey changes
     />
   )
 }

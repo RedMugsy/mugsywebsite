@@ -5,7 +5,7 @@
 
 import { PrismaClient } from '@prisma/client';
 
-async function verifyAndRepairSchema() {
+async function verifyAndRepairSchema(): Promise<void> {
   const prisma = new PrismaClient();
   
   try {
@@ -13,7 +13,7 @@ async function verifyAndRepairSchema() {
     
     // Try to create a test record to see if all fields work
     const testData = {
-      requestId: 'TEST-' + Date.now(),
+      requestId: 'TEST-' + Date.now().toString(),
       name: 'Test User',
       email: 'test@example.com',
       purpose: 'Support',
@@ -51,12 +51,13 @@ async function verifyAndRepairSchema() {
     console.log('📊 Database is working correctly');
     console.log('Recent submissions count:', submissions.length);
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Schema verification failed:', error);
     
-    if (error.code === 'P2002') {
+    const err = error as any;
+    if (err?.code === 'P2002') {
       console.log('💡 Unique constraint error - this is expected for the test');
-    } else if (error.message.includes('column') && (error.message.includes('name') || error.message.includes('email'))) {
+    } else if (err?.message && typeof err.message === 'string' && err.message.includes('column') && (err.message.includes('name') || err.message.includes('email'))) {
       console.error('🚨 Missing name or email column detected!');
       console.log('🔧 Run: npx prisma db push --accept-data-loss');
       console.log('   This will add missing columns to your PostgreSQL table');

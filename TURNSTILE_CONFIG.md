@@ -6,19 +6,19 @@ Cloudflare Turnstile integration has been added to all three forms across both R
 ## 📋 Turnstile Site Keys Configuration
 
 ### Contact Us Form
-- **Site Key**: `0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q`
+- **Site Key**: `0x4AAAAAAB-gWCHhZ_cF2uz9`
 - **App**: mugsywebsite Railway app
 - **Endpoint**: `/api/contact/captcha`
 - **Environment Variable**: `TURNSTILE_SITEKEY_CONTACT`
 
 ### Claims Form  
-- **Site Key**: `0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4`
+- **Site Key**: `0x4AAAAAAB-gYLApRvUyjKDX`
 - **App**: mugsywebsite Railway app
 - **Endpoint**: `/api/claims/captcha`
 - **Environment Variable**: `TURNSTILE_SITEKEY_CLAIMS`
 
 ### Community Subscription Form
-- **Site Key**: `0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo`
+- **Site Key**: `0x4AAAAAAB_cZo6l9Vt0npf_`
 - **App**: Perfect Integrity Railway app
 - **Endpoint**: `/api/newsletter/captcha`
 - **Environment Variable**: `TURNSTILE_SITEKEY_COMMUNITY`
@@ -28,21 +28,21 @@ Cloudflare Turnstile integration has been added to all three forms across both R
 ### mugsywebsite Railway App
 ```bash
 # Turnstile Site Keys
-TURNSTILE_SITEKEY_CONTACT=0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q
-TURNSTILE_SITEKEY_CLAIMS=0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4
+TURNSTILE_SITEKEY_CONTACT=0x4AAAAAAB-gWCHhZ_cF2uz9
+TURNSTILE_SITEKEY_CLAIMS=0x4AAAAAAB-gYLApRvUyjKDX
 
-# Turnstile Secret Keys (obtain from Cloudflare dashboard)
-TURNSTILE_SECRET_CONTACT=[secret-key-for-contact-form]
-TURNSTILE_SECRET_CLAIMS=[secret-key-for-claims-form]
+# Turnstile Secret Keys
+TURNSTILE_SECRET_CONTACT=0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q
+TURNSTILE_SECRET_CLAIMS=0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4
 ```
 
 ### Perfect Integrity Railway App
 ```bash
 # Turnstile Site Key
-TURNSTILE_SITEKEY_COMMUNITY=0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo
+TURNSTILE_SITEKEY_COMMUNITY=0x4AAAAAAB_cZo6l9Vt0npf_
 
-# Turnstile Secret Key (obtain from Cloudflare dashboard)
-TURNSTILE_SECRET_COMMUNITY=[secret-key-for-community-form]
+# Turnstile Secret Key
+TURNSTILE_SECRET_COMMUNITY=0x4AAAAAAB_cZiQeiVdmtK6Dctwa7L9i6FE
 ```
 
 ## 🛡️ Implementation Details
@@ -84,9 +84,9 @@ TURNSTILE_SECRET_COMMUNITY=[secret-key-for-community-form]
 
 | Form | Site Key | Secret Key | Integration | Status |
 |------|----------|------------|-------------|--------|
-| Contact Us | ✅ Added | ⏳ Needed | ✅ Complete | Ready for Testing |
-| Claims | ✅ Added | ⏳ Needed | ✅ Complete | Ready for Testing |
-| Community Newsletter | ✅ Added | ⏳ Needed | ✅ Complete | Ready for Testing |
+| Contact Us | ✅ Added | ✅ Added | ✅ Complete | Ready for Testing |
+| Claims | ✅ Added | ✅ Added | ✅ Complete | Ready for Testing |
+| Community Newsletter | ✅ Added | ✅ Added | ✅ Complete | Ready for Testing |
 
 ## 🔧 Troubleshooting
 

@@ -32,10 +32,10 @@ NODE_ENV=production
 PORT=8787
 
 # Turnstile Security Keys
-TURNSTILE_SITEKEY_CONTACT=0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q
-TURNSTILE_SITEKEY_CLAIMS=0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4
-TURNSTILE_SECRET_CONTACT=[get-from-cloudflare-dashboard]
-TURNSTILE_SECRET_CLAIMS=[get-from-cloudflare-dashboard]
+TURNSTILE_SITEKEY_CONTACT=0x4AAAAAAB-gWCHhZ_cF2uz9
+TURNSTILE_SITEKEY_CLAIMS=0x4AAAAAAB-gYLApRvUyjKDX
+TURNSTILE_SECRET_CONTACT=0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q
+TURNSTILE_SECRET_CLAIMS=0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4
 
 # Email From Address
 MAIL_FROM=contact@redmugsy.com
@@ -89,8 +89,8 @@ NODE_ENV=production
 PORT=8788
 
 # Turnstile Security Keys
-TURNSTILE_SITEKEY_COMMUNITY=0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo
-TURNSTILE_SECRET_COMMUNITY=[get-from-cloudflare-dashboard]
+TURNSTILE_SITEKEY_COMMUNITY=0x4AAAAAAB_cZo6l9Vt0npf_
+TURNSTILE_SECRET_COMMUNITY=0x4AAAAAAB_cZiQeiVdmtK6Dctwa7L9i6FE
 ```
 
 ### Setup Steps
@@ -131,10 +131,10 @@ TURNSTILE_SECRET_COMMUNITY=[get-from-cloudflare-dashboard]
 ### Get Secret Keys from Cloudflare
 1. **Login to Cloudflare Dashboard**
 2. **Navigate to Turnstile section**
-3. **Find your sites**:
-   - Contact Us: `0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q`
-   - Claims: `0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4`
-   - Community: `0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo`
+3. **Find your sites** and record both keys for each:
+   - Contact Us: Site `0x4AAAAAAB-gWCHhZ_cF2uz9`, Secret `0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q`
+   - Claims: Site `0x4AAAAAAB-gYLApRvUyjKDX`, Secret `0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4`
+   - Community: Site `0x4AAAAAAB_cZo6l9Vt0npf_`, Secret `0x4AAAAAAB_cZiQeiVdmtK6Dctwa7L9i6FE`
 4. **Copy Secret Keys** and add to respective Railway apps
 
 ### Development/Testing

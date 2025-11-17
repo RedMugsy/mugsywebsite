@@ -113,7 +113,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/newsletter/captcha', (req, res) => {
   res.json({
     type: 'turnstile',
-    sitekey: process.env.TURNSTILE_SITEKEY_COMMUNITY || '0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo'
+    sitekey: process.env.TURNSTILE_SITEKEY_COMMUNITY || '0x4AAAAAAB_cZo6l9Vt0npf_'
   });
 });
 

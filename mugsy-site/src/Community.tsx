@@ -3,7 +3,7 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { Turnstile } from './claim/turnstile'
 
-const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || '0x4AAAAAAB_cZtzk94J3ZRyDKnOYoaQ6sKo'
+const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || '0x4AAAAAAB_cZo6l9Vt0npf_'
 // Use Perfect Integrity API for newsletter subscriptions
 const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
 

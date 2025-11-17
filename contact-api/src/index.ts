@@ -157,7 +157,7 @@ async function verifyTurnstile(token: string, secret: string): Promise<boolean> 
 app.get('/api/contact/captcha', (req, res) => {
   res.json({
     type: 'turnstile',
-    sitekey: process.env.TURNSTILE_SITEKEY_CONTACT || '0x4AAAAAAB-gWNfde6-qKg0rzQgK2fLZ71Q'
+    sitekey: process.env.TURNSTILE_SITEKEY_CONTACT || '0x4AAAAAAB-gWCHhZ_cF2uz9'
   });
 });
 
@@ -165,7 +165,7 @@ app.get('/api/contact/captcha', (req, res) => {
 app.get('/api/claims/captcha', (req, res) => {
   res.json({
     type: 'turnstile',
-    sitekey: process.env.TURNSTILE_SITEKEY_CLAIMS || '0x4AAAAAAB-gYA67_gkGJR_fMbrK6biOEA4'
+    sitekey: process.env.TURNSTILE_SITEKEY_CLAIMS || '0x4AAAAAAB-gYLApRvUyjKDX'
   });
 });
 

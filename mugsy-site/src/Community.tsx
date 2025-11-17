@@ -71,11 +71,9 @@ This is an automated subscription request from the Red Mugsy community page.`,
       <SiteHeader />
       
       <main className="max-w-4xl mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h1 className="glitch-text text-5xl sm:text-7xl font-extrabold tracking-tight text-white mb-4">
-            <span className="text-white">Join Our</span> <span className="text-[#ff1a4b]">Community</span>
-          </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+        <div className="mb-12">
+          <h1 className="text-3xl font-extrabold text-white">Join Our Community</h1>
+          <p className="text-slate-300 mt-3 max-w-2xl text-base sm:text-lg">
             Stay updated with the latest Red Mugsy news, memes, and community events.
           </p>
         </div>

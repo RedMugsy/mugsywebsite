@@ -27,23 +27,11 @@ export default function Community() {
     console.log('Community component loaded')
     console.log('Current domain:', window.location.hostname)
     console.log('Current protocol:', window.location.protocol)
-    console.log('Sitekey from env:', ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY))
-    console.log('Using sitekey:', sitekey)
-    console.log('Newsletter API:', NEWSLETTER_API)
-    console.log('Contact API:', CONTACT_API)
-  }, [])
-
-  useEffect(() => {
-    // Simplified sitekey resolution - use environment variable directly
-    const envSitekey = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string)
-    const resolved = envSitekey || DEFAULT_SITEKEY
-    
-    console.log('Using Community sitekey:', resolved)
-    setSitekey(resolved)
+    console.log('Using sitekey directly:', DEFAULT_SITEKEY)
+    setSitekey(DEFAULT_SITEKEY)
     setSitekeyStatus('ready')
     setCaptchaNotice('')
   }, [])
-  }, [NEWSLETTER_API])
 
   function resetWidget() {
     setWidgetResetKey((n) => n + 1)
@@ -61,68 +49,15 @@ export default function Community() {
     setError('')
 
     try {
-      // Try Perfect Integrity API first for newsletter subscription
-      const response = await fetch(`${NEWSLETTER_API}/api/newsletter/subscribe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Newsletter Subscriber',
-          email: email,
-          purpose: 'Newsletter Subscription',
-          subject: 'Newsletter Subscription Request',
-          message: `Newsletter subscription request from community page.
-
-Email: ${email}
-Source: community-page
-Timestamp: ${new Date().toISOString()}
-
-This is an automated subscription request from the Red Mugsy community page.`,
-          captcha: {
-            type: 'turnstile',
-            token: turnstileToken
-          },
-          turnstileToken,
-          website: '', // honeypot field
-          issuedAt: Date.now(),
-          issuedSig: 'community-form'
-        })
-      })
-
-      if (response.ok) {
-        setSubmitted(true)
-        setEmail('')
-        resetWidget()
-        return
-      }
-
-      // If newsletter API fails, try using contact API as fallback
-      console.warn('Newsletter API failed, trying contact API fallback:', response.status)
-      
-      const fallbackResponse = await fetch(`${CONTACT_API}/api/contact`, {
+      // Submit directly to contact API (which is working)
+      const response = await fetch(`${CONTACT_API}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: 'Community Newsletter Subscriber',
           email: email,
-          company: '',
-          phoneCountry: 'US',
-          phoneDialCode: '+1',
-          phoneNational: '',
-          phoneE164: '',
-          purpose: 'Newsletter Subscription',
-          subject: 'Community Newsletter Subscription',
-          message: `Newsletter subscription request from community page.
-
-Email: ${email}
-Source: community-page-fallback
-Timestamp: ${new Date().toISOString()}
-
-This is a newsletter subscription request submitted through the community page.`,
-          walletAddress: '',
-          website: '', // honeypot field
-          issuedAt: Date.now(),
-          issuedSig: 'community-form-fallback',
-          turnstileToken,
+          subject: 'Newsletter Subscription',
+          message: `Newsletter subscription from community page.\nEmail: ${email}`,
           captcha: {
             type: 'turnstile',
             token: turnstileToken
@@ -130,13 +65,14 @@ This is a newsletter subscription request submitted through the community page.`
         })
       })
 
-      if (fallbackResponse.ok) {
+      if (response.ok) {
         setSubmitted(true)
         setEmail('')
         resetWidget()
       } else {
-        const data = await fallbackResponse.json().catch(() => ({}))
-        setError(data.error === 'invalid_captcha' ? 'Please verify you are human' : 'Subscription service temporarily unavailable. Please follow us on social media or email us directly at contact@redmugsy.com')
+        const data = await response.json().catch(() => ({}))
+        setError(data.error === 'invalid_captcha' ? 'Please verify you are human' : 'Subscription failed. Please try again.')
+        resetWidget()
       }
     } catch (err) {
       console.error('Community form submission error:', err)

@@ -8,7 +8,10 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { createHash } from 'crypto';
 import multer from 'multer';
+import { Request, Response, NextFunction } from 'express';
+import fetch from 'node-fetch';
 
+// Updated 2025-11-18: Enhanced CORS for redmugsy.com domains
 const app = express();
 
 const parseOrigins = (value?: string | null) =>

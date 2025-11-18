@@ -13,6 +13,8 @@ const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const crypto_2 = require("crypto");
 const multer_1 = __importDefault(require("multer"));
+const node_fetch_1 = __importDefault(require("node-fetch"));
+// Updated 2025-11-18: Enhanced CORS for redmugsy.com domains
 const app = (0, express_1.default)();
 const parseOrigins = (value) => (value ?? '')
     .split(',')
@@ -135,7 +137,7 @@ async function verifyTurnstile(token, secret) {
         return false; // Fail if not configured
     }
     try {
-        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        const response = await (0, node_fetch_1.default)('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

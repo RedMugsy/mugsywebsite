@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import fetch from 'node-fetch';
 
+// Updated 2025-11-18: Added /api/newsletter/captcha endpoint for Community form
 const app = express();
 
 const parseOrigins = (value?: string | null) =>

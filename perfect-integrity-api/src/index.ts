@@ -9,6 +9,28 @@ import fetch from 'node-fetch';
 
 const app = express();
 
+const parseOrigins = (value?: string | null) =>
+  (value ?? '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+const DEFAULT_ALLOWED_ORIGINS: (string | RegExp)[] = [
+  'https://redmugsy.com',
+  'https://www.redmugsy.com',
+  'https://redmugsy.github.io',
+  'https://redmugsy.github.io/mugsywebsite',
+  /^https:\/\/.*\.github\.io$/,
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+const allowedOrigins: (string | RegExp)[] = [
+  ...parseOrigins(process.env.ALLOWED_ORIGINS),
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ...DEFAULT_ALLOWED_ORIGINS,
+];
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -28,12 +50,7 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    'https://redmugsy.com',
-    'https://redmugsy.github.io',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -241,7 +258,9 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
 // Step 2: Email verification endpoint
 app.get('/api/newsletter/verify', async (req, res) => {
   try {
-    const { token } = req.query;
+    const token = typeof req.query?.token === 'string'
+      ? req.query.token
+      : undefined;
     
     if (!token) {
       return res.status(400).json({ ok: false, error: 'missing_token' });
@@ -259,6 +278,10 @@ app.get('/api/newsletter/verify', async (req, res) => {
     }
 
     // Check if token is expired (24 hours)
+    if (!subscription.verificationSentAt) {
+      return res.status(410).json({ ok: false, error: 'token_expired' });
+    }
+
     const tokenAge = Date.now() - subscription.verificationSentAt.getTime();
     if (tokenAge > 24 * 60 * 60 * 1000) {
       return res.status(410).json({ ok: false, error: 'token_expired' });

@@ -4,7 +4,7 @@ import SiteFooter from './components/SiteFooter'
 import { Turnstile } from './claim/turnstile'
 import { TurnstileDebug } from './components/TurnstileDebug'
 
-const DEFAULT_SITEKEY = '0x4AAAAAAADnPIDROouI0waQ' // This is Cloudflare's test sitekey that always works
+const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_' // Community form Turnstile sitekey
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
 // Use Perfect Integrity API for newsletter subscriptions
 const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'

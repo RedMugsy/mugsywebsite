@@ -4,885 +4,422 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const multer_1 = __importDefault(require("multer"));
+const db_js_1 = require("./db.js");
+const ensure_table_js_1 = require("./ensure-table.js");
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const crypto_1 = require("crypto");
+const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
-const hpp_1 = __importDefault(require("hpp"));
-const express_slow_down_1 = __importDefault(require("express-slow-down"));
-const compression_1 = __importDefault(require("compression"));
-const zod_1 = require("zod");
-const node_fetch_1 = __importDefault(require("node-fetch"));
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const db_1 = require("./db");
-dotenv_1.default.config();
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const crypto_2 = require("crypto");
+const multer_1 = __importDefault(require("multer"));
 const app = (0, express_1.default)();
-// Trust proxy headers so rate-limiters and IP detection work behind CDNs/proxies
-app.set('trust proxy', true);
-app.disable('x-powered-by');
-// Security headers (API-safe)
-app.use((0, helmet_1.default)({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-    referrerPolicy: { policy: 'no-referrer-when-downgrade' },
-    hsts: process.env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
-}));
-// Parameter pollution protection
-app.use((0, hpp_1.default)());
-// Basic compression
-app.use((0, compression_1.default)());
-const ADMIN_UI_ENABLED = String(process.env.ADMIN_UI_ENABLED || '').toLowerCase() === 'true';
-// Basic JSON body parsing for non-multipart routes
-app.use(express_1.default.json({ limit: '1mb' }));
-// Apply a reasonable timeout to responses to avoid resource hogging
-app.use((req, res, next) => {
-    try {
-        res.setTimeout(Number(process.env.REQUEST_TIMEOUT_MS || 15000));
-    }
-    catch { }
-    next();
-});
-// CORS
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
+const parseOrigins = (value) => (value ?? '')
     .split(',')
-    .map(s => s.trim())
+    .map(origin => origin.trim())
     .filter(Boolean);
-app.use((0, cors_1.default)({
-    origin: (origin, cb) => {
-        if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin))
-            return cb(null, true);
-        return cb(new Error('Not allowed by CORS'));
+const DEFAULT_ALLOWED_ORIGINS = [
+    'https://redmugsy.com',
+    'https://www.redmugsy.com',
+    'https://redmugsy.github.io',
+    'https://redmugsy.github.io/mugsywebsite',
+    /^https:\/\/.*\.github\.io$/,
+    'http://localhost:5173',
+    'http://localhost:3000',
+];
+const allowedOrigins = [
+    ...parseOrigins(process.env.ALLOWED_ORIGINS),
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+    ...DEFAULT_ALLOWED_ORIGINS,
+];
+// Security middleware
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"],
+        },
     },
-    credentials: true,
 }));
-// Optional: only allow requests that come through edge (e.g., Cloudflare) by checking a shared header
-const EDGE_AUTH_SECRET = process.env.EDGE_AUTH_SECRET || '';
-function requireEdgeAuth(req, res, next) {
-    if (!EDGE_AUTH_SECRET)
-        return next();
-    const hdr = (req.headers['x-edge-auth'] || req.headers['cf-edge-auth']);
-    if (hdr && hdr === EDGE_AUTH_SECRET)
-        return next();
-    return res.status(403).json({ error: 'forbidden' });
-}
-// Global and route-specific rate limits / slow-downs
-const GLOBAL_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60000);
-const GLOBAL_MAX = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 120);
-const globalLimiter = (0, express_rate_limit_1.default)({
-    windowMs: GLOBAL_WINDOW_MS,
-    max: GLOBAL_MAX,
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.warn(`[rate-limit] global limit reached ip=${ip} path=${req.originalUrl}`);
-        return res.status(429).json({ error: 'Too many requests' });
-    },
+// CORS configuration
+app.use((0, cors_1.default)({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+}));
+app.use(express_1.default.json({ limit: '10mb' }));
+app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+// Rate limiting
+const limiter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
 });
-// Fine-grained route controls
-const contactLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 60 * 60 * 1000,
-    max: Number(process.env.CONTACT_MAX_PER_HOUR || 10),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.warn(`[rate-limit] contact limit reached ip=${ip} path=${req.originalUrl}`);
-        return res.status(429).json({ error: 'Too many requests' });
-    },
-});
-const contactSlowdown = (0, express_slow_down_1.default)({ windowMs: 15 * 60 * 1000, delayAfter: 3, delayMs: 500 });
-const authLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 15 * 60 * 1000,
-    max: Number(process.env.AUTH_MAX_PER_WINDOW || 20),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.warn(`[rate-limit] auth limit reached ip=${ip} path=${req.originalUrl}`);
-        return res.status(429).json({ error: 'Too many requests' });
-    },
-});
-const authSlowdown = (0, express_slow_down_1.default)({ windowMs: 15 * 60 * 1000, delayAfter: 5, delayMs: 750 });
-const turnstileLimiter = (0, express_rate_limit_1.default)({
-    windowMs: 60 * 1000,
-    max: Number(process.env.TURNSTILE_VERIFY_MAX_PER_MIN || 30),
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.warn(`[rate-limit] turnstile limit reached ip=${ip} path=${req.originalUrl}`);
-        return res.status(429).json({ error: 'Too many requests' });
-    },
-});
-// Apply to sensitive paths
-app.use(['/contact', '/api/contact'], contactLimiter, contactSlowdown, requireEdgeAuth);
-app.use('/oauth/token', authLimiter, authSlowdown, requireEdgeAuth);
-app.use('/api/claim/turnstile-verify', turnstileLimiter);
-app.use(['/api/claim'], globalLimiter);
-// Multer for file upload (memory for email attachment)
+app.use(limiter);
+// File upload configuration
 const upload = (0, multer_1.default)({
-    storage: multer_1.default.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    dest: 'uploads/',
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     fileFilter: (req, file, cb) => {
-        const ok = [
-            'application/pdf',
-            'image/png',
-            'image/jpeg',
-            'image/webp',
-            'text/plain',
-        ];
-        if (ok.includes(file.mimetype))
-            cb(null, true);
-        else
-            cb(new Error('Invalid file type'));
-    },
+        const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'text/plain'];
+        cb(null, allowed.includes(file.mimetype));
+    }
 });
-const PurposeEnum = zod_1.z.enum([
-    'General',
-    'Partnership',
-    'Support',
-    'Bug Report',
-    'Feedback',
-    'Other',
-]);
-const contactSchema = zod_1.z.object({
-    name: zod_1.z.string().min(2).max(100),
-    email: zod_1.z.string().email(),
-    company: zod_1.z.string().max(120).optional().or(zod_1.z.literal('')),
-    phoneCountry: zod_1.z.string().max(2).optional().or(zod_1.z.literal('')),
-    phoneCode: zod_1.z.string().max(6).optional().or(zod_1.z.literal('')),
-    phoneNumber: zod_1.z.string().max(32).optional().or(zod_1.z.literal('')),
-    purpose: PurposeEnum,
-    subject: zod_1.z.string().max(140).optional().or(zod_1.z.literal('')),
-    message: zod_1.z.string().min(50).max(3000),
-    walletAddress: zod_1.z
-        .string()
-        .regex(/^0x[a-fA-F0-9]{40}$/)
-        .optional()
-        .or(zod_1.z.literal('')),
-    agreePolicy: zod_1.z.literal(true),
-    human: zod_1.z.boolean().optional(),
-    cfTurnstileToken: zod_1.z.string().optional(),
-});
-function suggestSubject(purpose) {
-    switch (purpose) {
-        case 'Partnership':
-            return 'Partnership inquiry';
-        case 'Support':
-            return 'Support request';
-        case 'Bug Report':
-            return 'Bug report';
-        case 'Feedback':
-            return 'User feedback';
-        case 'General':
-            return 'General inquiry';
-        case 'Other':
-        default:
-            return 'Contact request';
-    }
-}
-async function verifyHuman(token, fallbackHuman) {
-    const secret = process.env.TURNSTILE_SECRET;
-    if (secret && token) {
-        try {
-            const resp = await (0, node_fetch_1.default)('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ secret, response: token }),
-            });
-            const data = (await resp.json());
-            return !!data?.success;
-        }
-        catch {
-            return false;
-        }
-    }
-    // fallback to checkbox
-    return !!fallbackHuman;
-}
-async function verifyTurnstile(token, secretOverride) {
-    const secret = secretOverride || process.env.TURNSTILE_SECRET;
-    // If Turnstile is not configured, allow (dev mode)
-    if (!secret)
-        return true;
-    // If configured, require a token
-    if (!token)
-        return false;
-    try {
-        const resp = await (0, node_fetch_1.default)('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ secret, response: token }),
-        });
-        const data = (await resp.json());
-        return !!data?.success;
-    }
-    catch {
-        return false;
-    }
-}
-function makeTransport() {
-    const host = process.env.SMTP_HOST;
-    const port = Number(process.env.SMTP_PORT || '587');
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
-    if (!host || !user || !pass) {
-        console.warn('SMTP not fully configured. Set SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS');
-    }
+// Email configuration
+const createEmailTransporter = () => {
     return nodemailer_1.default.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: user && pass ? { user, pass } : undefined,
+        service: 'gmail',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        }
     });
-}
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
-app.post('/api/ping', (_req, res) => res.json({ ok: true }));
-app.get('/api/ping', (_req, res) => res.json({ ok: true }));
-// Claim flow helper: verify Turnstile token directly
-app.post('/api/claim/turnstile-verify', express_1.default.json(), async (req, res) => {
-    try {
-        const token = req.body?.token;
-        const ok = await verifyTurnstile(token, process.env.TURNSTILE_SECRET_CLAIM);
-        return res.json({ ok });
-    }
-    catch {
-        return res.status(500).json({ ok: false });
-    }
+};
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// CSRF token generation
+const generateCSRF = () => (0, crypto_1.randomBytes)(32).toString('hex');
+const csrfTokens = new Set();
+// Session store (in production, use Redis or similar)
+const sessions = new Map();
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({
+        ok: true,
+        timestamp: new Date().toISOString(),
+        message: 'Contact Us API is running',
+        features: ['contact_form', 'file_uploads', 'admin_panel']
+    });
 });
-// Claim event logging (used by Claim UI)
-app.post('/api/claim/log', express_1.default.json(), async (req, res) => {
-    try {
-        const prisma = (0, db_1.getDb)();
-        const body = req.body || {};
-        const item = await prisma.claimEvent.create({
-            data: {
-                type: String(body.type || 'other'),
-                address: body.address || null,
-                chainId: body.chainId != null ? Number(body.chainId) : null,
-                contract: body.contract || null,
-                txHash: body.txHash || null,
-                amount: body.amount != null ? String(body.amount) : null,
-                status: body.status || null,
-                payload: body && Object.keys(body).length ? JSON.stringify(body) : null,
-                ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || undefined,
-                userAgent: req.headers['user-agent'],
-            },
-        });
-        res.json({ ok: true, id: item.id });
-    }
-    catch (e) {
-        res.status(500).json({ ok: false });
-    }
+// Also keep /api/health for backwards compatibility
+app.get('/api/health', (req, res) => {
+    res.json({
+        ok: true,
+        timestamp: new Date().toISOString(),
+        message: 'Contact Us API is running',
+        features: ['contact_form', 'file_uploads', 'admin_panel']
+    });
 });
-// Claim eligibility (hybrid: merkle or voucher)
-app.get('/api/claim/eligibility', async (req, res) => {
-    try {
-        const addressRaw = String(req.query.address || '').toLowerCase();
-        if (!/^0x[0-9a-f]{40}$/i.test(addressRaw))
-            return res.json({ method: 'none' });
-        const dir = process.env.CLAIM_DATA_DIR || path_1.default.join(process.cwd(), 'public', 'claim-data');
-        const fp = path_1.default.join(dir, 'eligibility.json');
-        if (!fs_1.default.existsSync(fp))
-            return res.json({ method: 'none' });
-        const map = JSON.parse(fs_1.default.readFileSync(fp, 'utf8'));
-        const e = map[addressRaw] || map[addressRaw.toLowerCase()] || map['*'];
-        if (!e)
-            return res.json({ method: 'none' });
-        return res.json(e);
+// CSRF endpoint
+app.get('/api/contact/csrf', (req, res) => {
+    const token = generateCSRF();
+    csrfTokens.add(token);
+    // Clean up old tokens (keep last 100)
+    if (csrfTokens.size > 100) {
+        const tokensArray = Array.from(csrfTokens);
+        csrfTokens.clear();
+        tokensArray.slice(-50).forEach(t => csrfTokens.add(t));
     }
-    catch {
-        return res.json({ method: 'none' });
-    }
-});
-// Compatibility endpoints expected by the existing frontend antiSpam util
-app.get('/api/contact/csrf', (_req, res) => {
-    const token = Math.random().toString(36).slice(2);
     res.json({ token });
 });
-app.get('/api/contact/timestamp', (_req, res) => {
-    const issuedAt = Date.now();
-    const issuedSig = 'dev';
-    res.json({ issuedAt, issuedSig });
+// Timestamp endpoint
+app.get('/api/contact/timestamp', (req, res) => {
+    const now = Date.now();
+    const signature = (0, crypto_2.createHash)('sha256')
+        .update(`${now}-${process.env.TIMESTAMP_SECRET || 'fallback-secret'}`)
+        .digest('hex');
+    res.json({
+        issuedAt: now,
+        issuedSig: signature
+    });
 });
-app.get('/api/contact/captcha', (_req, res) => {
-    // If Turnstile is configured, advertise Turnstile so the frontend renders the widget
-    if (process.env.TURNSTILE_SECRET) {
-        return res.json({ type: 'turnstile', expiresAt: new Date(Date.now() + 5 * 60000).toISOString() });
+// Turnstile verification function
+async function verifyTurnstile(token, secret) {
+    if (!secret || !token) {
+        return false; // Fail if not configured
     }
-    // Fallback: trivial placeholder
-    res.json({ type: 'image', nonce: Math.random().toString(36).slice(2), expiresAt: new Date(Date.now() + 5 * 60000).toISOString() });
-});
-app.post('/contact', upload.single('file'), async (req, res) => {
     try {
-        const fieldsRaw = {
-            ...req.body,
-            purpose: req.body?.purpose,
-            agreePolicy: req.body?.agreePolicy === 'true' || req.body?.agreePolicy === true,
-            human: req.body?.human === 'true' || req.body?.human === true,
-        };
-        const parsed = contactSchema.safeParse(fieldsRaw);
-        if (!parsed.success) {
-            return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
+        const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                secret: secret,
+                response: token
+            })
+        });
+        const data = await response.json();
+        return data.success === true;
+    }
+    catch (error) {
+        console.error('Turnstile verification error:', error);
+        return false;
+    }
+}
+// Contact form captcha endpoint
+app.get('/api/contact/captcha', (req, res) => {
+    res.json({
+        type: 'turnstile',
+        sitekey: process.env.TURNSTILE_SITEKEY_CONTACT || '0x4AAAAAAB-gWCHhZ_cF2uz9'
+    });
+});
+// Claims form captcha endpoint
+app.get('/api/claims/captcha', (req, res) => {
+    res.json({
+        type: 'turnstile',
+        sitekey: process.env.TURNSTILE_SITEKEY_CLAIMS || '0x4AAAAAAB-gYLApRvUyjKDX'
+    });
+});
+// Main contact form submission
+app.post('/api/contact', upload.single('file'), async (req, res) => {
+    const contactRequestId = `req_${(0, crypto_1.randomBytes)(8).toString('hex')}`;
+    console.log(`📝 [${contactRequestId}] Contact form submission started`);
+    try {
+        // CSRF validation
+        const csrfToken = req.headers['x-csrf-token'];
+        if (!csrfToken || !csrfTokens.has(csrfToken)) {
+            console.log(`❌ [${contactRequestId}] CSRF validation failed`);
+            return res.status(403).json({ ok: false, error: 'invalid_csrf' });
         }
-        const data = parsed.data;
-        // Verify human
-        const humanOk = await verifyHuman(data.cfTurnstileToken, data.human);
-        if (!humanOk)
-            return res.status(400).json({ ok: false, error: 'Human check failed' });
-        // Subject
-        const subject = data.subject && data.subject.trim().length > 0 ? data.subject : suggestSubject(data.purpose);
-        // Persist submission
-        const prisma = (0, db_1.getDb)();
-        let savedPath;
-        let savedName;
-        let savedMime;
-        const uploadDir = path_1.default.join(process.cwd(), 'uploads');
-        try {
-            if (!fs_1.default.existsSync(uploadDir))
-                fs_1.default.mkdirSync(uploadDir, { recursive: true });
+        // Extract form data
+        const { locale = 'en', name, email, company = '', phoneCountry, phoneDialCode, phoneNational, phoneE164, purpose, otherReason, subject, message, walletAddress, website = '', // honeypot
+        issuedAt, issuedSig, captcha, turnstileToken } = req.body;
+        const contactTurnstileToken = turnstileToken ||
+            ((captcha && typeof captcha === 'object' && captcha.type === 'turnstile') ? captcha.token : undefined);
+        if (process.env.TURNSTILE_SECRET_CONTACT) {
+            if (!contactTurnstileToken) {
+                console.log(`❌ [${contactRequestId}] Missing Turnstile token`);
+                return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+            }
+            const turnstileValid = await verifyTurnstile(contactTurnstileToken, process.env.TURNSTILE_SECRET_CONTACT);
+            if (!turnstileValid) {
+                console.log(`❌ [${contactRequestId}] Turnstile verification failed`);
+                return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+            }
+            console.log(`✅ [${contactRequestId}] Turnstile verification successful`);
         }
-        catch { }
-        const file = req.file;
-        if (file && file.buffer) {
-            const fname = `${Date.now()}_${file.originalname}`.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const fpath = path_1.default.join(uploadDir, fname);
-            fs_1.default.writeFileSync(fpath, file.buffer);
-            savedPath = fpath;
-            savedName = file.originalname;
-            savedMime = file.mimetype;
+        // Honeypot check
+        if (website) {
+            return res.status(400).json({ ok: false, error: 'spam_detected' });
         }
-        await prisma.submission.create({
+        // Validation
+        if (!EMAIL_RE.test(email)) {
+            return res.status(400).json({ ok: false, error: 'invalid_email' });
+        }
+        if (!name || name.trim().length < 2) {
+            return res.status(400).json({ ok: false, error: 'invalid_name' });
+        }
+        if (!message || message.trim().length < 10) {
+            return res.status(400).json({ ok: false, error: 'invalid_message' });
+        }
+        // Generate request ID
+        const dbRequestId = (0, crypto_1.randomBytes)(8).toString('hex').toUpperCase();
+        // Save to database
+        const db = await (0, db_js_1.getDb)();
+        const submission = await db.contactSubmission.create({
             data: {
-                name: data.name,
-                email: data.email,
-                company: data.company || null,
-                phoneDialCode: data.phoneCode || null,
-                phoneNational: data.phoneNumber || null,
-                purpose: data.purpose,
-                subject,
-                message: data.message,
-                walletAddress: data.walletAddress || null,
-                attachmentPath: savedPath,
-                attachmentMime: savedMime,
-                attachmentName: savedName,
-                ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || undefined,
-                userAgent: req.headers['user-agent'],
+                requestId: dbRequestId,
+                locale,
+                name: name.trim(),
+                email: email.toLowerCase().trim(),
+                company: company.trim(),
+                phoneCountry,
+                phoneDialCode,
+                phoneNational,
+                phoneE164,
+                purpose,
+                otherReason: purpose === 'Other' ? otherReason?.trim() : null,
+                subject: subject.trim(),
+                message: message.trim(),
+                walletAddress: walletAddress?.trim(),
+                fileName: req.file?.originalname,
+                fileSize: req.file?.size,
+                fileMimeType: req.file?.mimetype,
+                ip: req.ip,
+                userAgent: req.get('User-Agent'),
+                status: 'new'
             }
         });
-        // Compose email
-        const transporter = makeTransport();
-        const from = process.env.MAIL_FROM || 'no-reply@example.com';
-        const to = process.env.MAIL_TO || 'support@example.com';
-        const lines = [
-            `Name: ${data.name}`,
-            `Email: ${data.email}`,
-            data.company ? `Company: ${data.company}` : undefined,
-            data.phoneCode || data.phoneNumber
-                ? `Phone: ${data.phoneCode || ''} ${data.phoneNumber || ''}`
-                : undefined,
-            `Purpose: ${data.purpose}`,
-            data.walletAddress ? `Wallet: ${data.walletAddress}` : undefined,
-            '',
-            'Message:',
-            data.message,
-        ]
-            .filter(Boolean)
-            .join('\n');
-        const attachments = [];
-        if (file && file.buffer) {
-            attachments.push({ filename: file.originalname, content: file.buffer, contentType: file.mimetype });
-        }
-        await transporter.sendMail({ from, to, subject: `[Contact] ${subject}`, text: lines, attachments });
-        return res.json({ ok: true });
-    }
-    catch (err) {
-        console.error(err);
-        return res.status(500).json({ ok: false, error: 'ServerError' });
-    }
-});
-// Newsletter subscription endpoint
-app.post('/api/newsletter/subscribe', async (req, res) => {
-    try {
-        const body = req.body || {};
-        const schema = zod_1.z.object({
-            email: zod_1.z.string().email(),
-            turnstileToken: zod_1.z.string().optional(),
-            source: zod_1.z.string().optional(),
-        });
-        const parsed = schema.safeParse(body);
-        if (!parsed.success) {
-            return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
-        }
-        const data = parsed.data;
-        // Verify Turnstile if token provided
-        const turnstileOk = await verifyTurnstile(data.turnstileToken);
-        if (!turnstileOk) {
-            return res.status(400).json({ ok: false, error: 'Human verification failed' });
-        }
-        // Save subscription to database
-        const prisma = (0, db_1.getDb)();
-        try {
-            await prisma.newsletterSubscription.create({
-                data: {
-                    email: data.email,
-                    source: data.source || 'unknown',
-                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || undefined,
-                    userAgent: req.headers['user-agent'],
-                }
-            });
-        }
-        catch (dbError) {
-            // Handle duplicate email gracefully
-            if (dbError.code === 'P2002') {
-                return res.status(400).json({ ok: false, error: 'Email already subscribed' });
-            }
-            throw dbError;
-        }
         // Send notification email to admin
         try {
-            const from = process.env.MAIL_FROM || 'no-reply@redmugsy.com';
-            const to = process.env.MAIL_TO || 'contact@redmugsy.com';
-            const smtpConfigured = !!(process.env.SMTP_HOST && (process.env.SMTP_USER || process.env.SMTP_PASS));
-            if (smtpConfigured) {
-                const transporter = makeTransport();
-                await transporter.sendMail({
-                    from,
-                    to,
-                    subject: '[Red Mugsy] New Newsletter Subscription',
-                    text: `New newsletter subscription:\n\nEmail: ${data.email}\nSource: ${data.source || 'unknown'}\nTimestamp: ${new Date().toISOString()}`
-                });
-            }
+            const transporter = createEmailTransporter();
+            const adminEmail = {
+                from: process.env.MAIL_FROM || 'noreply@redmugsy.com',
+                to: process.env.MAIL_TO || 'support@redmugsy.com',
+                subject: `New Contact Form: ${subject} [${dbRequestId}]`,
+                html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #333; margin: 0;">New Contact Form Submission</h2>
+              <p style="color: #666; margin: 5px 0 0 0;">Request ID: <strong>${dbRequestId}</strong></p>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Name:</td><td style="padding: 8px;">${name}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Email:</td><td style="padding: 8px;">${email}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Company:</td><td style="padding: 8px;">${company}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Phone:</td><td style="padding: 8px;">${phoneE164}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Purpose:</td><td style="padding: 8px;">${purpose}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Subject:</td><td style="padding: 8px;">${subject}</td></tr>
+              <tr><td style="padding: 8px; background: #f8f9fa; font-weight: bold;">Wallet:</td><td style="padding: 8px;">${walletAddress}</td></tr>
+            </table>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0;">Message:</h3>
+              <p style="white-space: pre-wrap;">${message}</p>
+            </div>
+            
+            ${req.file ? `<p><strong>Attachment:</strong> ${req.file.originalname} (${Math.round(req.file.size / 1024)}KB)</p>` : ''}
+          </div>
+        `
+            };
+            await transporter.sendMail(adminEmail);
+            console.log('Admin notification sent for:', dbRequestId);
         }
         catch (emailError) {
-            console.warn('Failed to send newsletter notification email:', emailError);
-            // Don't fail the subscription if email fails
+            console.error('Failed to send admin notification:', emailError);
+            // Don't fail the submission if email fails
         }
-        return res.json({ ok: true, message: 'Successfully subscribed to newsletter' });
-    }
-    catch (err) {
-        console.error('Newsletter subscription error:', err);
-        return res.status(500).json({ ok: false, error: 'ServerError' });
-    }
-});
-// JSON submission path used by current frontend (no file upload)
-app.post('/api/contact', async (req, res) => {
-    try {
-        if (process.env.MOCK_CONTACT === '1') {
-            const requestId = Math.random().toString(36).slice(2, 10);
-            return res.json({ ok: true, requestId, mocked: true });
-        }
-        const body = req.body || {};
-        const jsonSchema = zod_1.z.object({
-            locale: zod_1.z.string().optional(),
-            name: zod_1.z.string().min(2).max(100),
-            email: zod_1.z.string().email(),
-            company: zod_1.z.string().max(120).optional().or(zod_1.z.literal('')),
-            phoneCountry: zod_1.z.string().max(3).optional().or(zod_1.z.literal('')),
-            phoneDialCode: zod_1.z.string().max(8).optional().or(zod_1.z.literal('')),
-            phoneNational: zod_1.z.string().max(32).optional().or(zod_1.z.literal('')),
-            phoneE164: zod_1.z.string().max(32).optional().or(zod_1.z.literal('')),
-            purpose: zod_1.z.string().min(2).max(64),
-            otherReason: zod_1.z.string().max(200).optional().or(zod_1.z.literal('')),
-            subject: zod_1.z.string().max(140).optional().or(zod_1.z.literal('')),
-            message: zod_1.z.string().min(50).max(3000),
-            walletAddress: zod_1.z.string().optional().or(zod_1.z.literal('')),
-            issuedAt: zod_1.z.number().optional(),
-            issuedSig: zod_1.z.string().optional(),
-            website: zod_1.z.string().optional(), // honeypot
-            captcha: zod_1.z.any().optional(),
+        res.json({
+            ok: true,
+            requestId: dbRequestId,
+            message: 'Your message has been submitted successfully. We will respond within 2-3 business days.'
         });
-        const parsed = jsonSchema.safeParse(body);
-        if (!parsed.success)
-            return res.status(400).json({ ok: false, error: 'ValidationError', details: parsed.error.flatten() });
-        const data = parsed.data;
-        if (data.website)
-            return res.status(400).json({ ok: false, error: 'Spam detected' });
-        // Optional Turnstile verification if token is present
-        const turnstileToken = data?.captcha?.type === 'turnstile' ? data.captcha.token : undefined;
-        const turnstileOk = await verifyTurnstile(turnstileToken);
-        if (!turnstileOk)
-            return res.status(400).json({ ok: false, error: 'Human check failed' });
-        const subject = data.subject && data.subject.trim().length > 0 ? data.subject : suggestSubject('General');
-        const lines = [
-            `Name: ${data.name}`,
-            `Email: ${data.email}`,
-            data.company ? `Company: ${data.company}` : undefined,
-            (data.phoneE164 || data.phoneDialCode || data.phoneNational)
-                ? `Phone: ${data.phoneE164 || `${data.phoneDialCode || ''} ${data.phoneNational || ''}`}`
-                : undefined,
-            `Purpose: ${data.purpose}${data.otherReason ? ` (${data.otherReason})` : ''}`,
-            data.walletAddress ? `Wallet: ${data.walletAddress}` : undefined,
-            '',
-            'Message:',
-            data.message,
-        ].filter(Boolean).join('\n');
-        // Persist to DB
-        const prisma = (0, db_1.getDb)();
-        await prisma.submission.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                company: data.company || null,
-                phoneE164: data.phoneE164 || null,
-                phoneDialCode: data.phoneDialCode || null,
-                phoneNational: data.phoneNational || null,
-                purpose: data.purpose,
-                subject,
-                message: data.message,
-                walletAddress: data.walletAddress || null,
-                ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || undefined,
-                userAgent: req.headers['user-agent'],
-            }
+    }
+    catch (error) {
+        console.error('Contact form error:', error);
+        res.status(500).json({
+            ok: false,
+            error: 'submission_failed',
+            message: 'Please try again later'
         });
-        const from = process.env.MAIL_FROM || 'no-reply@example.com';
-        const to = process.env.MAIL_TO || 'support@example.com';
-        const smtpConfigured = !!(process.env.SMTP_HOST && (process.env.SMTP_USER || process.env.SMTP_PASS));
-        if (smtpConfigured) {
-            const transporter = makeTransport();
-            await transporter.sendMail({ from, to, subject: `[Contact] ${subject}`, text: lines });
-        }
-        const requestId = Math.random().toString(36).slice(2, 10);
-        return res.json({ ok: true, requestId });
-    }
-    catch (err) {
-        try {
-            const dir = path_1.default.join(process.cwd(), 'tmp');
-            if (!fs_1.default.existsSync(dir))
-                fs_1.default.mkdirSync(dir);
-            const fp = path_1.default.join(dir, 'server-error.log');
-            const msg = `[${new Date().toISOString()}] /api/contact error: ${String(err?.message || err)}\n${err?.stack || ''}\n`;
-            fs_1.default.appendFileSync(fp, msg);
-        }
-        catch { }
-        console.error(err);
-        return res.status(500).json({ ok: false, error: 'ServerError' });
     }
 });
-const port = Number(process.env.PORT || 8787);
-app.listen(port, () => {
-    console.log(`Contact API listening on http://localhost:${port}`);
-});
-// Global error handler
-app.use((err, _req, res, _next) => {
+// Admin endpoint to view submissions
+app.get('/api/admin/submissions', async (req, res) => {
     try {
-        const dir = path_1.default.join(process.cwd(), 'tmp');
-        if (!fs_1.default.existsSync(dir))
-            fs_1.default.mkdirSync(dir);
-        const fp = path_1.default.join(dir, 'server-error.log');
-        const msg = `[${new Date().toISOString()}] Global error: ${String(err?.message || err)}\n${err?.stack || ''}\n`;
-        fs_1.default.appendFileSync(fp, msg);
-    }
-    catch { }
-    res.status(500).json({ ok: false, error: 'ServerError' });
-});
-process.on('unhandledRejection', (reason) => {
-    try {
-        const dir = path_1.default.join(process.cwd(), 'tmp');
-        if (!fs_1.default.existsSync(dir))
-            fs_1.default.mkdirSync(dir);
-        const fp = path_1.default.join(dir, 'server-error.log');
-        const msg = `[${new Date().toISOString()}] UnhandledRejection: ${String(reason?.message || reason)}\n${reason?.stack || ''}\n`;
-        fs_1.default.appendFileSync(fp, msg);
-    }
-    catch { }
-});
-process.on('uncaughtException', (err) => {
-    try {
-        const dir = path_1.default.join(process.cwd(), 'tmp');
-        if (!fs_1.default.existsSync(dir))
-            fs_1.default.mkdirSync(dir);
-        const fp = path_1.default.join(dir, 'server-error.log');
-        const msg = `[${new Date().toISOString()}] UncaughtException: ${String(err?.message || err)}\n${err?.stack || ''}\n`;
-        fs_1.default.appendFileSync(fp, msg);
-    }
-    catch { }
-});
-// --- OAuth2-style admin auth and APIs ---
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'devsecret';
-async function ensureAdminSeed() {
-    const prisma = (0, db_1.getDb)();
-    const count = await prisma.adminUser.count();
-    if (count === 0 && process.env.ADMIN_USER && process.env.ADMIN_PASS) {
-        const hash = await bcryptjs_1.default.hash(process.env.ADMIN_PASS, 10);
-        await prisma.adminUser.create({ data: { username: process.env.ADMIN_USER, passwordHash: hash, role: 'MASTER', fullName: process.env.ADMIN_NAME || 'Admin' } });
-        console.log('Admin user created:', process.env.ADMIN_USER);
-    }
-}
-ensureAdminSeed().catch(() => { });
-app.post('/oauth/token', express_1.default.urlencoded({ extended: true }), async (req, res) => {
-    try {
-        const grant = (req.body?.grant_type || '').toString();
-        if (grant !== 'password')
-            return res.status(400).json({ error: 'unsupported_grant_type' });
-        const username = (req.body?.username || '').toString();
-        const password = (req.body?.password || '').toString();
-        const prisma = (0, db_1.getDb)();
-        const user = await prisma.adminUser.findUnique({ where: { username } });
-        if (!user) {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-            console.warn(`[auth] invalid_grant (no user) username=${username} ip=${ip}`);
-            return res.status(400).json({ error: 'invalid_grant' });
-        }
-        const ok = await bcryptjs_1.default.compare(password, user.passwordHash);
-        if (!ok) {
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-            console.warn(`[auth] invalid_grant (bad password) username=${username} ip=${ip}`);
-            return res.status(400).json({ error: 'invalid_grant' });
-        }
-        const role = user.role || 'MASTER';
-        const access_token = jsonwebtoken_1.default.sign({ sub: user.id, username, role }, JWT_SECRET, { expiresIn: '1h' });
-        return res.json({ token_type: 'Bearer', access_token, expires_in: 3600, role });
-    }
-    catch (e) {
-        return res.status(500).json({ error: 'server_error' });
-    }
-});
-function authRequired(req, res, next) {
-    try {
-        const header = req.headers['authorization'] || '';
-        const m = /^Bearer\s+(.+)$/i.exec(header);
-        if (!m)
-            return res.status(401).json({ error: 'unauthorized' });
-        const token = m[1];
-        const payload = jsonwebtoken_1.default.verify(token, JWT_SECRET);
-        req.admin = { id: payload.sub, username: payload.username, role: payload.role || 'MASTER' };
-        next();
-    }
-    catch {
-        return res.status(401).json({ error: 'unauthorized' });
-    }
-}
-function requireRole(roles) {
-    return function (req, res, next) {
-        const r = req.admin?.role || 'MASTER';
-        if (!roles.includes(r))
-            return res.status(403).json({ error: 'forbidden' });
-        next();
-    };
-}
-// Current user info
-app.get('/api/admin/me', authRequired, async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const me = await prisma.adminUser.findUnique({ where: { id: req.admin.id }, select: { id: true, username: true, role: true, createdAt: true } });
-    if (!me)
-        return res.status(404).json({ error: 'not_found' });
-    res.json(me);
-});
-app.get('/api/admin/submissions', authRequired, requireRole(['MASTER', 'ENGAGEMENT']), async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const take = Math.min(Number(req.query.take || 50), 200);
-    const skip = Math.max(Number(req.query.skip || 0), 0);
-    const q = req.query.q?.trim() || '';
-    const sortByRaw = req.query.sortBy?.toLowerCase() || 'date';
-    const sortDirRaw = req.query.sortDir?.toLowerCase() || 'desc';
-    const sortDir = sortDirRaw === 'asc' ? 'asc' : 'desc';
-    const sortField = (() => {
-        switch (sortByRaw) {
-            case 'name': return 'name';
-            case 'email': return 'email';
-            case 'purpose': return 'purpose';
-            case 'subject': return 'subject';
-            case 'date':
-            default: return 'createdAt';
-        }
-    })();
-    // Build where clause
-    let where = undefined;
-    if (q) {
-        // If q looks like YYYY-MM-DD, filter by that date range
-        const m = /^\d{4}-\d{2}-\d{2}$/.exec(q);
-        if (m) {
-            const start = new Date(q + 'T00:00:00.000Z');
-            const end = new Date(new Date(q + 'T00:00:00.000Z').getTime() + 24 * 60 * 60 * 1000);
-            where = { createdAt: { gte: start, lt: end } };
-        }
-        else {
-            where = {
-                OR: [
-                    { name: { contains: q, mode: 'insensitive' } },
-                    { email: { contains: q, mode: 'insensitive' } },
-                    { purpose: { contains: q, mode: 'insensitive' } },
-                    { subject: { contains: q, mode: 'insensitive' } },
-                ],
-            };
-        }
-    }
-    const [items, total] = await Promise.all([
-        prisma.submission.findMany({ where, orderBy: { [sortField]: sortDir }, take, skip }),
-        prisma.submission.count({ where }),
-    ]);
-    res.json({ total, items });
-});
-app.get('/api/admin/claims', authRequired, requireRole(['MASTER', 'CLAIM_MANAGER']), async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const take = Math.min(Number(req.query.take || 50), 200);
-    const skip = Math.max(Number(req.query.skip || 0), 0);
-    const q = req.query.q?.trim() || '';
-    const sortByRaw = req.query.sortBy?.toLowerCase() || 'date';
-    const sortDirRaw = req.query.sortDir?.toLowerCase() || 'desc';
-    const sortDir = sortDirRaw === 'asc' ? 'asc' : 'desc';
-    const sortField = (() => {
-        switch (sortByRaw) {
-            case 'address': return 'address';
-            case 'chain': return 'chainId';
-            case 'contract': return 'contract';
-            case 'type': return 'type';
-            case 'status': return 'status';
-            case 'amount': return 'amount';
-            case 'date':
-            default: return 'createdAt';
-        }
-    })();
-    let where = undefined;
-    if (q) {
-        const m = /^\d{4}-\d{2}-\d{2}$/.exec(q);
-        if (m) {
-            const start = new Date(q + 'T00:00:00.000Z');
-            const end = new Date(new Date(q + 'T00:00:00.000Z').getTime() + 24 * 60 * 60 * 1000);
-            where = { createdAt: { gte: start, lt: end } };
-        }
-        else {
-            where = {
-                OR: [
-                    { address: { contains: q, mode: 'insensitive' } },
-                    { contract: { contains: q, mode: 'insensitive' } },
-                    { type: { contains: q, mode: 'insensitive' } },
-                    { status: { contains: q, mode: 'insensitive' } },
-                    { txHash: { contains: q, mode: 'insensitive' } },
-                ],
-            };
-        }
-    }
-    const [items, total] = await Promise.all([
-        prisma.claimEvent.findMany({ where, orderBy: { [sortField]: sortDir }, take, skip }),
-        prisma.claimEvent.count({ where }),
-    ]);
-    res.json({ total, items });
-});
-app.get('/api/admin/claims/:id', authRequired, requireRole(['MASTER', 'CLAIM_MANAGER']), async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const item = await prisma.claimEvent.findUnique({ where: { id: String(req.params.id) } });
-    if (!item)
-        return res.status(404).json({ error: 'not_found' });
-    res.json(item);
-});
-app.get('/api/admin/submissions/:id', authRequired, requireRole(['MASTER', 'ENGAGEMENT']), async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const item = await prisma.submission.findUnique({ where: { id: String(req.params.id) } });
-    if (!item)
-        return res.status(404).json({ error: 'not_found' });
-    res.json(item);
-});
-app.get('/api/admin/attachments/:id', authRequired, requireRole(['MASTER', 'ENGAGEMENT']), async (req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const item = await prisma.submission.findUnique({ where: { id: String(req.params.id) } });
-    if (!item || !item.attachmentPath)
-        return res.status(404).end();
-    res.setHeader('Content-Type', item.attachmentMime || 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="${item.attachmentName || 'file'}"`);
-    fs_1.default.createReadStream(item.attachmentPath).pipe(res);
-});
-// User management (MASTER only)
-app.get('/api/admin/users', authRequired, requireRole(['MASTER']), async (_req, res) => {
-    const prisma = (0, db_1.getDb)();
-    const users = await prisma.adminUser.findMany({ select: { id: true, username: true, fullName: true, role: true, createdAt: true } });
-    res.json({ items: users });
-});
-app.post('/api/admin/users', authRequired, requireRole(['MASTER']), express_1.default.json(), async (req, res) => {
-    try {
-        const username = String(req.body?.username || '').trim();
-        const password = String(req.body?.password || '').trim();
-        const role = String(req.body?.role || 'ENGAGEMENT').toUpperCase();
-        const fullName = (req.body?.fullName ? String(req.body.fullName) : undefined);
-        if (!username || !password)
-            return res.status(400).json({ error: 'missing_fields' });
-        if (!['MASTER', 'ENGAGEMENT', 'CLAIM_MANAGER'].includes(role))
-            return res.status(400).json({ error: 'invalid_role' });
-        const prisma = (0, db_1.getDb)();
-        const hash = await bcryptjs_1.default.hash(password, 10);
-        const user = await prisma.adminUser.create({ data: { username, passwordHash: hash, role, fullName } });
-        // Send welcome email
-        try {
-            const transport = makeTransport();
-            const admin = await prisma.adminUser.findUnique({ where: { id: req.admin.id } });
-            const adminName = admin?.fullName || admin?.username || 'Admin';
-            const toName = user.fullName || user.username;
-            const portalUrl = process.env.ADMIN_PORTAL_URL || `${req.protocol}://${req.get('host')}/admin/`;
-            const text = `Welcome ${toName} to Red Mugsy squad. The Admin ${adminName} has added you to the list of users.
-
-You have been assigned the profile of ${role === 'MASTER' ? 'Master' : role === 'ENGAGEMENT' ? 'Engagement' : 'Claim Manager'}.
-
-Your access credentials are:
-User Name: ${user.username}
-Password: ${password}
-
-To access the portal, click on the link below
-${portalUrl}
-
-We wish you luck down the rabbit hole :-).
-
-Regards,
-
-Red Mugsy Squad`;
-            await transport.sendMail({
-                to: user.username,
-                from: process.env.MAIL_FROM || 'no-reply@redmugsy.com',
-                subject: 'Your Red Mugsy Admin Access',
-                text,
+        const { type = 'contact', take = '100', skip = '0', q = '', sortBy = 'createdAt', sortDir = 'desc' } = req.query;
+        const takeNum = Math.min(parseInt(take) || 100, 100);
+        const skipNum = parseInt(skip) || 0;
+        const db = await (0, db_js_1.getDb)();
+        const where = q ? {
+            OR: [
+                { name: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+                { subject: { contains: q, mode: 'insensitive' } },
+                { requestId: { contains: q, mode: 'insensitive' } }
+            ]
+        } : {};
+        if (type === 'claims') {
+            // Future claims functionality
+            const claims = await db.claimSubmission.findMany({
+                where,
+                orderBy: { [sortBy]: sortDir },
+                take: takeNum,
+                skip: skipNum
+            });
+            const total = await db.claimSubmission.count({ where });
+            return res.json({
+                ok: true,
+                items: claims.map(claim => ({
+                    id: claim.id,
+                    requestId: claim.requestId,
+                    name: claim.name,
+                    email: claim.email,
+                    claimType: claim.claimType,
+                    status: claim.status,
+                    createdAt: claim.createdAt
+                })),
+                total
             });
         }
-        catch (e) {
-            console.warn('Send welcome mail failed:', e?.message || e);
-        }
-        res.json({ ok: true, id: user.id });
+        // Default: contact submissions
+        const submissions = await db.contactSubmission.findMany({
+            where,
+            orderBy: { [sortBy]: sortDir },
+            take: takeNum,
+            skip: skipNum
+        });
+        const total = await db.contactSubmission.count({ where });
+        const safeSubmissions = submissions.map(sub => ({
+            id: sub.id,
+            requestId: sub.requestId,
+            name: sub.name,
+            email: sub.email,
+            company: sub.company,
+            purpose: sub.purpose,
+            subject: sub.subject,
+            status: sub.status,
+            createdAt: sub.createdAt,
+            hasAttachment: !!sub.fileName
+        }));
+        res.json({
+            ok: true,
+            items: safeSubmissions,
+            total
+        });
     }
-    catch (e) {
-        res.status(500).json({ error: 'server_error' });
+    catch (error) {
+        console.error('Admin submissions error:', error);
+        res.status(500).json({ ok: false, error: 'fetch_failed' });
     }
 });
-app.patch('/api/admin/users/:id', authRequired, requireRole(['MASTER']), express_1.default.json(), async (req, res) => {
+// Basic claims endpoint for future use
+app.post('/api/claims', upload.array('images', 5), async (req, res) => {
     try {
-        const id = String(req.params.id);
-        const data = {};
-        if (req.body?.username)
-            data.username = String(req.body.username);
-        if (req.body?.fullName != null)
-            data.fullName = req.body.fullName ? String(req.body.fullName) : null;
-        if (req.body?.password)
-            data.passwordHash = await bcryptjs_1.default.hash(String(req.body.password), 10);
-        if (req.body?.role) {
-            const role = String(req.body.role).toUpperCase();
-            if (!['MASTER', 'ENGAGEMENT', 'CLAIM_MANAGER'].includes(role))
-                return res.status(400).json({ error: 'invalid_role' });
-            data.role = role;
+        const { name, email, claimType, productModel, purchaseDate, issueDescription, turnstileToken, captcha } = req.body;
+        if (!name || !email || !claimType || !issueDescription) {
+            return res.status(400).json({ ok: false, error: 'missing_required_fields' });
         }
-        const prisma = (0, db_1.getDb)();
-        const u = await prisma.adminUser.update({ where: { id }, data });
-        res.json({ ok: true, id: u.id });
+        const claimTurnstileToken = turnstileToken ||
+            ((captcha && typeof captcha === 'object' && captcha.type === 'turnstile') ? captcha.token : undefined);
+        if (process.env.TURNSTILE_SECRET_CLAIMS) {
+            if (!claimTurnstileToken) {
+                return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+            }
+            const turnstileValid = await verifyTurnstile(claimTurnstileToken, process.env.TURNSTILE_SECRET_CLAIMS);
+            if (!turnstileValid) {
+                return res.status(400).json({ ok: false, error: 'invalid_captcha' });
+            }
+        }
+        const claimRequestId = (0, crypto_1.randomBytes)(8).toString('hex').toUpperCase();
+        const images = req.files?.map(file => file.path) || [];
+        const db = await (0, db_js_1.getDb)();
+        const claim = await db.claimSubmission.create({
+            data: {
+                requestId: claimRequestId,
+                name: name.trim(),
+                email: email.toLowerCase().trim(),
+                claimType,
+                productModel: productModel?.trim(),
+                purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+                issueDescription: issueDescription.trim(),
+                images,
+                status: 'submitted'
+            }
+        });
+        res.json({
+            ok: true,
+            requestId: claimRequestId,
+            message: 'Claim submitted successfully. We will review and respond within 5-7 business days.'
+        });
     }
-    catch (e) {
-        res.status(500).json({ error: 'server_error' });
+    catch (error) {
+        console.error('Claims submission error:', error);
+        res.status(500).json({
+            ok: false,
+            error: 'submission_failed',
+            message: 'Please try again later'
+        });
     }
 });
-app.delete('/api/admin/users/:id', authRequired, requireRole(['MASTER']), async (req, res) => {
-    try {
-        const id = String(req.params.id);
-        const prisma = (0, db_1.getDb)();
-        await prisma.adminUser.delete({ where: { id } });
-        res.json({ ok: true });
-    }
-    catch (e) {
-        res.status(500).json({ error: 'server_error' });
-    }
+const PORT = process.env.PORT || 8787;
+// Ensure database table exists before starting server
+(0, ensure_table_js_1.ensureTableExists)().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Red Mugsy Contact API running on port ${PORT}`);
+        console.log('Features: Contact forms, file uploads, admin panel');
+        console.log('Database: Contact_us table verified and ready');
+    });
+}).catch(error => {
+    console.error('❌ Failed to ensure database table exists:', error);
+    console.error('🚨 Server startup aborted due to database issues');
+    process.exit(1);
 });
-// Minimal static admin UI (opt-in via ADMIN_UI_ENABLED=true)
-if (ADMIN_UI_ENABLED) {
-    app.use('/admin', express_1.default.static(path_1.default.join(process.cwd(), 'public', 'admin')));
-}

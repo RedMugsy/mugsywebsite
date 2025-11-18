@@ -11,6 +11,28 @@ import multer from 'multer';
 
 const app = express();
 
+const parseOrigins = (value?: string | null) =>
+  (value ?? '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+const DEFAULT_ALLOWED_ORIGINS: (string | RegExp)[] = [
+  'https://redmugsy.com',
+  'https://www.redmugsy.com',
+  'https://redmugsy.github.io',
+  'https://redmugsy.github.io/mugsywebsite',
+  /^https:\/\/.*\.github\.io$/,
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+const allowedOrigins: (string | RegExp)[] = [
+  ...parseOrigins(process.env.ALLOWED_ORIGINS),
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ...DEFAULT_ALLOWED_ORIGINS,
+];
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -30,14 +52,7 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    'https://redmugsy.com',
-    'https://redmugsy.github.io',
-    'https://redmugsy.github.io/mugsywebsite',
-    /^https:\/\/.*\.github\.io$/,  // Allow all GitHub Pages domains
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],

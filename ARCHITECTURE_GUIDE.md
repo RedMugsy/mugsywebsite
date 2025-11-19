@@ -48,16 +48,16 @@ This document explains the architecture of the `mugsywebsite` repository to help
 - **Database**: PostgreSQL with ContactSubmission and ClaimSubmission models
 - **✅ PRODUCTION READY** - Contact and Claims forms active
 
-### App 2: `Perfect Integrity` ✅ ACTIVE
-- **Purpose**: Handles Community Newsletter subscriptions with email verification
-- **Status**: Deployed and active on Railway
+### App 2: `Perfect Integrity` ⚠️ NEEDS REDEPLOYMENT
+- **Purpose**: Should handle Community Newsletter subscriptions with email verification
+- **Status**: Deployed but running wrong code (contact-api instead of perfect-integrity-api)
 - **Railway Project Name**: "Perfect Integrity"
+- **URL**: https://perfect-integrity-production.up.railway.app
 - **Location**: `/perfect-integrity-api/` directory in this repository
-- **Health Check**: https://web-production-8c2c8.up.railway.app/health
-- **Technology**: Node.js/TypeScript backend with email verification workflow
-- **Database**: PostgreSQL with NewsletterSubmission model
-- **Features**: Email verification, admin dashboard, community-branded emails
-- **✅ PRODUCTION READY** - Newsletter functionality active
+- **Issue**: Currently serving contact-api endpoints instead of newsletter endpoints
+- **Temporary Fix**: Community form routes through contact-api until proper deployment
+- **Database**: PostgreSQL with DATABASE_URL: postgresql://postgres:YMOWCleygGcjDuzqnPMgKZwIjFIxdpmp@postgres.railway.internal:5432/railway
+- **❌ NEEDS REDEPLOYMENT** - Newsletter functionality temporarily routed through contact-api
 
 ## 🎯 Current Development Status
 

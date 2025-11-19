@@ -464,7 +464,7 @@ export default function App() {
 
         {/* About CTA centered at the bottom */}
         <div className="mt-10 flex justify-center">
-          <a href="#/community" className="btn-claim" aria-label="Join our Community">Join our Community</a>
+          <a href="#/contact" className="btn-claim" aria-label="Contact Us">Contact Us</a>
         </div>
       </Section>
 

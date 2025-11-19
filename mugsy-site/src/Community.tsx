@@ -6,8 +6,7 @@ import { TurnstileDebug } from './components/TurnstileDebug'
 
 const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_' // Community form Turnstile sitekey
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
-// Fallback to main contact API if newsletter API fails
-const CONTACT_API = ((import.meta as any).env?.VITE_API_BASE as string) || 'https://mugsywebsite-production-b065.up.railway.app'
+const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
 
 export default function Community() {
   const [email, setEmail] = useState('')
@@ -20,13 +19,10 @@ export default function Community() {
   const [error, setError] = useState('')
   const [captchaNotice, setCaptchaNotice] = useState('')
 
-  // Debug logging
   useEffect(() => {
-    console.log('Community component loaded')
-    console.log('Current domain:', window.location.hostname)
-    console.log('Current protocol:', window.location.protocol)
-    console.log('Using sitekey directly:', DEFAULT_SITEKEY)
-    setSitekey(DEFAULT_SITEKEY)
+    const resolvedSitekey = SITEKEY || DEFAULT_SITEKEY
+    console.log('Community form using sitekey:', resolvedSitekey)
+    setSitekey(resolvedSitekey)
     setSitekeyStatus('ready')
     setCaptchaNotice('')
   }, [])
@@ -47,19 +43,23 @@ export default function Community() {
     setError('')
 
     try {
-      // Submit directly to contact API (which is working)
-      const response = await fetch(`${CONTACT_API}/api/contact`, {
+      const response = await fetch(`${NEWSLETTER_API}/api/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: 'Community Newsletter Subscriber',
-          email: email,
-          subject: 'Newsletter Subscription',
-          message: `Newsletter subscription from community page.\nEmail: ${email}`,
+          name: 'Newsletter Subscriber',
+          email,
+          purpose: 'Newsletter Subscription',
+          subject: 'Newsletter Subscription Request',
+          message: `Newsletter subscription request from community page.\n\nEmail: ${email}\nSource: community-page\nTimestamp: ${new Date().toISOString()}\n\nThis is an automated subscription request from the Red Mugsy community page.`,
+          website: '',
+          issuedAt: Date.now(),
+          issuedSig: 'community-form',
           captcha: {
             type: 'turnstile',
             token: turnstileToken
-          }
+          },
+          turnstileToken
         })
       })
 
@@ -67,13 +67,18 @@ export default function Community() {
         setSubmitted(true)
         setEmail('')
         resetWidget()
-      } else {
-        const data = await response.json().catch(() => ({}))
-        setError(data.error === 'invalid_captcha' ? 'Please verify you are human' : 'Subscription failed. Please try again.')
-        resetWidget()
+        return
       }
+
+      const data = await response.json().catch(() => ({}))
+      if (data?.error === 'invalid_captcha') {
+        setError('Please verify you are human.')
+      } else {
+        setError('Subscription service temporarily unavailable. Please try again shortly or email contact@redmugsy.com.')
+      }
+      resetWidget()
     } catch (err) {
-      console.error('Community form submission error:', err)
+      console.error('Community form subscription error:', err)
       setError('Subscription service temporarily unavailable. Please follow us on social media below or email us directly at contact@redmugsy.com')
     } finally {
       setIsSubmitting(false)

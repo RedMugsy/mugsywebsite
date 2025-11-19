@@ -62,7 +62,6 @@ export default function SiteFooter() {
               <a href="/Public%20Documents/Whitepaper.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">Whitepaper</a>
               <a href="/Public%20Documents/Audit%20Report.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">Audit Report</a>
               <a href="https://github.com/redmugsy" target="_blank" rel="noopener noreferrer" className="hover:text-white">GitHub</a>
-              <a href="#/community" className="hover:text-white">Community</a>
             </div>
           </div>
           <div className="md:col-span-3">

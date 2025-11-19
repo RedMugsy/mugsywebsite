@@ -10,7 +10,6 @@ import CookieBanner from './components/CookieBanner.tsx'
 import { checkCookieConsent, loadAnalytics } from './utils/cookieConsent'
 import Contact from './Contact.tsx'
 import Admin from './Admin.tsx'
-import Community from './Community.tsx'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/config'
 
@@ -55,9 +54,6 @@ function RootRouter() {
   }
   if (path === '/mugsywebsite/privacy-request' || path === '/mugsywebsite/privacy-request/' || path === '/privacy-request' || path === '/privacy-request/') {
     return <PrivacyRequestForm />
-  }
-  if (path === '/mugsywebsite/community' || path === '/mugsywebsite/community/' || path === '/community' || path === '/community/') {
-    return <Community />
   }
   if (path === '/mugsywebsite/claim' || path === '/mugsywebsite/claim/' || path === '/claim' || path === '/claim/') {
     if (!FEATURE_CLAIM) {

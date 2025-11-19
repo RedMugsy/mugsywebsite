@@ -8,9 +8,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Nuclear cache busting - make every file completely unique with timestamp
-        entryFileNames: 'v20251113110738/[name]-[hash].js',
-        chunkFileNames: 'v20251113110738/[name]-[hash].js', 
-        assetFileNames: 'v20251113110738/[name]-[hash].[ext]'
+        entryFileNames: 'v20251119104500/[name]-[hash].js',
+        chunkFileNames: 'v20251119104500/[name]-[hash].js', 
+        assetFileNames: 'v20251119104500/[name]-[hash].[ext]'
       }
     },
     emptyOutDir: true,

@@ -5,7 +5,6 @@ import { validateEmail, validateName, validatePhone, normalizePhone } from './li
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 
-type Locale = 'en' | 'ar'
 const PURPOSES = [
   'Partnership','Press/Media','Support','Security Disclosure','Legal/Compliance','Feature Request','Bug Report','Listing/Exchange','Investment/BD','Other'
 ] as const
@@ -16,7 +15,6 @@ function isWallet(v: string) {
 }
 
 export default function Contact() {
-  const [locale, setLocale] = useState<Locale>('en')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
@@ -92,24 +90,8 @@ export default function Contact() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[purpose])
 
-  const dir = locale === 'ar' ? 'rtl' : 'ltr'
-  const t = (en: string, ar: string) => (locale==='ar'? ar : en)
-  const LANG_OPTIONS: Array<{ code: string; label: string }> = [
-    { code: 'en', label: 'English' },
-    { code: 'ar', label: 'Arabic' },
-    { code: 'de', label: 'German' },
-    { code: 'fr', label: 'French' },
-    { code: 'it', label: 'Italian' },
-    { code: 'es', label: 'Spanish' },
-    { code: 'zh', label: 'Mandarin' },
-    { code: 'pt', label: 'Portuguese' },
-    { code: 'hi', label: 'Indian' },
-    { code: 'ru', label: 'Russian' },
-    { code: 'ja', label: 'Japanese' },
-    { code: 'ko', label: 'South Korean' },
-    { code: 'sw', label: 'Swahili' },
-    { code: 'pl', label: 'Polish' },
-  ]
+  const dir = 'ltr' // Fixed to left-to-right since we removed language selection
+  const t = (en: string) => en // Always use English since we removed language selection
 
   function validate(): string | null {
     // Name
@@ -128,16 +110,16 @@ export default function Contact() {
     if (nErr) return nErr
     if (eErr) return eErr
     if (pRes.error) return 'Phone must be digits only (optionally starting with +) and 6�15 digits long.'
-    if (!purpose) return t('Please select a purpose','?????? ?????? ?????')
-    if (purpose === 'Other' && !otherReason.trim()) return t('Please provide a reason for Other','???? ????? ??? ?????? ????')
-    if (message.trim().length < 50 || message.trim().length > 3000) return t('Message must be 50-3000 characters','??? ?? ???? ??????? ??? 50 ? 3000 ???')
-    if (!isWallet(wallet)) return t('Wallet address format not recognized','???? ????? ??? ??????')
-    if (!consent) return t('You must agree to the Privacy Policy','??? ???????? ??? ????? ????????')
+    if (!purpose) return t('Please select a purpose')
+    if (purpose === 'Other' && !otherReason.trim()) return t('Please provide a reason for Other')
+    if (message.trim().length < 50 || message.trim().length > 3000) return t('Message must be 50-3000 characters')
+    if (!isWallet(wallet)) return t('Wallet address format not recognized')
+    if (!consent) return t('You must agree to the Privacy Policy')
     if (file) {
       const allowed = ['application/pdf','image/png','image/jpeg','image/webp','text/plain']
-      if (!allowed.includes(file.type)) return t('Attachment must be PDF/PNG/JPG/WEBP/TXT','????? ??? ?? ????')
+      if (!allowed.includes(file.type)) return t('Attachment must be PDF/PNG/JPG/WEBP/TXT')
       const maxMb = Number((import.meta as any).env?.VITE_MAX_UPLOAD_MB || 10)
-      if (file.size > maxMb * 1024 * 1024) return t('Attachment too large','???? ??????') + ` (>${maxMb}MB)`
+      if (file.size > maxMb * 1024 * 1024) return t('Attachment too large') + ` (>${maxMb}MB)`
     }
     return null
   }
@@ -169,7 +151,6 @@ export default function Contact() {
 
       const turnstileToken = ((captcha as any)?.type === 'turnstile') ? (captcha as any)?.token : undefined
       const body = {
-        locale,
         name, email, company,
         // structured phone fields
         phoneCountry: phone.country.toUpperCase(),
@@ -216,24 +197,13 @@ export default function Contact() {
       <SiteHeader />
 
       <main className="max-w-3xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-end mb-2 gap-3">
-          <label className="text-sm text-slate-300" htmlFor="langSel">Language</label>
-          <select
-            id="langSel"
-            className="bg-black/50 border border-white/10 rounded px-2 py-1 text-sm"
-            value={locale}
-            onChange={(e)=> setLocale(e.target.value as any)}
-          >
-            {LANG_OPTIONS.map(o=> <option key={o.code} value={o.code}>{o.label}</option>)}
-          </select>
-        </div>
-        <h1 className="text-3xl font-extrabold text-white">{t('Contact Us','???? ???')}</h1>
-        <p className="text-slate-400 mt-2">{t('We typically respond within 2-3 business days.','????? ?? ??? ???? 2-3 ???? ???.')}</p>
+        <h1 className="text-3xl font-extrabold text-white">{t('Contact Us')}</h1>
+        <p className="text-slate-400 mt-2">{t('We typically respond within 2-3 business days.')}</p>
 
         {submittedId && (
           <div className="mt-6 rounded-xl border border-white/10 bg-black/60 p-4">
-            <h2 className="text-xl font-bold text-white">{t('Thanks! We received your message.','?????! ?? ?????? ??????.')}</h2>
-            <p className="mt-2 text-sm text-slate-300">{t('Your Request ID:','???? ?????:')} <span className="font-semibold">{submittedId}</span></p>
+            <h2 className="text-xl font-bold text-white">{t('Thanks! We received your message.')}</h2>
+            <p className="mt-2 text-sm text-slate-300">{t('Your Request ID:')} <span className="font-semibold">{submittedId}</span></p>
           </div>
         )}
 
@@ -243,7 +213,7 @@ export default function Contact() {
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="contact-name" className="block text-sm font-semibold">{t('Full Name','????? ??????')}</label>
+              <label htmlFor="contact-name" className="block text-sm font-semibold">{t('Full Name')}</label>
               <input
                 id="contact-name"
                 ref={nameRef}
@@ -263,7 +233,7 @@ export default function Contact() {
               )}
             </div>
             <div>
-              <label htmlFor="contact-email" className="block text-sm font-semibold">{t('Email','?????? ??????????')}</label>
+              <label htmlFor="contact-email" className="block text-sm font-semibold">{t('Email')}</label>
               <input
                 id="contact-email"
                 ref={emailRef}
@@ -285,11 +255,11 @@ export default function Contact() {
               )}
             </div>
             <div>
-              <label htmlFor="contact-company" className="block text-sm font-semibold">{t('Company/Project (optional)','??????/??????? (???????)')}</label>
-              <input id="contact-company" className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={company} onChange={e=>setCompany(e.target.value)} placeholder={t('Enter company or project name','????? ??? ??????? ?? ???????')} autoComplete="organization" />
+              <label htmlFor="contact-company" className="block text-sm font-semibold">{t('Company/Project (optional)')}</label>
+              <input id="contact-company" className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={company} onChange={e=>setCompany(e.target.value)} placeholder={t('Enter company or project name')} autoComplete="organization" />
             </div>
             <div ref={phoneAnchorRef}>
-              <label className="block text-sm font-semibold">{t('Phone (optional)','?????? (???????)')}</label>
+              <label className="block text-sm font-semibold">{t('Phone (optional)')}</label>
               <PhoneField
                 value={phone}
                 onChange={(v)=>{
@@ -314,48 +284,48 @@ export default function Contact() {
 
           <div className="grid sm:grid-cols-2 gap-4 items-end">
             <div>
-              <label htmlFor="contact-purpose" className="block text-sm font-semibold">{t('Purpose','?????')}</label>
+              <label htmlFor="contact-purpose" className="block text-sm font-semibold">{t('Purpose')}</label>
               <select id="contact-purpose" className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={purpose} onChange={e=>setPurpose(e.target.value as any)} required>
-                <option value="">{t('Select...','????...')}</option>
-                {PURPOSES.map(p=> <option key={p} value={p}>{t(p,p)}</option>)}
+                <option value="">{t('Select...')}</option>
+                {PURPOSES.map(p=> <option key={p} value={p}>{t(p)}</option>)}
               </select>
               {purpose==='Other' && (
                 <div className="mt-2">
-                  <label className="block text-sm font-semibold">{t('Tell us more','?????? ??????')}</label>
-                  <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={otherReason} onChange={e=>setOtherReason(e.target.value)} placeholder={t('Reason for Other','??? ?????? ????')} />
+                  <label className="block text-sm font-semibold">{t('Tell us more')}</label>
+                  <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={otherReason} onChange={e=>setOtherReason(e.target.value)} placeholder={t('Reason for Other')} />
                 </div>
               )}
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-semibold">{t('Subject','???????')}</label>
+                <label className="block text-sm font-semibold">{t('Subject')}</label>
                 <button type="button" className="text-xs underline text-slate-400 hover:text-slate-200" onClick={()=>{ setSubjectTouched(false); if (purpose!=='Other') setSubject(SUBJECT_BY_PURPOSE[purpose]||'') }}>
-                  ? {t('Reset subject to purpose','???? ?????? ??????')}
+                  ? {t('Reset subject to purpose')}
                 </button>
               </div>
-              <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={subject} onChange={e=>{ setSubject(e.target.value); if (!subjectTouched) setSubjectTouched(true) }} placeholder={t('Auto-suggested from Purpose','????? ????????')} />
+              <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={subject} onChange={e=>{ setSubject(e.target.value); if (!subjectTouched) setSubjectTouched(true) }} placeholder={t('Auto-suggested from Purpose')} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold">{t('Message','???????')}</label>
-            <textarea className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" rows={7} value={message} onChange={e=>setMessage(e.target.value)} placeholder={t('50-3000 characters','?? 50 ??? 3000 ???')} />
+            <label className="block text-sm font-semibold">{t('Message')}</label>
+            <textarea className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" rows={7} value={message} onChange={e=>setMessage(e.target.value)} placeholder={t('50-3000 characters')} />
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold">{t('Wallet Address (optional)','????? (???????)')}</label>
+              <label className="block text-sm font-semibold">{t('Wallet Address (optional)')}</label>
               <input className="mt-1 w-full rounded-lg bg-black/50 border border-white/10 px-3 py-2" value={wallet} onChange={e=>setWallet(e.target.value)} placeholder="0x..." />
             </div>
             <div>
-              <label htmlFor="fileHidden" className="block text-sm font-semibold">{t('File Attachment (optional)','???? (???????)')}</label>
+              <label htmlFor="fileHidden" className="block text-sm font-semibold">{t('File Attachment (optional)')}</label>
               <div className="mt-1">
                 <input id="fileHidden" type="file" accept=".pdf,image/png,image/jpeg,image/webp,text/plain" className="hidden" onChange={e=>setFile(e.target.files?.[0] || null)} aria-describedby="file-help" />
-                <button type="button" onClick={()=>document.getElementById('fileHidden')?.click()} className="rounded-md px-4 py-2 bg-[#00F0FF] text-black font-semibold disabled:opacity-60">{t('Upload document','????? ?????')}</button>
+                <button type="button" onClick={()=>document.getElementById('fileHidden')?.click()} className="rounded-md px-4 py-2 bg-[#00F0FF] text-black font-semibold disabled:opacity-60">{t('Upload document')}</button>
                 <div role="status" className="mt-2 text-xs text-slate-400">
-                  {file ? `${file.name} (${Math.ceil(file.size/1024)} KB)` : t('No file selected','?? ???? ?????')}
+                  {file ? `${file.name} (${Math.ceil(file.size/1024)} KB)` : t('No file selected')}
                   {file && (
-                    <button type="button" className="ml-2 text-[#ff8fa0] underline" onClick={()=>setFile(null)}>� {t('Remove','????')}</button>
+                    <button type="button" className="ml-2 text-[#ff8fa0] underline" onClick={()=>setFile(null)}>� {t('Remove')}</button>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 mt-1">PDF/PNG/JPG/WEBP/TXT, = {(import.meta as any).env?.VITE_MAX_UPLOAD_MB || 10}MB</p>
@@ -366,7 +336,7 @@ export default function Contact() {
           <div>
             <label className="inline-flex items-center gap-2 text-sm">
               <input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)} />
-              <span>{t('I agree to the','????? ???')} <a href="/Public%20Documents/Privacy%20Policy.pdf" target="_blank" rel="noopener noreferrer" className="underline decoration-[#00F0FF]">{t('Privacy Policy','????? ????????')}</a></span>
+              <span>{t('I agree to the')} <a href="/Public%20Documents/Privacy%20Policy.pdf" target="_blank" rel="noopener noreferrer" className="underline decoration-[#00F0FF]">{t('Privacy Policy')}</a></span>
             </label>
           </div>
 
@@ -393,12 +363,12 @@ export default function Contact() {
                 const isPow = c?.type==='pow' || c?.type==='altcha-pow'
                 const isTurnstile = c?.type==='turnstile'
                 const has = !!captcha && (isPow ? powSolution!=null : isTurnstile ? !!c?.token : true)
-                return has ? '' : t("Please verify you're human",'????? ??? ?? ?????')
+                return has ? '' : t("Please verify you're human")
               })()}
             >
-              {submitting ? t('Submitting...','???? ???????...') : t('Submit','?????')}
+              {submitting ? t('Submitting...') : t('Submit')}
             </button>
-            <a href="mailto:contact@redmugsy.com" className="btn-ghost btn-ghost--red px-6 py-3 text-sm">{t('Or email us','?? ?????? ???????')}</a>
+            <a href="mailto:contact@redmugsy.com" className="btn-ghost btn-ghost--red px-6 py-3 text-sm">{t('Or email us')}</a>
           </div>
         </form>
       </main>

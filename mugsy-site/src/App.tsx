@@ -464,7 +464,23 @@ export default function App() {
 
         {/* About CTA centered at the bottom */}
         <div className="mt-10 flex justify-center">
-          <a href="#/contact" className="btn-claim" aria-label="Contact Us">Contact Us</a>
+          <button 
+            onClick={() => {
+              const socialSection = document.getElementById('social-links');
+              if (socialSection) {
+                socialSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Optional: Add a brief highlight effect
+                socialSection.style.animation = 'pulse 2s ease-in-out';
+                setTimeout(() => {
+                  socialSection.style.animation = '';
+                }, 2000);
+              }
+            }} 
+            className="btn-claim" 
+            aria-label="Join our Community"
+          >
+            Join our Community
+          </button>
         </div>
       </Section>
 

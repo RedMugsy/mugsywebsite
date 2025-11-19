@@ -490,3 +490,14 @@ body { @apply bg-black text-slate-200 antialiased; }
   opacity: 0.3; /* 70% transparent */
   pointer-events: none;
 }
+
+/* =========================
+   Flag Icons Fix
+   Ensure flag icons display properly in phone field
+========================= */
+.fi {
+  display: inline-block;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}

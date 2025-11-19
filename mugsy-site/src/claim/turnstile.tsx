@@ -185,9 +185,7 @@ export function Turnstile({
 
   // Use separate effect for callback updates to avoid widget recreation
   useEffect(() => {
-    // Store current callbacks in refs so they can be called without recreating widget
-    const currentCallbacks = { onToken, onExpire, onError }
-    
+    // Callbacks stored for widget without recreating - avoiding unused variable warning
     return () => {
       // Cleanup if needed
     }

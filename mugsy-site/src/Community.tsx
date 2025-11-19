@@ -6,8 +6,6 @@ import { TurnstileDebug } from './components/TurnstileDebug'
 
 const DEFAULT_SITEKEY = '0x4AAAAAAB_cZo6l9Vt0npf_' // Community form Turnstile sitekey
 const SITEKEY = ((import.meta as any).env?.VITE_TURNSTILE_SITEKEY_COMMUNITY as string) || DEFAULT_SITEKEY
-// Use Perfect Integrity API for newsletter subscriptions
-const NEWSLETTER_API = ((import.meta as any).env?.VITE_NEWSLETTER_API as string) || 'https://perfect-integrity-production.up.railway.app'
 // Fallback to main contact API if newsletter API fails
 const CONTACT_API = ((import.meta as any).env?.VITE_API_BASE as string) || 'https://mugsywebsite-production-b065.up.railway.app'
 

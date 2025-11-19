@@ -162,7 +162,7 @@ export default function App() {
       <ProgressBar />
 
       {/* Left vertical social icon rail (fixed) */}
-      <div id="social-links" className="hidden md:flex fixed left-0 top-1/2 -translate-y-1/2 z-50 w-16 flex-col items-center">
+      <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">
         {/* Vertical ribbon */}
         <div
           className="w-full mb-8 rounded-r-xl bg-gradient-to-b from-[#ff1a4b] to-[#00F0FF] shadow-[0_10px_30px_rgba(255,26,75,0.25),0_6px_18px_rgba(0,240,255,0.18)] border border-white/10"
@@ -365,9 +365,21 @@ export default function App() {
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
           <div id="cta-buttons" className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4 sm:shrink-0 sm:flex-wrap sm:justify-center w-full sm:w-auto">
             <a href="#buy" className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
-            <a href="#tokenomics" className="btn-ghost btn-ghost--red text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="View Tokenomics">{t('hero.cta_secondary')}</a>
+            <button 
+              onClick={() => {
+                const tokenomicsSection = document.getElementById('tokenomics');
+                if (tokenomicsSection) {
+                  tokenomicsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="btn-ghost btn-ghost--red text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" 
+              aria-label="View Tokenomics"
+            >
+              {t('hero.cta_secondary')}
+            </button>
             <a href="#buy" className="btn-buy text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">Buy $MUGSY</a>
-            <a href="#/claim" className="btn-claim text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Claim $MUGSY">Claim $MUGSY</a>
+            {/* Claims button hidden for now - will be exposed to investors later */}
+            {false && <a href="#/claim" className="btn-claim text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Claim $MUGSY">Claim $MUGSY</a>}
           </div>
         </div>
       </div>

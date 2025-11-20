@@ -143,7 +143,7 @@ export default function App() {
   
   // Parallax blobs + magnetic CTA
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [socialLinksVisible, setSocialLinksVisible] = useState(true);
+  const [showSocialPopup, setShowSocialPopup] = useState(false);
   
   useEffect(() => {
     const handle = (e: MouseEvent) =>
@@ -154,6 +154,21 @@ export default function App() {
     window.addEventListener("mousemove", handle);
     return () => window.removeEventListener("mousemove", handle);
   }, []);
+
+  // Handle scroll to close popup
+  useEffect(() => {
+    const handleScroll = () => {
+      if (showSocialPopup) {
+        setShowSocialPopup(false);
+      }
+    };
+    
+    if (showSocialPopup) {
+      window.addEventListener('scroll', handleScroll);
+    }
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showSocialPopup]);
   const parallaxStyle = useMemo(
     () => ({ transform: `translate3d(${mouse.x * 12}px, ${mouse.y * 12}px, 0)` }),
     [mouse]
@@ -163,16 +178,15 @@ export default function App() {
     <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
       <ProgressBar />
 
-      {/* Left vertical social icon rail (fixed) */}
-      {socialLinksVisible && (
-        <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">
-          {/* Vertical ribbon */}
-          <div
-            className="w-full mb-8 rounded-r-xl bg-gradient-to-b from-[#ff1a4b] to-[#00F0FF] shadow-[0_10px_30px_rgba(255,26,75,0.25),0_6px_18px_rgba(0,240,255,0.18)] border border-white/10"
-            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'scaleY(1.30)', transformOrigin: 'center' } as React.CSSProperties}
-          >
-            <span className="block text-center font-extrabold tracking-widest text-black/90 py-3" style={{ fontSize: '76.5%' }}>Join Us</span>
-          </div>
+      {/* Left vertical social icon rail (fixed) - Always visible */}
+      <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">
+        {/* Vertical ribbon */}
+        <div
+          className="w-full mb-8 rounded-r-xl bg-gradient-to-b from-[#ff1a4b] to-[#00F0FF] shadow-[0_10px_30px_rgba(255,26,75,0.25),0_6px_18px_rgba(0,240,255,0.18)] border border-white/10"
+          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'scaleY(1.30)', transformOrigin: 'center' } as React.CSSProperties}
+        >
+          <span className="block text-center font-extrabold tracking-widest text-black/90 py-3" style={{ fontSize: '76.5%' }}>Join Us</span>
+        </div>
         {/* Icons */}
         <div className="flex flex-col items-center gap-4">
         <a
@@ -246,6 +260,85 @@ export default function App() {
           <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
         </a>
         </div>
+        </div>
+
+      {/* Social Links Popup Modal */}
+      {showSocialPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowSocialPopup(false)}>
+          <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-2xl shadow-2xl border border-[#ff1a4b]/30 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-white mb-6 text-center">Join Our Community</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <a
+                href="https://x.com/RedMugsyToken"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-6 w-6" />
+                <span className="text-white font-medium">X / Twitter</span>
+              </a>
+              <a
+                href="https://bsky.app/profile/redmugsy.bsky.social"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-6 w-6" />
+                <span className="text-white font-medium">BlueSky</span>
+              </a>
+              <a
+                href="https://t.me/REDMUGSY"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-6 w-6" />
+                <span className="text-white font-medium">Telegram</span>
+              </a>
+              <a
+                href="https://discord.gg/9GJcjKhaYj"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-6 w-6" />
+                <span className="text-white font-medium">Discord</span>
+              </a>
+              <a
+                href="https://www.tiktok.com/@redmugsy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-6 w-6" />
+                <span className="text-white font-medium">TikTok</span>
+              </a>
+              <a
+                href="https://www.instagram.com/redmugsy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700"
+              >
+                <img src="img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-6 w-6" />
+                <span className="text-white font-medium">Instagram</span>
+              </a>
+              <a
+                href="https://www.reddit.com/user/redmugsy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 transition-colors border border-gray-700 col-span-2"
+              >
+                <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-6 w-6" />
+                <span className="text-white font-medium">Reddit</span>
+              </a>
+            </div>
+            <button 
+              onClick={() => setShowSocialPopup(false)}
+              className="mt-6 w-full py-2 px-4 bg-[#ff1a4b] hover:bg-[#ff1a4b]/80 text-white font-semibold rounded-lg transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
@@ -481,21 +574,11 @@ export default function App() {
         {/* About CTA centered at the bottom */}
         <div className="mt-10 flex justify-center">
           <button 
-            onClick={() => {
-              setSocialLinksVisible(!socialLinksVisible);
-              if (!socialLinksVisible) {
-                setTimeout(() => {
-                  const socialSection = document.getElementById('social-links');
-                  if (socialSection) {
-                    socialSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                }, 100);
-              }
-            }} 
+            onClick={() => setShowSocialPopup(true)} 
             className="btn-claim" 
             aria-label="Join our Community"
           >
-            {socialLinksVisible ? 'Hide Community Links' : 'Join our Community'}
+            Join our Community
           </button>
         </div>
       </Section>

@@ -143,6 +143,8 @@ export default function App() {
   
   // Parallax blobs + magnetic CTA
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [socialLinksVisible, setSocialLinksVisible] = useState(true);
+  
   useEffect(() => {
     const handle = (e: MouseEvent) =>
       setMouse({
@@ -162,14 +164,15 @@ export default function App() {
       <ProgressBar />
 
       {/* Left vertical social icon rail (fixed) */}
-      <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">
-        {/* Vertical ribbon */}
-        <div
-          className="w-full mb-8 rounded-r-xl bg-gradient-to-b from-[#ff1a4b] to-[#00F0FF] shadow-[0_10px_30px_rgba(255,26,75,0.25),0_6px_18px_rgba(0,240,255,0.18)] border border-white/10"
-          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'scaleY(1.30)', transformOrigin: 'center' } as React.CSSProperties}
-        >
-          <span className="block text-center font-extrabold tracking-widest text-black/90 py-3" style={{ fontSize: '76.5%' }}>Join Us</span>
-        </div>
+      {socialLinksVisible && (
+        <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">
+          {/* Vertical ribbon */}
+          <div
+            className="w-full mb-8 rounded-r-xl bg-gradient-to-b from-[#ff1a4b] to-[#00F0FF] shadow-[0_10px_30px_rgba(255,26,75,0.25),0_6px_18px_rgba(0,240,255,0.18)] border border-white/10"
+            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'scaleY(1.30)', transformOrigin: 'center' } as React.CSSProperties}
+          >
+            <span className="block text-center font-extrabold tracking-widest text-black/90 py-3" style={{ fontSize: '76.5%' }}>Join Us</span>
+          </div>
         {/* Icons */}
         <div className="flex flex-col items-center gap-4">
         <a
@@ -243,7 +246,8 @@ export default function App() {
           <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
         </a>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* NAV */}
       <SiteHeader onHome />
@@ -361,7 +365,7 @@ export default function App() {
       </section>
 
       {/* All action buttons row (moved from header and hero) */}
-      <div className="py-2 px-6 -mt-24">
+      <div className="py-2 px-6 -mt-12 md:-mt-8">
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
           <div id="cta-buttons" className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4 sm:shrink-0 sm:flex-wrap sm:justify-center w-full sm:w-auto">
             <a href="#buy" className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>
@@ -478,20 +482,20 @@ export default function App() {
         <div className="mt-10 flex justify-center">
           <button 
             onClick={() => {
-              const socialSection = document.getElementById('social-links');
-              if (socialSection) {
-                socialSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Optional: Add a brief highlight effect
-                socialSection.style.animation = 'pulse 2s ease-in-out';
+              setSocialLinksVisible(!socialLinksVisible);
+              if (!socialLinksVisible) {
                 setTimeout(() => {
-                  socialSection.style.animation = '';
-                }, 2000);
+                  const socialSection = document.getElementById('social-links');
+                  if (socialSection) {
+                    socialSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 100);
               }
             }} 
             className="btn-claim" 
             aria-label="Join our Community"
           >
-            Join our Community
+            {socialLinksVisible ? 'Hide Community Links' : 'Join our Community'}
           </button>
         </div>
       </Section>

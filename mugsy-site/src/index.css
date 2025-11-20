@@ -246,6 +246,15 @@ body { @apply bg-black text-slate-200 antialiased; }
     z-index: 1000 !important;
   }
   
+  /* Ensure mobile navigation elements are accessible */
+  header button,
+  .mobile-menu button,
+  nav button {
+    touch-action: manipulation !important;
+    pointer-events: auto !important;
+    z-index: 1001 !important;
+  }
+  
   /* Ensure buttons are properly clickable on mobile */
   #cta-buttons {
     position: relative !important;

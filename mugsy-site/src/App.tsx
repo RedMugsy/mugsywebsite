@@ -662,7 +662,13 @@ export default function App() {
 
             {/* Tokenomics CTA under the chart */}
             <div className="flex justify-center">
-              <a href="#buy" className="btn-buy" aria-label="Buy Mugsy">Buy Mugsy</a>
+              <button 
+                onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+                className="btn-buy touch-manipulation" 
+                aria-label="Buy Mugsy"
+              >
+                Buy Mugsy
+              </button>
             </div>
 
             {/* Legend (2-col grid, single line each) */}
@@ -802,7 +808,13 @@ export default function App() {
 
         {/* Security CTA at the bottom */}
         <div className="mt-10 flex justify-center">
-          <a href="#buy" className="btn-buy" aria-label="Buy Mugsy">Buy Mugsy</a>
+          <button 
+            onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+            className="btn-buy touch-manipulation" 
+            aria-label="Buy Mugsy"
+          >
+            Buy Mugsy
+          </button>
         </div>
       </Section>
 

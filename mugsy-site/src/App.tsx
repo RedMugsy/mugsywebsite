@@ -461,7 +461,7 @@ export default function App() {
       </section>
 
       {/* All action buttons row (moved from header and hero) */}
-      <div className="py-8 px-6 mt-8 relative z-50">
+      <div className="py-4 sm:py-6 md:py-4 px-6 mt-4 sm:mt-6 md:mt-2 relative z-50">
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
           <div id="cta-buttons" className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-3 md:flex md:items-center md:gap-4 md:shrink-0 md:flex-wrap md:justify-center w-full md:w-auto">
             <button 

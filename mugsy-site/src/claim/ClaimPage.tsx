@@ -20,7 +20,7 @@ const TARGET_CHAIN_ID = Number((import.meta as any).env?.VITE_CLAIM_CHAIN_ID || 
 const RPC_URL = (import.meta as any).env?.VITE_CLAIM_RPC_URL || undefined
 
 const explorerByChain: Record<number, { name: string; base: string }> = {
-  1: { name: 'Ethereum', base: 'https://etherscan.io' },
+  1: { name: 'Solana', base: 'https://etherscan.io' },
   8453: { name: 'Base', base: 'https://basescan.org' },
   42161: { name: 'Arbitrum', base: 'https://arbiscan.io' },
   10: { name: 'Optimism', base: 'https://optimistic.etherscan.io' },

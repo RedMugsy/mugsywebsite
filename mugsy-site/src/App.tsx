@@ -458,7 +458,7 @@ export default function App() {
       </section>
 
       {/* All action buttons row (moved from header and hero) */}
-      <div className="py-2 px-6 -mt-12 md:-mt-8 relative z-10">
+      <div className="py-2 px-6 mt-0 md:-mt-12 lg:-mt-24 relative z-10">
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
           <div id="cta-buttons" className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4 sm:shrink-0 sm:flex-wrap sm:justify-center w-full sm:w-auto">
             <a href="#buy" className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center touch-manipulation" aria-label="Buy $MUGSY">{t('hero.cta_primary')}</a>

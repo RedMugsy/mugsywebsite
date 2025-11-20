@@ -114,14 +114,17 @@ function Section({
   titleRight?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const [hasAnimated, setHasAnimated] = useState(false);
+  
   return (
     <section id={id} className="relative min-h-[60vh] pt-8 pb-20 sm:pt-12 sm:pb-24 px-6 sm:px-10 max-w-7xl mx-auto scroll-mt-28 sm:scroll-mt-40 flex flex-col">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
+        viewport={{ once: true, amount: 0.1, margin: "-100px" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="flex-1 flex flex-col justify-start space-y-6"
+        onAnimationComplete={() => setHasAnimated(true)}
       >
         {kicker && (
           <p className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-slate-400">{kicker}</p>
@@ -554,7 +557,12 @@ export default function App() {
               src="img/RedMugsy Home Office Trading.png"
               alt="Red Mugsy at home office trading"
               loading="lazy"
+              decoding="async"
               className="w-full max-w-md rounded-xl shadow-2xl drop-shadow-[0_0_24px_#ff1a4b55]"
+              onError={(e) => {
+                console.warn('Failed to load image:', e.currentTarget.src);
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
         </div>
@@ -567,7 +575,12 @@ export default function App() {
                 src="img/ECH042 Profile Pic.png"
                 alt="Ech042 AI Barista Profile"
                 loading="lazy"
+                decoding="async"
                 className="w-full max-w-md rounded-xl shadow-2xl drop-shadow-[0_0_24px_#00F0FF55]"
+                onError={(e) => {
+                  console.warn('Failed to load image:', e.currentTarget.src);
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
             

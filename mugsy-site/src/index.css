@@ -156,11 +156,17 @@ body { @apply bg-black text-slate-200 antialiased; }
   @apply relative inline-flex items-center justify-center px-5 py-3 rounded-xl font-semibold text-black transition-transform;
   background: linear-gradient(135deg, #ff1a4b, #00F0FF);
   box-shadow: 0 10px 30px #ff1a4b30, 0 6px 20px #00F0FF20;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .btn-neo:hover { transform: translateY(-2px) scale(1.02); }
 
 .btn-ghost {
   @apply inline-flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-slate-200 hover:bg-white/10;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Red ghost button variant: uses neon red edge/glow variables */
@@ -171,6 +177,9 @@ body { @apply bg-black text-slate-200 antialiased; }
   color: #ffffff;
   background: transparent;
   box-shadow: 0 0 0 1px var(--edge) inset, 0 12px 38px var(--glow);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .btn-ghost--red:hover {
   background: rgba(255, 26, 75, 0.10);
@@ -190,6 +199,9 @@ body { @apply bg-black text-slate-200 antialiased; }
   background: #FF1A4B;
   box-shadow: 0 12px 30px rgba(255, 26, 75, 0.25);
   transition: background-color .2s ease, box-shadow .2s ease;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .btn-buy:hover {
   background: #E01540;
@@ -210,9 +222,35 @@ body { @apply bg-black text-slate-200 antialiased; }
   border: 2px solid #3CF2FF;       /* neon blue outline */
   box-shadow: 0 12px 30px rgba(60,242,255,0.18);
   transition: background-color .2s ease, box-shadow .2s ease, color .2s ease;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .btn-claim:hover {
   background: rgba(60,242,255,0.10);
+}
+
+/* =========================
+   Mobile Touch Optimization
+========================= */
+@media (max-width: 768px) {
+  button, a[class*="btn-"], .btn-neo, .btn-ghost, .btn-buy, .btn-claim {
+    touch-action: manipulation !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    min-height: 48px;
+    min-width: 48px;
+    cursor: pointer;
+  }
+  
+  /* Ensure buttons are properly clickable on mobile */
+  #cta-buttons button,
+  #cta-buttons a {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
+  }
 }
 
 /* =========================

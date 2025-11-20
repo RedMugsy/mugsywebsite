@@ -239,17 +239,40 @@ body { @apply bg-black text-slate-200 antialiased; }
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
     user-select: none !important;
-    min-height: 48px;
-    min-width: 48px;
-    cursor: pointer;
+    min-height: 48px !important;
+    min-width: 48px !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 1000 !important;
   }
   
   /* Ensure buttons are properly clickable on mobile */
+  #cta-buttons {
+    position: relative !important;
+    z-index: 1000 !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+  }
+  
   #cta-buttons button,
   #cta-buttons a {
     pointer-events: auto !important;
-    position: relative;
-    z-index: 10;
+    position: relative !important;
+    z-index: 1001 !important;
+    background: transparent !important;
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  /* Ensure no overlays block buttons on mobile */
+  .fixed {
+    pointer-events: none !important;
+  }
+  
+  .fixed button,
+  .fixed a {
+    pointer-events: auto !important;
   }
 }
 

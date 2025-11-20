@@ -16,6 +16,33 @@ export default function SiteFooter() {
             <p className="text-sm text-slate-400">
               {t('footer.tagline')}
             </p>
+            
+            {/* Social links moved directly under logo */}
+            <div className="flex items-center gap-3 mt-4 mb-6">
+              <a href="https://x.com/RedMugsyToken" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="X / Twitter" title="X / Twitter">
+                <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
+              </a>
+              <a href="https://bsky.app/profile/redmugsy.bsky.social" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="BlueSky" title="BlueSky">
+                <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
+              </a>
+              <a href="https://t.me/REDMUGSY" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Telegram" title="Telegram">
+                <img src="img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
+              </a>
+              <a href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Discord" title="Discord">
+                <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
+              </a>
+              <a href="https://www.tiktok.com/@redmugsy" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
+                <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
+              </a>
+              <a href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Instagram" title="Instagram">
+                <img src="img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
+              </a>
+              <a href="https://www.reddit.com/user/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Reddit" title="Reddit">
+                <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
+              </a>
+            </div>
+            
+            {/* Legal links moved below social */}
             <div className="mt-3 space-y-2 text-xs text-slate-400">
               <div className="flex flex-wrap items-center gap-3">
                 <a href="/Public%20Documents/Privacy%20Policy.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t('footer.privacy')}</a>
@@ -30,29 +57,6 @@ export default function SiteFooter() {
                 <a href="#/cookie-preferences" className="hover:text-white">{t('footer.cookiePreferences')}</a>
                 <span className="opacity-50">•</span>
                 <a href="/Public%20Documents/Disclaimer%20Risk.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t('footer.disclaimer')}</a>
-              </div>
-              <div className="flex items-center gap-3 mt-4">
-                <a href="https://x.com/RedMugsyToken" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="X / Twitter" title="X / Twitter">
-                  <img src="img/X logo White Trnsprt.png" alt="X logo" className="h-5 w-5" />
-                </a>
-                <a href="https://bsky.app/profile/redmugsy.bsky.social" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="BlueSky" title="BlueSky">
-                  <img src="img/bluesky logo White Trnsprt.png" alt="BlueSky logo" className="h-5 w-5" />
-                </a>
-                <a href="https://t.me/REDMUGSY" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Telegram" title="Telegram">
-                  <img src="img/Telegram logo White Trnsprt.png" alt="Telegram logo" className="h-5 w-5" />
-                </a>
-                <a href="https://discord.gg/9GJcjKhaYj" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Discord" title="Discord">
-                  <img src="img/Discord logo White Trnsprt.png" alt="Discord logo" className="h-5 w-5" />
-                </a>
-                <a href="https://www.tiktok.com/@redmugsy" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="TikTok" title="TikTok">
-                  <img src="img/TikTok logo White Trnsprt.png" alt="TikTok logo" className="h-5 w-5" />
-                </a>
-                <a href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Instagram" title="Instagram">
-                  <img src="img/Instagram logo White Trnsprt.png" alt="Instagram logo" className="h-5 w-5" />
-                </a>
-                <a href="https://www.reddit.com/user/redmugsy/" target="_blank" rel="noopener noreferrer" className="icon-sphere icon-sphere--red" aria-label="Reddit" title="Reddit">
-                  <img src="img/Reddit logo White Trnsprt.png" alt="Reddit logo" className="h-5 w-5" />
-                </a>
               </div>
             </div>
           </div>

@@ -462,28 +462,53 @@ export default function App() {
         <div id="cta-group" className="max-w-7xl mx-auto flex items-center justify-center">
           <div id="cta-buttons" className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-3 md:flex md:items-center md:gap-4 md:shrink-0 md:flex-wrap md:justify-center w-full md:w-auto">
             <button 
-              onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  window.open('https://pump.fun', '_blank', 'noopener,noreferrer');
+                } catch (err) {
+                  window.location.href = 'https://pump.fun';
+                }
+              }}
               className="btn-neo text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center touch-manipulation block" 
               aria-label="Buy $MUGSY"
+              type="button"
             >
               {t('hero.cta_primary')}
             </button>
             <button 
-              onClick={() => {
-                const tokenomicsSection = document.getElementById('tokenomics');
-                if (tokenomicsSection) {
-                  tokenomicsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  const tokenomicsSection = document.getElementById('tokenomics');
+                  if (tokenomicsSection) {
+                    tokenomicsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                } catch (err) {
+                  window.location.hash = '#tokenomics';
                 }
               }}
               className="btn-ghost btn-ghost--red text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center touch-manipulation block" 
               aria-label="View Tokenomics"
+              type="button"
             >
               {t('hero.cta_secondary')}
             </button>
             <button 
-              onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  window.open('https://pump.fun', '_blank', 'noopener,noreferrer');
+                } catch (err) {
+                  window.location.href = 'https://pump.fun';
+                }
+              }}
               className="btn-buy text-sm sm:text-lg px-4 py-3 sm:px-8 sm:py-4 text-center touch-manipulation block" 
               aria-label="Buy $MUGSY"
+              type="button"
             >
               Buy $MUGSY
             </button>
@@ -663,9 +688,18 @@ export default function App() {
             {/* Tokenomics CTA under the chart */}
             <div className="flex justify-center">
               <button 
-                onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  try {
+                    window.open('https://pump.fun', '_blank', 'noopener,noreferrer');
+                  } catch (err) {
+                    window.location.href = 'https://pump.fun';
+                  }
+                }}
                 className="btn-buy touch-manipulation" 
                 aria-label="Buy Mugsy"
+                type="button"
               >
                 Buy Mugsy
               </button>
@@ -809,9 +843,18 @@ export default function App() {
         {/* Security CTA at the bottom */}
         <div className="mt-10 flex justify-center">
           <button 
-            onClick={() => window.open('https://pump.fun', '_blank', 'noopener,noreferrer')}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              try {
+                window.open('https://pump.fun', '_blank', 'noopener,noreferrer');
+              } catch (err) {
+                window.location.href = 'https://pump.fun';
+              }
+            }}
             className="btn-buy touch-manipulation" 
             aria-label="Buy Mugsy"
+            type="button"
           >
             Buy Mugsy
           </button>

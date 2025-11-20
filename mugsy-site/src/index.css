@@ -234,6 +234,7 @@ body { @apply bg-black text-slate-200 antialiased; }
    Mobile Touch Optimization
 ========================= */
 @media (max-width: 768px) {
+  /* Enhanced mobile button support */
   button, a[class*="btn-"], .btn-neo, .btn-ghost, .btn-buy, .btn-claim {
     touch-action: manipulation !important;
     -webkit-touch-callout: none !important;
@@ -244,6 +245,10 @@ body { @apply bg-black text-slate-200 antialiased; }
     cursor: pointer !important;
     position: relative !important;
     z-index: 1000 !important;
+    /* Ensure buttons are clickable */
+    pointer-events: auto !important;
+    /* Remove any opacity that might block clicks */
+    opacity: 1 !important;
   }
   
   /* Ensure mobile navigation elements are accessible */
@@ -273,32 +278,38 @@ body { @apply bg-black text-slate-200 antialiased; }
     /* Preserve button styling - don't override backgrounds */
     color: inherit !important;
     font-weight: inherit !important;
+    /* Ensure clicks work properly */
+    -webkit-tap-highlight-color: rgba(255, 26, 75, 0.3) !important;
   }
   
   /* Ensure specific button types maintain their styles */
-  #cta-buttons .btn-neo {
+  #cta-buttons .btn-neo,
+  .btn-neo {
     background: linear-gradient(135deg, #ff1a4b, #00F0FF) !important;
     color: #000000 !important;
   }
   
-  #cta-buttons .btn-ghost--red {
+  #cta-buttons .btn-ghost--red,
+  .btn-ghost--red {
     background: rgba(255, 26, 75, 0.10) !important;
     border-color: rgba(255, 26, 75, 0.60) !important;
     color: #ffffff !important;
   }
   
-  #cta-buttons .btn-buy {
+  #cta-buttons .btn-buy,
+  .btn-buy {
     background: #FF1A4B !important;
     color: #0b0b0b !important;
   }
   
   /* Ensure no overlays block buttons on mobile */
-  .fixed {
+  .fixed:not(button):not([role="button"]) {
     pointer-events: none !important;
   }
   
   .fixed button,
-  .fixed a {
+  .fixed a,
+  .fixed [role="button"] {
     pointer-events: auto !important;
   }
 }

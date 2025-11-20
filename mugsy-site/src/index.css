@@ -250,7 +250,6 @@ body { @apply bg-black text-slate-200 antialiased; }
   #cta-buttons {
     position: relative !important;
     z-index: 1000 !important;
-    background: transparent !important;
     pointer-events: auto !important;
   }
   
@@ -259,10 +258,29 @@ body { @apply bg-black text-slate-200 antialiased; }
     pointer-events: auto !important;
     position: relative !important;
     z-index: 1001 !important;
-    background: transparent !important;
     display: block !important;
     width: 100% !important;
     text-align: center !important;
+    /* Preserve button styling - don't override backgrounds */
+    color: inherit !important;
+    font-weight: inherit !important;
+  }
+  
+  /* Ensure specific button types maintain their styles */
+  #cta-buttons .btn-neo {
+    background: linear-gradient(135deg, #ff1a4b, #00F0FF) !important;
+    color: #000000 !important;
+  }
+  
+  #cta-buttons .btn-ghost--red {
+    background: rgba(255, 26, 75, 0.10) !important;
+    border-color: rgba(255, 26, 75, 0.60) !important;
+    color: #ffffff !important;
+  }
+  
+  #cta-buttons .btn-buy {
+    background: #FF1A4B !important;
+    color: #0b0b0b !important;
   }
   
   /* Ensure no overlays block buttons on mobile */

@@ -585,7 +585,7 @@ export default function App() {
             </div>
             
             <div className="space-y-4 text-slate-300 order-1 md:order-2">
-              <h3 className="text-3xl sm:text-5xl font-bold text-white mb-4">Meet Ech042</h3>
+              <h2 className="text-3xl sm:text-5xl font-bold text-white mb-4">Meet Ech042</h2>
               <p className="text-lg text-[#ff1a4b] font-semibold mb-6">The AI Barista Who Enables Bad Decisions</p>
               
               <p className="text-lg leading-relaxed">

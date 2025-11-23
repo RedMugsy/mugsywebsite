@@ -14,6 +14,7 @@ import Admin from './Admin.tsx'
 import TreasureHunt from './TreasureHunt.tsx'
 import TreasureHuntRegistration from './TreasureHuntRegistration.tsx'
 import TreasureHuntPromoters from './TreasureHuntPromoters.tsx'
+import TreasureHuntAdmin from './TreasureHuntAdmin.tsx'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/config'
 
@@ -64,6 +65,9 @@ function RootRouter() {
   }
   if (path === '/mugsywebsite/treasure-hunt/promoters' || path === '/mugsywebsite/treasure-hunt/promoters/' || path === '/treasure-hunt/promoters' || path === '/treasure-hunt/promoters/') {
     return <TreasureHuntPromoters />
+  }
+  if (path === '/mugsywebsite/treasure-hunt/admin' || path === '/mugsywebsite/treasure-hunt/admin/' || path === '/treasure-hunt/admin' || path === '/treasure-hunt/admin/') {
+    return <TreasureHuntAdmin />
   }
   if (path === '/mugsywebsite/privacy-request' || path === '/mugsywebsite/privacy-request/' || path === '/privacy-request' || path === '/privacy-request/') {
     return <PrivacyRequestForm />

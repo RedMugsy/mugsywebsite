@@ -5,6 +5,17 @@ import { motion } from 'framer-motion'
 
 type Tier = 'free' | 'pathfinder' | 'keymaster'
 
+type FormErrors = {
+  firstName?: string
+  lastName?: string
+  email?: string
+  phone?: string
+  wallet?: string
+  tier?: string
+  payment?: string
+  server?: string
+}
+
 export default function TreasureHuntRegistration() {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -16,11 +27,21 @@ export default function TreasureHuntRegistration() {
   const [selectedTier, setSelectedTier] = useState<Tier>('free')
   const [walletConnected, setWalletConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState('')
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [walletError, setWalletError] = useState('')
 
   const tierPricing = {
     free: { sol: 0, label: 'Free' },
     pathfinder: { sol: 0.055, label: '0.055 SOL' },
     keymaster: { sol: 0.11, label: '0.11 SOL' }
+  }
+
+  const tierHeadStart = {
+    free: 'Start when the Hunt officially begins',
+    pathfinder: '12-hour head start',
+    keymaster: '36-hour head start'
   }
 
   const getDiscountedPrice = (tier: Tier) => {
@@ -31,43 +52,230 @@ export default function TreasureHuntRegistration() {
     return basePrice
   }
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validatePhone = (phone: string) => {
+    // Basic phone validation - can be enhanced
+    const phoneRegex = /^\+?[\d\s\-()]+$/
+    return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10
+  }
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    // First Name
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'Please enter your first name.'
+    }
+
+    // Last Name
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Please enter your last name.'
+    }
+
+    // Email
+    if (!formData.email.trim()) {
+      newErrors.email = 'Please enter a valid email address.'
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address.'
+    }
+
+    // Phone
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Please enter a valid mobile number.'
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = 'Please enter a valid mobile number.'
+    }
+
+    // Wallet validation for paid tiers
+    if (selectedTier !== 'free' && !walletConnected) {
+      newErrors.wallet = 'Connect your wallet to continue.'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const connectWallet = async () => {
-    // Placeholder for wallet connection
-    // In production, integrate with @solana/wallet-adapter-react
+    setWalletError('')
     try {
       if ((window as any).solana?.isPhantom) {
         const response = await (window as any).solana.connect()
         setWalletAddress(response.publicKey.toString())
         setWalletConnected(true)
+        setErrors({ ...errors, wallet: undefined })
       } else {
-        alert('Please install a Solana wallet (Phantom, Backpack, Trust Wallet, etc.)')
+        setWalletError('Could not connect to your wallet. Please try again.')
       }
-    } catch (err) {
-      console.error('Wallet connection failed:', err)
+    } catch (err: any) {
+      if (err.message?.includes('rejected') || err.code === 4001) {
+        setWalletError('Payment was canceled. No charges were made.')
+      } else if (err.message?.includes('network')) {
+        setWalletError('We couldn\'t verify your wallet. Check your internet and try again.')
+      } else {
+        setWalletError('Could not connect to your wallet. Please try again.')
+      }
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validation
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-      alert('Please fill in all required fields')
+    // Clear previous errors
+    setErrors({})
+
+    // Validate form
+    if (!validateForm()) {
       return
     }
 
-    if (selectedTier !== 'free' && !walletConnected) {
-      alert('Please connect your wallet to continue with a paid tier')
-      return
+    setIsSubmitting(true)
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // In production: Send to API, process payment, etc.
+      // Check for duplicate email
+      const isDuplicate = false // Replace with actual API check
+      if (isDuplicate) {
+        setErrors({ email: 'This email is already registered. Try another one.' })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Handle payment for paid tiers
+      if (selectedTier !== 'free') {
+        // Simulate payment processing
+        const paymentSuccess = true // Replace with actual payment logic
+        if (!paymentSuccess) {
+          setErrors({ payment: 'Your payment didn\'t go through. Try again to secure your spot.' })
+          setIsSubmitting(false)
+          return
+        }
+      }
+
+      // Success!
+      setShowSuccess(true)
+      setIsSubmitting(false)
+
+    } catch (err: any) {
+      setIsSubmitting(false)
+      if (err.message?.includes('timeout')) {
+        setErrors({ server: 'Submission timeout — check your connection and resubmit.' })
+      } else {
+        setErrors({ server: 'Something went wrong on our side. Please try again in a moment.' })
+      }
     }
-
-    // Handle payment and submission
-    console.log('Form submitted:', { ...formData, selectedTier, walletAddress })
-
-    // In production: Send to API, process payment, etc.
-    alert(`Registration submitted! ${selectedTier !== 'free' ? `Payment of ${getDiscountedPrice(selectedTier)} SOL will be processed.` : 'Welcome to the free tier!'}`)
   }
 
+  // Success Screen
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
+        <SiteHeader />
+
+        <main className="relative pt-8 pb-24 sm:pt-12 sm:pb-32 px-6 sm:px-10">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="card bg-gradient-to-br from-[#ff1a4b]/20 to-[#00F0FF]/20 border-[#ff1a4b] text-center space-y-8"
+            >
+              <div className="text-6xl">🔥</div>
+
+              <h1 className="text-4xl sm:text-6xl font-bold text-white">
+                Success! You're In.
+              </h1>
+
+              <div className="space-y-4 text-lg text-slate-300">
+                <p className="text-xl text-white font-semibold">
+                  Welcome to the Red Mugsy Treasure Hunt.
+                </p>
+                <p>
+                  Your registration is confirmed, your path is chosen, and your chaos arc officially begins.
+                </p>
+              </div>
+
+              <div className="card bg-black/40 text-left space-y-6">
+                <h2 className="text-2xl font-bold text-white">Here's what happens next:</h2>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#ff1a4b] mb-2">
+                    The Hunt opens based on your tier:
+                  </h3>
+                  <ul className="space-y-2 text-slate-300">
+                    <li className={selectedTier === 'free' ? 'text-white font-semibold' : ''}>
+                      • <strong>Free Loader:</strong> {tierHeadStart.free}
+                    </li>
+                    <li className={selectedTier === 'pathfinder' ? 'text-white font-semibold' : ''}>
+                      • <strong>Pathfinder:</strong> {tierHeadStart.pathfinder}
+                    </li>
+                    <li className={selectedTier === 'keymaster' ? 'text-white font-semibold' : ''}>
+                      • <strong>Key Master:</strong> {tierHeadStart.keymaster}
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-[#00F0FF] mb-2">
+                    You'll receive:
+                  </h3>
+                  <ul className="space-y-2 text-slate-300">
+                    <li>✓ A confirmation email</li>
+                    <li>✓ Your starting clue when your access window opens</li>
+                    <li>✓ Instructions on how to redeem Mugsy Whispers</li>
+                    <li>✓ A personal link to track your progress</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="card bg-gradient-to-br from-[#ff1a4b]/10 to-[#00F0FF]/10 border-[#00F0FF]/30 space-y-4">
+                <h3 className="text-2xl font-bold text-white">Before You Go</h3>
+                <p className="text-slate-300">
+                  Join the community so you don't miss updates, hints, or bonus drops:
+                </p>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <a
+                    href="https://t.me/REDMUGSY"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-neo px-6 py-3"
+                  >
+                    Join Telegram
+                  </a>
+                  <a
+                    href="https://x.com/RedMugsyToken"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-ghost btn-ghost--red px-6 py-3"
+                  >
+                    Follow on X
+                  </a>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10">
+                <p className="text-2xl font-bold text-white mb-2">Good Luck, Hunter.</p>
+                <p className="text-slate-300">
+                  Crack the clues. Break the ciphers.<br />
+                  Become a legend in the Mugsy universe.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </main>
+
+        <SiteFooter />
+      </div>
+    )
+  }
+
+  // Registration Form
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
       <SiteHeader />
@@ -87,6 +295,17 @@ export default function TreasureHuntRegistration() {
             </p>
           </motion.div>
 
+          {/* Server Error Alert */}
+          {errors.server && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-2xl mx-auto mb-6 card bg-red-500/10 border-red-500/30"
+            >
+              <p className="text-red-400">⚠️ {errors.server}</p>
+            </motion.div>
+          )}
+
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Registration Form */}
             <motion.div
@@ -104,11 +323,18 @@ export default function TreasureHuntRegistration() {
                   <input
                     id="firstName"
                     type="text"
-                    required
-                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#ff1a4b] focus:outline-none"
+                    className={`w-full rounded-lg bg-black/50 border px-4 py-3 text-white focus:outline-none ${
+                      errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-[#ff1a4b]'
+                    }`}
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, firstName: e.target.value })
+                      setErrors({ ...errors, firstName: undefined })
+                    }}
                   />
+                  {errors.firstName && (
+                    <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>
+                  )}
                 </div>
 
                 <div>
@@ -118,11 +344,18 @@ export default function TreasureHuntRegistration() {
                   <input
                     id="lastName"
                     type="text"
-                    required
-                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#ff1a4b] focus:outline-none"
+                    className={`w-full rounded-lg bg-black/50 border px-4 py-3 text-white focus:outline-none ${
+                      errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-[#ff1a4b]'
+                    }`}
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, lastName: e.target.value })
+                      setErrors({ ...errors, lastName: undefined })
+                    }}
                   />
+                  {errors.lastName && (
+                    <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>
+                  )}
                 </div>
 
                 <div>
@@ -132,11 +365,18 @@ export default function TreasureHuntRegistration() {
                   <input
                     id="email"
                     type="email"
-                    required
-                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#ff1a4b] focus:outline-none"
+                    className={`w-full rounded-lg bg-black/50 border px-4 py-3 text-white focus:outline-none ${
+                      errors.email ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-[#ff1a4b]'
+                    }`}
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value })
+                      setErrors({ ...errors, email: undefined })
+                    }}
                   />
+                  {errors.email && (
+                    <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 <div>
@@ -146,11 +386,18 @@ export default function TreasureHuntRegistration() {
                   <input
                     id="phone"
                     type="tel"
-                    required
-                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#ff1a4b] focus:outline-none"
+                    className={`w-full rounded-lg bg-black/50 border px-4 py-3 text-white focus:outline-none ${
+                      errors.phone ? 'border-red-500 focus:border-red-500' : 'border-white/10 focus:border-[#ff1a4b]'
+                    }`}
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, phone: e.target.value })
+                      setErrors({ ...errors, phone: undefined })
+                    }}
                   />
+                  {errors.phone && (
+                    <p className="text-red-400 text-sm mt-1">{errors.phone}</p>
+                  )}
                 </div>
 
                 <div>
@@ -170,13 +417,20 @@ export default function TreasureHuntRegistration() {
                       </p>
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={connectWallet}
-                      className="w-full rounded-lg bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF] px-4 py-3 font-semibold text-black hover:opacity-90 transition"
-                    >
-                      Connect Wallet
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={connectWallet}
+                        className={`w-full rounded-lg bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF] px-4 py-3 font-semibold text-black hover:opacity-90 transition ${
+                          errors.wallet ? 'ring-2 ring-red-500' : ''
+                        }`}
+                      >
+                        Connect Wallet
+                      </button>
+                      {(errors.wallet || walletError) && (
+                        <p className="text-red-400 text-sm mt-2">{errors.wallet || walletError}</p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -190,17 +444,24 @@ export default function TreasureHuntRegistration() {
                   <input
                     id="referralCode"
                     type="text"
-                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#00F0FF] focus:outline-none"
+                    className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#00F0FF] focus:outline-none uppercase"
                     value={formData.referralCode}
-                    onChange={(e) => setFormData({ ...formData, referralCode: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
                   />
                 </div>
 
+                {errors.payment && (
+                  <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3">
+                    <p className="text-red-400 text-sm">{errors.payment}</p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full btn-neo text-lg py-4 mt-6"
+                  disabled={isSubmitting}
+                  className="w-full btn-neo text-lg py-4 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Registration
+                  {isSubmitting ? 'Submitting...' : 'Submit Registration'}
                 </button>
               </form>
             </motion.div>
@@ -267,7 +528,7 @@ export default function TreasureHuntRegistration() {
                           <div className="text-xs text-slate-400 line-through">0.055 SOL</div>
                         )}
                         <span className="text-lg font-bold text-[#00F0FF]">
-                          {getDiscountedPrice('pathfinder')} SOL
+                          {getDiscountedPrice('pathfinder').toFixed(4)} SOL
                         </span>
                       </div>
                     </div>
@@ -300,7 +561,7 @@ export default function TreasureHuntRegistration() {
                           <div className="text-xs text-slate-400 line-through">0.11 SOL</div>
                         )}
                         <span className="text-lg font-bold text-[#00F0FF]">
-                          {getDiscountedPrice('keymaster')} SOL
+                          {getDiscountedPrice('keymaster').toFixed(4)} SOL
                         </span>
                       </div>
                     </div>

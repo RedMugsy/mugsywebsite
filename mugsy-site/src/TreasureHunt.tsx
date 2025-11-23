@@ -78,9 +78,9 @@ export default function TreasureHunt() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="pt-8"
           >
-            <button className="btn-neo text-lg sm:text-2xl px-10 py-5">
+            <a href="#/treasure-hunt/register" className="btn-neo text-lg sm:text-2xl px-10 py-5 inline-block">
               JOIN THE HUNT
-            </button>
+            </a>
           </motion.div>
         </div>
       </section>
@@ -189,9 +189,9 @@ export default function TreasureHunt() {
 
           {/* Button under prizes */}
           <div className="text-center pt-8">
-            <button className="btn-buy text-lg sm:text-xl px-8 py-4">
+            <a href="#/treasure-hunt/register" className="btn-buy text-lg sm:text-xl px-8 py-4 inline-block">
               CRACK THE FIRST CIPHER
-            </button>
+            </a>
           </div>
         </div>
 

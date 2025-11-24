@@ -368,6 +368,21 @@ export default function TreasureHunt() {
         </div>
       </section>
 
+      {/* PROMOTER SECTION */}
+      <section className="relative py-12 px-6 sm:px-10 max-w-7xl mx-auto border-t border-white/10">
+        <div className="text-center space-y-4">
+          <p className="text-slate-300 text-lg">
+            Want to help grow the Red Mugsy Treasure Hunt?
+          </p>
+          <a
+            href="#/treasure-hunt/promoter-register"
+            className="inline-block text-[#ff1a4b] hover:text-[#00F0FF] font-semibold text-xl transition-colors underline"
+          >
+            Register as a Promoter
+          </a>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <SiteFooter />
     </div>

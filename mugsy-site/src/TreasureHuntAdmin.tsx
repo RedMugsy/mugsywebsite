@@ -26,12 +26,65 @@ type AdminUser = {
   lastLogin: string
 }
 
-type Page = 'dashboard' | 'admins' | 'communications'
+type PromoterType = 'individual' | 'company'
+
+type PromoterStatus = 'pending' | 'active' | 'removed'
+
+type Promoter = {
+  id: string
+  type: PromoterType
+  status: PromoterStatus
+  referralCode: string
+  registeredDate: string
+
+  // Individual fields
+  firstName?: string
+  middleName?: string
+  lastName?: string
+  phone?: string
+  email?: string
+  xAccount?: string
+  telegramAccount?: string
+  discordAccount?: string
+
+  // Company fields
+  companyName?: string
+  companyLicense?: string
+  companyAddress?: string
+  companyWebsite?: string
+  companyX?: string
+  companyTelegram?: string
+  companyDiscord?: string
+  contactPersonName?: string
+  contactPersonEmail?: string
+  contactPersonPhone?: string
+
+  // Common fields
+  forecastedParticipants: number
+  walletAddress: string
+  actualParticipants: number
+}
+
+type PromoterDraft = Partial<Promoter> & { draftId: string; savedAt: string }
+
+type Page = 'dashboard' | 'admins' | 'communications' | 'promoters'
 
 export default function TreasureHuntAdmin() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard')
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
   const [editForm, setEditForm] = useState<Partial<Participant>>({})
+
+  // Promoter Management
+  const [showPromoterForm, setShowPromoterForm] = useState(false)
+  const [promoterFormType, setPromoterFormType] = useState<PromoterType>('individual')
+  const [promoterFormData, setPromoterFormData] = useState<Partial<Promoter>>({
+    type: 'individual',
+    forecastedParticipants: 0,
+    walletAddress: ''
+  })
+  const [editingDraft, setEditingDraft] = useState<PromoterDraft | null>(null)
+  const [showRejectionForm, setShowRejectionForm] = useState<Promoter | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
 
   // Communication state
   const [messageType, setMessageType] = useState<'email' | 'portal' | 'both'>('both')
@@ -40,7 +93,7 @@ export default function TreasureHuntAdmin() {
   const [messageSubject, setMessageSubject] = useState('')
   const [messageBody, setMessageBody] = useState('')
 
-  // Sample data - in production, this would come from an API
+  // Sample data
   const tierData = [
     { name: 'Free Loader', value: 145, color: '#888888' },
     { name: 'Pathfinder', value: 212, color: '#ff1a4b' },
@@ -83,21 +136,46 @@ export default function TreasureHuntAdmin() {
       referralCode: 'PROMO456',
       registeredDate: '2024-11-21',
       ciphersSolved: 2
-    },
-    {
-      id: '3',
-      firstName: 'Bob',
-      lastName: 'Johnson',
-      email: 'bob.johnson@example.com',
-      phone: '+1234567892',
-      tier: 'free',
-      walletAddress: '',
-      status: 'on-hold',
-      referralCode: '',
-      registeredDate: '2024-11-22',
-      ciphersSolved: 1
     }
   ])
+
+  const [promoters, setPromoters] = useState<Promoter[]>([
+    {
+      id: '1',
+      type: 'individual',
+      status: 'active',
+      referralCode: 'PROMO123',
+      registeredDate: '2024-11-15',
+      firstName: 'Alice',
+      middleName: 'M',
+      lastName: 'Johnson',
+      phone: '+1234567890',
+      email: 'alice@example.com',
+      xAccount: '@alicejohnson',
+      forecastedParticipants: 100,
+      walletAddress: '7Abc...d4Ef',
+      actualParticipants: 87
+    },
+    {
+      id: '2',
+      type: 'company',
+      status: 'pending',
+      referralCode: 'CORP456',
+      registeredDate: '2024-11-22',
+      companyName: 'Crypto Marketing Inc',
+      companyLicense: 'LIC123456',
+      companyAddress: '123 Main St, City',
+      companyWebsite: 'https://cryptomarketing.com',
+      contactPersonName: 'Bob Smith',
+      contactPersonEmail: 'bob@cryptomarketing.com',
+      contactPersonPhone: '+1987654321',
+      forecastedParticipants: 500,
+      walletAddress: '',
+      actualParticipants: 0
+    }
+  ])
+
+  const [drafts, setDrafts] = useState<PromoterDraft[]>([])
 
   const [admins, setAdmins] = useState<AdminUser[]>([
     {
@@ -106,13 +184,6 @@ export default function TreasureHuntAdmin() {
       email: 'admin@redmugsy.com',
       role: 'super-admin',
       lastLogin: '2024-11-23 10:30'
-    },
-    {
-      id: '2',
-      name: 'Moderator User',
-      email: 'moderator@redmugsy.com',
-      role: 'moderator',
-      lastLogin: '2024-11-23 09:15'
     }
   ])
 
@@ -153,6 +224,99 @@ export default function TreasureHuntAdmin() {
     setMessageBody('')
   }
 
+  // Promoter Management Functions
+  const generateReferralCode = () => {
+    return 'PROMO' + Math.random().toString(36).substring(2, 8).toUpperCase()
+  }
+
+  const handleRegisterPromoter = () => {
+    const newPromoter: Promoter = {
+      ...promoterFormData as Promoter,
+      id: Date.now().toString(),
+      status: 'active',
+      referralCode: generateReferralCode(),
+      registeredDate: new Date().toISOString().split('T')[0],
+      actualParticipants: 0
+    }
+
+    setPromoters([...promoters, newPromoter])
+
+    // Send email (in production)
+    const email = promoterFormData.type === 'individual'
+      ? promoterFormData.email
+      : promoterFormData.contactPersonEmail
+
+    console.log('Sending welcome email to:', email, {
+      username: email,
+      temporaryPassword: 'TempPass' + Math.random().toString(36).substring(2, 8),
+      referralCode: newPromoter.referralCode
+    })
+
+    alert(`Promoter registered successfully!\nReferral Code: ${newPromoter.referralCode}\nWelcome email sent to ${email}`)
+
+    setShowPromoterForm(false)
+    resetPromoterForm()
+  }
+
+  const handleSaveDraft = () => {
+    const draft: PromoterDraft = {
+      ...promoterFormData,
+      draftId: Date.now().toString(),
+      savedAt: new Date().toISOString()
+    }
+    setDrafts([...drafts, draft])
+    alert('Draft saved successfully!')
+    setShowPromoterForm(false)
+    resetPromoterForm()
+  }
+
+  const handleLoadDraft = (draft: PromoterDraft) => {
+    setPromoterFormData(draft)
+    setPromoterFormType(draft.type || 'individual')
+    setEditingDraft(draft)
+    setShowPromoterForm(true)
+  }
+
+  const handleDeleteDraft = (draftId: string) => {
+    setDrafts(drafts.filter(d => d.draftId !== draftId))
+  }
+
+  const resetPromoterForm = () => {
+    setPromoterFormData({
+      type: 'individual',
+      forecastedParticipants: 0,
+      walletAddress: ''
+    })
+    setPromoterFormType('individual')
+    setEditingDraft(null)
+  }
+
+  const handleApprovePromoter = (promoterId: string) => {
+    setPromoters(promoters.map(p =>
+      p.id === promoterId ? { ...p, status: 'active' as PromoterStatus } : p
+    ))
+    alert('Promoter approved and welcome email sent!')
+  }
+
+  const handleRejectPromoter = (promoter: Promoter, withReason: boolean) => {
+    if (withReason) {
+      setShowRejectionForm(promoter)
+    } else {
+      setPromoters(promoters.filter(p => p.id !== promoter.id))
+      alert('Promoter rejected')
+    }
+  }
+
+  const handleSendRejection = () => {
+    if (showRejectionForm) {
+      setPromoters(promoters.filter(p => p.id !== showRejectionForm.id))
+      console.log('Sending rejection email with reason:', rejectionReason)
+      alert('Rejection email sent with feedback')
+      setShowRejectionForm(null)
+      setRejectionReason('')
+    }
+  }
+
   const getStatusBadge = (status: Participant['status']) => {
     const colors = {
       'active': 'bg-green-500/20 text-green-400 border-green-500/30',
@@ -184,6 +348,23 @@ export default function TreasureHuntAdmin() {
     )
   }
 
+  const getPromoterStatusBadge = (status: PromoterStatus) => {
+    const colors = {
+      'pending': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      'active': 'bg-green-500/20 text-green-400 border-green-500/30',
+      'removed': 'bg-red-500/20 text-red-400 border-red-500/30'
+    }
+    return (
+      <span className={`px-2 py-1 rounded text-xs border ${colors[status]}`}>
+        {status.toUpperCase()}
+      </span>
+    )
+  }
+
+  const pendingPromoters = promoters.filter(p => p.status === 'pending')
+  const activePromoters = promoters.filter(p => p.status === 'active')
+  const removedPromoters = promoters.filter(p => p.status === 'removed')
+
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased">
       <SiteHeader />
@@ -206,6 +387,16 @@ export default function TreasureHuntAdmin() {
               }`}
             >
               📊 Dashboard & Participants
+            </button>
+            <button
+              onClick={() => setCurrentPage('promoters')}
+              className={`w-full text-left px-4 py-3 rounded-lg transition ${
+                currentPage === 'promoters'
+                  ? 'bg-[#ff1a4b] text-white font-semibold'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              🎯 Promoter Management
             </button>
             <button
               onClick={() => setCurrentPage('admins')}
@@ -235,7 +426,7 @@ export default function TreasureHuntAdmin() {
           {/* PAGE 1: DASHBOARD & PARTICIPANTS */}
           {currentPage === 'dashboard' && (
             <div className="space-y-12">
-              {/* Section 1: Dashboard */}
+              {/* Dashboard content - keeping existing code */}
               <section>
                 <h1 className="text-4xl font-bold text-white mb-8">Dashboard</h1>
 
@@ -259,7 +450,6 @@ export default function TreasureHuntAdmin() {
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-8">
-                  {/* Pie Chart */}
                   <div className="card">
                     <h3 className="text-2xl font-bold text-white mb-6">Tier Distribution</h3>
                     <ResponsiveContainer width="100%" height={300}>
@@ -278,23 +468,18 @@ export default function TreasureHuntAdmin() {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip
-                          contentStyle={{ background: '#0f1115', border: '1px solid #333', borderRadius: 8, color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ background: '#0f1115', border: '1px solid #333', borderRadius: 8, color: '#fff' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Bar Chart */}
                   <div className="card">
                     <h3 className="text-2xl font-bold text-white mb-6">Daily Signups</h3>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={dailySignups}>
                         <XAxis dataKey="date" stroke="#888" style={{ fontSize: '12px' }} />
                         <YAxis stroke="#888" style={{ fontSize: '12px' }} />
-                        <Tooltip
-                          contentStyle={{ background: '#0f1115', border: '1px solid #333', borderRadius: 8, color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ background: '#0f1115', border: '1px solid #333', borderRadius: 8, color: '#fff' }} />
                         <Legend />
                         <Bar dataKey="free" stackId="a" fill="#888888" name="Free Loader" />
                         <Bar dataKey="pathfinder" stackId="a" fill="#ff1a4b" name="Pathfinder" />
@@ -305,7 +490,7 @@ export default function TreasureHuntAdmin() {
                 </div>
               </section>
 
-              {/* Section 2: Participants Table */}
+              {/* Participants Table */}
               <section>
                 <h2 className="text-3xl font-bold text-white mb-6">All Participants</h2>
 
@@ -382,7 +567,205 @@ export default function TreasureHuntAdmin() {
             </div>
           )}
 
-          {/* PAGE 2: ADMINISTRATOR MANAGEMENT */}
+          {/* PAGE 2: PROMOTER MANAGEMENT */}
+          {currentPage === 'promoters' && (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h1 className="text-4xl font-bold text-white">Promoter Management</h1>
+                <button
+                  onClick={() => setShowPromoterForm(true)}
+                  className="btn-neo px-6 py-3"
+                >
+                  + Register New Promoter
+                </button>
+              </div>
+
+              {/* Dashboard Stats */}
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="card bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-yellow-500/30">
+                  <h3 className="text-sm text-slate-400 uppercase tracking-wider mb-2">New Requests</h3>
+                  <p className="text-5xl font-bold text-yellow-400">{pendingPromoters.length}</p>
+                </div>
+                <div className="card bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/30">
+                  <h3 className="text-sm text-slate-400 uppercase tracking-wider mb-2">Active Promoters</h3>
+                  <p className="text-5xl font-bold text-green-400">{activePromoters.length}</p>
+                </div>
+                <div className="card bg-gradient-to-br from-red-500/20 to-red-500/5 border-red-500/30">
+                  <h3 className="text-sm text-slate-400 uppercase tracking-wider mb-2">Removed/Canceled</h3>
+                  <p className="text-5xl font-bold text-red-400">{removedPromoters.length}</p>
+                </div>
+              </div>
+
+              {/* Pending Requests */}
+              {pendingPromoters.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-white mb-4">Pending Registration Requests</h2>
+                  <div className="card overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Type</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Name</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Email</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Forecasted</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Date</th>
+                          <th className="text-right py-3 px-3 text-slate-300 font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pendingPromoters.map((promoter) => (
+                          <tr key={promoter.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="py-4 px-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                promoter.type === 'individual' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                              }`}>
+                                {promoter.type.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="py-4 px-3 text-white">
+                              {promoter.type === 'individual'
+                                ? `${promoter.firstName} ${promoter.lastName}`
+                                : promoter.companyName
+                              }
+                            </td>
+                            <td className="py-4 px-3 text-slate-300">
+                              {promoter.type === 'individual' ? promoter.email : promoter.contactPersonEmail}
+                            </td>
+                            <td className="py-4 px-3 text-slate-300">{promoter.forecastedParticipants}</td>
+                            <td className="py-4 px-3 text-slate-300">{promoter.registeredDate}</td>
+                            <td className="py-4 px-3">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleApprovePromoter(promoter.id)}
+                                  className="px-3 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30 text-xs"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleRejectPromoter(promoter, false)}
+                                  className="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs"
+                                >
+                                  Reject
+                                </button>
+                                <button
+                                  onClick={() => handleRejectPromoter(promoter, true)}
+                                  className="px-3 py-1 rounded bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 text-xs"
+                                >
+                                  Reject w/ Reason
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+
+              {/* All Promoters */}
+              <section>
+                <h2 className="text-2xl font-bold text-white mb-4">All Promoters</h2>
+                <div className="card overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Type</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Name</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Referral Code</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Status</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Participants</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {promoters.map((promoter) => (
+                        <tr key={promoter.id} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-4 px-3">
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              promoter.type === 'individual' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
+                            }`}>
+                              {promoter.type.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-4 px-3 text-white">
+                            {promoter.type === 'individual'
+                              ? `${promoter.firstName} ${promoter.lastName}`
+                              : promoter.companyName
+                            }
+                          </td>
+                          <td className="py-4 px-3 text-[#00F0FF] font-mono">{promoter.referralCode}</td>
+                          <td className="py-4 px-3">{getPromoterStatusBadge(promoter.status)}</td>
+                          <td className="py-4 px-3 text-white">
+                            {promoter.actualParticipants} / {promoter.forecastedParticipants}
+                          </td>
+                          <td className="py-4 px-3 text-slate-300">{promoter.registeredDate}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* Drafts Section */}
+              {drafts.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-white mb-4">Drafts</h2>
+                  <div className="card overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Type</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Name</th>
+                          <th className="text-left py-3 px-3 text-slate-300 font-semibold">Saved At</th>
+                          <th className="text-right py-3 px-3 text-slate-300 font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {drafts.map((draft) => (
+                          <tr key={draft.draftId} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="py-4 px-3">
+                              <span className="px-2 py-1 rounded text-xs bg-gray-500/20 text-gray-400">
+                                {draft.type?.toUpperCase() || 'DRAFT'}
+                              </span>
+                            </td>
+                            <td className="py-4 px-3 text-white">
+                              {draft.type === 'individual'
+                                ? `${draft.firstName || ''} ${draft.lastName || ''}`
+                                : draft.companyName || 'Untitled Draft'
+                              }
+                            </td>
+                            <td className="py-4 px-3 text-slate-300">
+                              {new Date(draft.savedAt).toLocaleString()}
+                            </td>
+                            <td className="py-4 px-3">
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleLoadDraft(draft)}
+                                  className="p-2 rounded hover:bg-white/10 text-[#00F0FF]"
+                                  title="Edit Draft"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteDraft(draft.draftId)}
+                                  className="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+
+          {/* PAGE 3: ADMINISTRATOR MANAGEMENT */}
           {currentPage === 'admins' && (
             <div className="space-y-8">
               <div className="flex items-center justify-between">
@@ -438,7 +821,7 @@ export default function TreasureHuntAdmin() {
             </div>
           )}
 
-          {/* PAGE 3: COMMUNICATION PORTAL */}
+          {/* PAGE 4: COMMUNICATION PORTAL */}
           {currentPage === 'communications' && (
             <div className="space-y-8">
               <h1 className="text-4xl font-bold text-white">Communication Portal</h1>
@@ -693,6 +1076,350 @@ export default function TreasureHuntAdmin() {
                 className="flex-1 px-6 py-3 rounded-lg border border-white/10 hover:bg-white/5"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Promoter Registration Form Modal */}
+      {showPromoterForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-[#0b0d12] border border-white/10 rounded-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold text-white mb-6">Register New Promoter</h3>
+
+            <div className="space-y-6">
+              {/* Type Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-3">
+                  Promoter Type <span className="text-[#ff1a4b]">*</span>
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="promoterType"
+                      value="individual"
+                      checked={promoterFormType === 'individual'}
+                      onChange={(e) => {
+                        setPromoterFormType(e.target.value as PromoterType)
+                        setPromoterFormData({ ...promoterFormData, type: e.target.value as PromoterType })
+                      }}
+                      className="text-[#ff1a4b]"
+                    />
+                    <span className="text-white">Individual</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="promoterType"
+                      value="company"
+                      checked={promoterFormType === 'company'}
+                      onChange={(e) => {
+                        setPromoterFormType(e.target.value as PromoterType)
+                        setPromoterFormData({ ...promoterFormData, type: e.target.value as PromoterType })
+                      }}
+                      className="text-[#ff1a4b]"
+                    />
+                    <span className="text-white">Company</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Individual Fields */}
+              {promoterFormType === 'individual' && (
+                <div className="space-y-4 border-t border-white/10 pt-6">
+                  <h4 className="text-lg font-semibold text-white">Individual Information</h4>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">First Name *</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.firstName || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, firstName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Middle Name</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.middleName || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, middleName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Last Name *</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.lastName || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, lastName: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Phone Number *</label>
+                      <input
+                        type="tel"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.phone || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, phone: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Email Address *</label>
+                      <input
+                        type="email"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.email || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">X Account</label>
+                      <input
+                        type="text"
+                        placeholder="@username"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.xAccount || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, xAccount: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Telegram Account</label>
+                      <input
+                        type="text"
+                        placeholder="@username"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.telegramAccount || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, telegramAccount: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Discord</label>
+                      <input
+                        type="text"
+                        placeholder="username#0000"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.discordAccount || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, discordAccount: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Company Fields */}
+              {promoterFormType === 'company' && (
+                <div className="space-y-4 border-t border-white/10 pt-6">
+                  <h4 className="text-lg font-semibold text-white">Company Information</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company Name *</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyName || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company License</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyLicense || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyLicense: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company Address</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyAddress || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyAddress: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company Website</label>
+                      <input
+                        type="url"
+                        placeholder="https://"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyWebsite || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyWebsite: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company X Account</label>
+                      <input
+                        type="text"
+                        placeholder="@company"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyX || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyX: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company Telegram</label>
+                      <input
+                        type="text"
+                        placeholder="@company"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyTelegram || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyTelegram: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Company Discord</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.companyDiscord || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, companyDiscord: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <h4 className="text-lg font-semibold text-white pt-4">Contact Person</h4>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.contactPersonName || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, contactPersonName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Email *</label>
+                      <input
+                        type="email"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.contactPersonEmail || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, contactPersonEmail: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-slate-300 mb-2">Phone *</label>
+                      <input
+                        type="tel"
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                        value={promoterFormData.contactPersonPhone || ''}
+                        onChange={(e) => setPromoterFormData({ ...promoterFormData, contactPersonPhone: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Common Fields */}
+              <div className="space-y-4 border-t border-white/10 pt-6">
+                <h4 className="text-lg font-semibold text-white">Additional Information</h4>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Forecasted Number of Participants *</label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white"
+                      value={promoterFormData.forecastedParticipants || 0}
+                      onChange={(e) => setPromoterFormData({ ...promoterFormData, forecastedParticipants: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Wallet Address</label>
+                    <input
+                      type="text"
+                      placeholder="Solana wallet address"
+                      className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white font-mono"
+                      value={promoterFormData.walletAddress || ''}
+                      onChange={(e) => setPromoterFormData({ ...promoterFormData, walletAddress: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex gap-4 mt-8">
+              <button
+                onClick={handleSaveDraft}
+                className="px-6 py-3 rounded-lg border border-white/10 hover:bg-white/5 text-white"
+              >
+                Save Draft
+              </button>
+              <button
+                onClick={() => {
+                  setShowPromoterForm(false)
+                  resetPromoterForm()
+                }}
+                className="px-6 py-3 rounded-lg border border-white/10 hover:bg-white/5 text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRegisterPromoter}
+                className="flex-1 btn-neo py-3"
+              >
+                Register Promoter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Feedback Modal */}
+      {showRejectionForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-[#0b0d12] border border-white/10 rounded-2xl p-8 max-w-2xl w-full">
+            <h3 className="text-2xl font-bold text-white mb-4">Rejection Feedback</h3>
+            <p className="text-slate-300 mb-6">
+              Provide feedback on why this promoter registration was rejected:
+            </p>
+
+            <textarea
+              rows={6}
+              className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:border-[#ff1a4b] focus:outline-none resize-none"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            />
+
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() => {
+                  setShowRejectionForm(null)
+                  setRejectionReason('')
+                }}
+                className="px-6 py-3 rounded-lg border border-white/10 hover:bg-white/5 text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendRejection}
+                className="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-6 py-3 rounded-lg font-semibold"
+              >
+                Send Rejection Email
               </button>
             </div>
           </div>

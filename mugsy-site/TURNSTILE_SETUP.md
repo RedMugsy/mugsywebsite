@@ -9,9 +9,13 @@ Cloudflare Turnstile provides bot protection for the registration forms without 
 - **Site Key**: `0x4AAAAAACCjOLDn-vMrwViE`
 - **Location**: `src/TreasureHuntRegistration.tsx`
 
-### Promoter Registration Form
+### Promoter Self-Registration Form
 - **Site Key**: `0x4AAAAAACCjPAPEx1KF6so2`
 - **Location**: `src/PromoterSelfRegistration.tsx`
+
+### Promoter Sign In Page
+- **Site Key**: `0x4AAAAAACCjW3-nQeujEtCX`
+- **Location**: `src/TreasureHuntPromoters.tsx`
 
 ## Secret Keys (MUST be kept secure - NEVER commit)
 
@@ -23,9 +27,13 @@ Cloudflare Turnstile provides bot protection for the registration forms without 
 - **Secret Key**: `0x4AAAAAACCjOKcMasWMf4LaJRbGmMfkIvc`
 - **Environment Variable**: `TURNSTILE_SECRET_PARTICIPANT`
 
-### Promoter Registration Form
+### Promoter Self-Registration Form
 - **Secret Key**: `0x4AAAAAACCjPAYKmLx3VnQK4daBnIlTgZA`
 - **Environment Variable**: `TURNSTILE_SECRET_PROMOTER`
+
+### Promoter Sign In Page
+- **Secret Key**: `0x4AAAAAACCjWwyE5V54avpl3kq7IKtH6cQ`
+- **Environment Variable**: `TURNSTILE_SECRET_PROMOTER_SIGNIN`
 
 ## Backend Implementation Required
 

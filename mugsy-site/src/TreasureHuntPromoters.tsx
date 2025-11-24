@@ -5,6 +5,10 @@ import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Turnstile } from '@marsidev/react-turnstile'
+
+// Cloudflare Turnstile site key for Promoter Sign In
+const TURNSTILE_SITE_KEY = '0x4AAAAAACCjW3-nQeujEtCX'
 
 export default function TreasureHuntPromoters() {
   const [contactForm, setContactForm] = useState({
@@ -20,6 +24,10 @@ export default function TreasureHuntPromoters() {
   // Terms & Conditions state
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
+
+  // Turnstile state
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
+  const [turnstileError, setTurnstileError] = useState<string>('')
 
   // Check if user has already accepted terms (using localStorage for demo)
   useEffect(() => {
@@ -109,6 +117,40 @@ export default function TreasureHuntPromoters() {
             Promoters Dashboard
           </motion.p>
 
+          {/* Security Verification */}
+          {termsAccepted && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col items-center gap-3"
+            >
+              <p className="text-sm text-slate-400">Complete security verification to continue</p>
+              <Turnstile
+                siteKey={TURNSTILE_SITE_KEY}
+                onSuccess={(token: string) => {
+                  setTurnstileToken(token)
+                  setTurnstileError('')
+                  console.log('===== PROMOTER SIGN IN - TURNSTILE VERIFIED =====')
+                  console.log('Turnstile Token:', token)
+                  console.log('Note: Token must be verified server-side with secret key')
+                  console.log('===============================================')
+                }}
+                onError={() => {
+                  setTurnstileToken('')
+                  setTurnstileError('Verification failed. Please try again.')
+                }}
+                onExpire={() => {
+                  setTurnstileToken('')
+                  setTurnstileError('Verification expired. Please verify again.')
+                }}
+              />
+              {turnstileError && (
+                <p className="text-[#ff1a4b] text-sm">{turnstileError}</p>
+              )}
+            </motion.div>
+          )}
+
           {/* Wallet Connection */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -120,16 +162,21 @@ export default function TreasureHuntPromoters() {
               <div className="wallet-adapter-custom">
                 <WalletMultiButton
                   className="btn-neo text-lg sm:text-xl px-8 py-4"
-                  disabled={!termsAccepted}
+                  disabled={!termsAccepted || !turnstileToken}
                   onClick={() => {
                     if (!termsAccepted) {
                       alert('Please accept the Terms & Conditions first.')
                       setShowTermsModal(true)
+                    } else if (!turnstileToken) {
+                      setTurnstileError('Please complete the security verification first.')
                     }
                   }}
                 >
                   {connecting ? 'Connecting...' : 'Connect Wallet'}
                 </WalletMultiButton>
+                {!turnstileToken && termsAccepted && (
+                  <p className="text-sm text-slate-400 mt-2">Complete security verification above to enable wallet connection</p>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-4">

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 type Tier = 'free' | 'pathfinder' | 'keymaster'
 
@@ -17,6 +19,10 @@ type FormErrors = {
 }
 
 export default function TreasureHuntRegistration() {
+  // Wallet adapter hooks
+  const { publicKey, connected } = useWallet()
+  const walletAddress = publicKey?.toBase58() || ''
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -25,12 +31,9 @@ export default function TreasureHuntRegistration() {
     referralCode: ''
   })
   const [selectedTier, setSelectedTier] = useState<Tier>('free')
-  const [walletConnected, setWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [walletError, setWalletError] = useState('')
 
   const tierPricing = {
     free: { sol: 0, label: 'Free' },
@@ -91,34 +94,12 @@ export default function TreasureHuntRegistration() {
     }
 
     // Wallet validation for paid tiers
-    if (selectedTier !== 'free' && !walletConnected) {
+    if (selectedTier !== 'free' && !connected) {
       newErrors.wallet = 'Connect your wallet to continue.'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
-
-  const connectWallet = async () => {
-    setWalletError('')
-    try {
-      if ((window as any).solana?.isPhantom) {
-        const response = await (window as any).solana.connect()
-        setWalletAddress(response.publicKey.toString())
-        setWalletConnected(true)
-        setErrors({ ...errors, wallet: undefined })
-      } else {
-        setWalletError('Could not connect to your wallet. Please try again.')
-      }
-    } catch (err: any) {
-      if (err.message?.includes('rejected') || err.code === 4001) {
-        setWalletError('Payment was canceled. No charges were made.')
-      } else if (err.message?.includes('network')) {
-        setWalletError('We couldn\'t verify your wallet. Check your internet and try again.')
-      } else {
-        setWalletError('Could not connect to your wallet. Please try again.')
-      }
-    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -405,30 +386,33 @@ export default function TreasureHuntRegistration() {
                     Connect Your Wallet {selectedTier !== 'free' && <span className="text-[#ff1a4b]">*</span>}
                   </label>
                   <p className="text-xs text-slate-400 mb-3">
-                    Backpack, Phantom, Trust Wallet, or any compatible Solana wallet
+                    Phantom, Solflare, Backpack, Trust Wallet, or any compatible Solana wallet
                   </p>
-                  {walletConnected ? (
-                    <div className="rounded-lg bg-green-900/20 border border-green-500/30 px-4 py-3">
-                      <p className="text-green-400 text-sm">
-                        ✓ Wallet Connected
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1 font-mono truncate">
-                        {walletAddress}
-                      </p>
+                  {connected ? (
+                    <div className="space-y-3">
+                      <div className="rounded-lg bg-green-900/20 border border-green-500/30 px-4 py-3">
+                        <p className="text-green-400 text-sm font-semibold">
+                          ✓ Wallet Connected
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1 font-mono truncate">
+                          {walletAddress}
+                        </p>
+                      </div>
+                      <div className="wallet-adapter-custom">
+                        <WalletMultiButton className="w-full !text-sm !py-2" />
+                      </div>
                     </div>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        onClick={connectWallet}
-                        className={`w-full rounded-lg bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF] px-4 py-3 font-semibold text-black hover:opacity-90 transition ${
-                          errors.wallet ? 'ring-2 ring-red-500' : ''
-                        }`}
-                      >
-                        Connect Wallet
-                      </button>
-                      {(errors.wallet || walletError) && (
-                        <p className="text-red-400 text-sm mt-2">{errors.wallet || walletError}</p>
+                      <div className="wallet-adapter-custom">
+                        <WalletMultiButton
+                          className={`w-full !rounded-lg !font-semibold ${
+                            errors.wallet ? '!ring-2 !ring-red-500' : ''
+                          }`}
+                        />
+                      </div>
+                      {errors.wallet && (
+                        <p className="text-red-400 text-sm mt-2">{errors.wallet}</p>
                       )}
                     </>
                   )}

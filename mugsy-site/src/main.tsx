@@ -63,7 +63,11 @@ function RootRouter() {
     return <TreasureHunt />
   }
   if (path === '/mugsywebsite/treasure-hunt/register' || path === '/mugsywebsite/treasure-hunt/register/' || path === '/treasure-hunt/register' || path === '/treasure-hunt/register/') {
-    return <TreasureHuntRegistration />
+    return (
+      <SolanaWalletProvider>
+        <TreasureHuntRegistration />
+      </SolanaWalletProvider>
+    )
   }
   if (path === '/mugsywebsite/treasure-hunt/promoters' || path === '/mugsywebsite/treasure-hunt/promoters/' || path === '/treasure-hunt/promoters' || path === '/treasure-hunt/promoters/') {
     return (

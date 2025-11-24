@@ -4,6 +4,10 @@ import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Turnstile } from '@marsidev/react-turnstile'
+
+// Cloudflare Turnstile Site Key for Participant Registration
+const TURNSTILE_SITE_KEY = '0x4AAAAAACCjOLDn-vMrwViE'
 
 type Tier = 'free' | 'pathfinder' | 'keymaster'
 
@@ -16,6 +20,7 @@ type FormErrors = {
   tier?: string
   payment?: string
   server?: string
+  captcha?: string
 }
 
 export default function TreasureHuntRegistration() {
@@ -34,6 +39,7 @@ export default function TreasureHuntRegistration() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
 
   const tierPricing = {
     free: { sol: 0, label: 'Free' },
@@ -98,6 +104,11 @@ export default function TreasureHuntRegistration() {
       newErrors.wallet = 'Connect your wallet to continue.'
     }
 
+    // Captcha validation
+    if (!turnstileToken) {
+      newErrors.captcha = 'Please complete the security verification.'
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -116,10 +127,20 @@ export default function TreasureHuntRegistration() {
     setIsSubmitting(true)
 
     try {
+      // Log turnstile token for backend verification
+      console.log('===== PARTICIPANT REGISTRATION SUBMISSION =====')
+      console.log('Turnstile Token:', turnstileToken)
+      console.log('Form Data:', formData)
+      console.log('Tier:', selectedTier)
+      console.log('Wallet Address:', walletAddress)
+      console.log('Note: Token must be verified server-side with secret key')
+      console.log('=============================================')
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      // In production: Send to API, process payment, etc.
+      // In production: Send to API with turnstile token for verification
+      // The backend should verify the token using the secret key before processing
       // Check for duplicate email
       const isDuplicate = false // Replace with actual API check
       if (isDuplicate) {
@@ -439,6 +460,33 @@ export default function TreasureHuntRegistration() {
                     <p className="text-red-400 text-sm">{errors.payment}</p>
                   </div>
                 )}
+
+                {/* Cloudflare Turnstile Captcha */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-3">
+                    Security Verification <span className="text-[#ff1a4b]">*</span>
+                  </label>
+                  <div className="flex justify-center">
+                    <Turnstile
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onSuccess={(token: string) => {
+                        setTurnstileToken(token)
+                        setErrors({ ...errors, captcha: undefined })
+                      }}
+                      onError={() => {
+                        setTurnstileToken('')
+                        setErrors({ ...errors, captcha: 'Verification failed. Please try again.' })
+                      }}
+                      onExpire={() => {
+                        setTurnstileToken('')
+                        setErrors({ ...errors, captcha: 'Verification expired. Please verify again.' })
+                      }}
+                    />
+                  </div>
+                  {errors.captcha && (
+                    <p className="text-red-400 text-sm mt-2 text-center">{errors.captcha}</p>
+                  )}
+                </div>
 
                 <button
                   type="submit"

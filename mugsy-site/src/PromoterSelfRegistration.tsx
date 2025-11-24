@@ -2,6 +2,10 @@ import { useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
+import { Turnstile } from '@marsidev/react-turnstile'
+
+// Cloudflare Turnstile Site Key for Promoter Registration
+const TURNSTILE_SITE_KEY = '0x4AAAAAACCjPAPEx1KF6so2'
 
 type PromoterType = 'individual' | 'company'
 
@@ -37,15 +41,33 @@ export default function PromoterSelfRegistration() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
+  const [captchaError, setCaptchaError] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate turnstile token
+    if (!turnstileToken) {
+      setCaptchaError('Please complete the security verification.')
+      return
+    }
+
     setIsSubmitting(true)
+    setCaptchaError('')
+
+    // Log turnstile token for backend verification
+    console.log('===== PROMOTER REGISTRATION SUBMISSION =====')
+    console.log('Turnstile Token:', turnstileToken)
+    console.log('Promoter Type:', promoterType)
+    console.log('Form Data:', formData)
+    console.log('Note: Token must be verified server-side with secret key')
+    console.log('============================================')
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // In production: Send to API, notify admin
+    // In production: Send to API with turnstile token for verification, notify admin
     console.log('Promoter registration submitted:', {
       type: promoterType,
       ...formData
@@ -409,6 +431,33 @@ export default function PromoterSelfRegistration() {
                   <p className="text-xs text-slate-400 mt-1">You can connect your wallet after approval</p>
                 </div>
               </div>
+            </div>
+
+            {/* Cloudflare Turnstile Captcha */}
+            <div className="border-t border-white/10 pt-8">
+              <label className="block text-sm font-medium text-slate-300 mb-3">
+                Security Verification <span className="text-[#ff1a4b]">*</span>
+              </label>
+              <div className="flex justify-center">
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={(token: string) => {
+                    setTurnstileToken(token)
+                    setCaptchaError('')
+                  }}
+                  onError={() => {
+                    setTurnstileToken('')
+                    setCaptchaError('Verification failed. Please try again.')
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken('')
+                    setCaptchaError('Verification expired. Please verify again.')
+                  }}
+                />
+              </div>
+              {captchaError && (
+                <p className="text-red-400 text-sm mt-2 text-center">{captchaError}</p>
+              )}
             </div>
 
             {/* Submit Button */}

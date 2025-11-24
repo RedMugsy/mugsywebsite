@@ -85,6 +85,13 @@ export default function TreasureHuntAdmin() {
   const [showRejectionForm, setShowRejectionForm] = useState<Promoter | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
+  // Search, Sort, Filter state
+  const [promoterSearch, setPromoterSearch] = useState('')
+  const [promoterSortBy, setPromoterSortBy] = useState<'participants' | 'date'>('date')
+  const [promoterSortOrder, setPromoterSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [promoterFilterType, setPromoterFilterType] = useState<'all' | 'individual' | 'company'>('all')
+  const [promoterFilterStatus, setPromoterFilterStatus] = useState<'all' | PromoterStatus>('all')
+
   // Communication state
   const [messageType, setMessageType] = useState<'email' | 'portal' | 'both'>('both')
   const [messageRecipients, setMessageRecipients] = useState<'all' | 'tier-specific'>('all')
@@ -291,10 +298,51 @@ export default function TreasureHuntAdmin() {
   }
 
   const handleApprovePromoter = (promoterId: string) => {
-    setPromoters(promoters.map(p =>
-      p.id === promoterId ? { ...p, status: 'active' as PromoterStatus } : p
-    ))
-    alert('Promoter approved and welcome email sent!')
+    const promoter = promoters.find(p => p.id === promoterId)
+    if (!promoter) return
+
+    // Generate referral code if not already present
+    const referralCode = promoter.referralCode || generateReferralCode()
+
+    // Generate temporary password
+    const temporaryPassword = 'TempPass' + Math.random().toString(36).substring(2, 10).toUpperCase()
+
+    // Get email
+    const email = promoter.type === 'individual'
+      ? promoter.email
+      : promoter.contactPersonEmail
+
+    // Get username (using email)
+    const username = email
+
+    // Update promoter status and add referral code
+    const updatedPromoters = promoters.map(p =>
+      p.id === promoterId
+        ? { ...p, status: 'active' as PromoterStatus, referralCode }
+        : p
+    )
+    setPromoters(updatedPromoters)
+
+    // Send email notification (In production, this would call an API endpoint)
+    console.log('===== PROMOTER APPROVED - SENDING WELCOME EMAIL =====')
+    console.log('To:', email)
+    console.log('Subject: Welcome to Red Mugsy Treasure Hunt - Promoter Access')
+    console.log('Email Content:')
+    console.log(`  Username: ${username}`)
+    console.log(`  Temporary Password: ${temporaryPassword}`)
+    console.log(`  Referral Code: ${referralCode}`)
+    console.log('  Login URL: https://redmugsy.com/treasure-hunt/promoters')
+    console.log('=====================================================')
+
+    alert(
+      `✅ Promoter Approved!\n\n` +
+      `📧 Welcome email sent to: ${email}\n\n` +
+      `Details:\n` +
+      `• Username: ${username}\n` +
+      `• Temporary Password: ${temporaryPassword}\n` +
+      `• Referral Code: ${referralCode}\n\n` +
+      `The promoter has been added to the master database.`
+    )
   }
 
   const handleRejectPromoter = (promoter: Promoter, withReason: boolean) => {
@@ -363,6 +411,56 @@ export default function TreasureHuntAdmin() {
   const pendingPromoters = promoters.filter(p => p.status === 'pending')
   const activePromoters = promoters.filter(p => p.status === 'active')
   const removedPromoters = promoters.filter(p => p.status === 'removed')
+
+  // Filter, search, and sort promoters
+  const getFilteredAndSortedPromoters = () => {
+    let filtered = [...promoters]
+
+    // Apply search filter
+    if (promoterSearch.trim()) {
+      const searchLower = promoterSearch.toLowerCase().trim()
+      filtered = filtered.filter(p => {
+        const name = p.type === 'individual'
+          ? `${p.firstName} ${p.lastName}`.toLowerCase()
+          : (p.companyName || '').toLowerCase()
+
+        const wallet = (p.walletAddress || '').toLowerCase()
+        const referralCode = (p.referralCode || '').toLowerCase()
+
+        return name.includes(searchLower) ||
+               wallet.includes(searchLower) ||
+               referralCode.includes(searchLower)
+      })
+    }
+
+    // Apply type filter
+    if (promoterFilterType !== 'all') {
+      filtered = filtered.filter(p => p.type === promoterFilterType)
+    }
+
+    // Apply status filter
+    if (promoterFilterStatus !== 'all') {
+      filtered = filtered.filter(p => p.status === promoterFilterStatus)
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      if (promoterSortBy === 'participants') {
+        const diff = (a.actualParticipants || 0) - (b.actualParticipants || 0)
+        return promoterSortOrder === 'asc' ? diff : -diff
+      } else {
+        // Sort by date
+        const dateA = new Date(a.registeredDate || 0).getTime()
+        const dateB = new Date(b.registeredDate || 0).getTime()
+        const diff = dateA - dateB
+        return promoterSortOrder === 'asc' ? diff : -diff
+      }
+    })
+
+    return filtered
+  }
+
+  const filteredPromoters = getFilteredAndSortedPromoters()
 
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased">
@@ -665,12 +763,94 @@ export default function TreasureHuntAdmin() {
               {/* All Promoters */}
               <section>
                 <h2 className="text-2xl font-bold text-white mb-4">All Promoters</h2>
+
+                {/* Search, Sort, and Filter Controls */}
+                <div className="card mb-4 space-y-4">
+                  {/* Search Bar */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Search Promoters
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Search by name, wallet address, or referral code..."
+                      value={promoterSearch}
+                      onChange={(e) => setPromoterSearch(e.target.value)}
+                      className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:border-[#00F0FF] focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Sort and Filter Controls */}
+                  <div className="grid md:grid-cols-4 gap-4">
+                    {/* Sort By */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Sort By</label>
+                      <select
+                        value={promoterSortBy}
+                        onChange={(e) => setPromoterSortBy(e.target.value as 'participants' | 'date')}
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white focus:border-[#00F0FF] focus:outline-none"
+                      >
+                        <option value="date">Registration Date</option>
+                        <option value="participants">Participants Count</option>
+                      </select>
+                    </div>
+
+                    {/* Sort Order */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Order</label>
+                      <select
+                        value={promoterSortOrder}
+                        onChange={(e) => setPromoterSortOrder(e.target.value as 'asc' | 'desc')}
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white focus:border-[#00F0FF] focus:outline-none"
+                      >
+                        <option value="desc">Descending</option>
+                        <option value="asc">Ascending</option>
+                      </select>
+                    </div>
+
+                    {/* Filter by Type */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Type</label>
+                      <select
+                        value={promoterFilterType}
+                        onChange={(e) => setPromoterFilterType(e.target.value as any)}
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white focus:border-[#00F0FF] focus:outline-none"
+                      >
+                        <option value="all">All Types</option>
+                        <option value="individual">Individual</option>
+                        <option value="company">Company</option>
+                      </select>
+                    </div>
+
+                    {/* Filter by Status */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                      <select
+                        value={promoterFilterStatus}
+                        onChange={(e) => setPromoterFilterStatus(e.target.value as any)}
+                        className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-2 text-white focus:border-[#00F0FF] focus:outline-none"
+                      >
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="active">Active</option>
+                        <option value="removed">Removed</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Results Count */}
+                  <div className="text-sm text-slate-400">
+                    Showing {filteredPromoters.length} of {promoters.length} promoters
+                  </div>
+                </div>
+
                 <div className="card overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10">
                         <th className="text-left py-3 px-3 text-slate-300 font-semibold">Type</th>
                         <th className="text-left py-3 px-3 text-slate-300 font-semibold">Name</th>
+                        <th className="text-left py-3 px-3 text-slate-300 font-semibold">Wallet</th>
                         <th className="text-left py-3 px-3 text-slate-300 font-semibold">Referral Code</th>
                         <th className="text-left py-3 px-3 text-slate-300 font-semibold">Status</th>
                         <th className="text-left py-3 px-3 text-slate-300 font-semibold">Participants</th>
@@ -678,7 +858,7 @@ export default function TreasureHuntAdmin() {
                       </tr>
                     </thead>
                     <tbody>
-                      {promoters.map((promoter) => (
+                      {filteredPromoters.map((promoter) => (
                         <tr key={promoter.id} className="border-b border-white/5 hover:bg-white/5">
                           <td className="py-4 px-3">
                             <span className={`px-2 py-1 rounded text-xs ${
@@ -691,6 +871,12 @@ export default function TreasureHuntAdmin() {
                             {promoter.type === 'individual'
                               ? `${promoter.firstName} ${promoter.lastName}`
                               : promoter.companyName
+                            }
+                          </td>
+                          <td className="py-4 px-3 text-slate-400 font-mono text-xs">
+                            {promoter.walletAddress
+                              ? `${promoter.walletAddress.slice(0, 6)}...${promoter.walletAddress.slice(-4)}`
+                              : '-'
                             }
                           </td>
                           <td className="py-4 px-3 text-[#00F0FF] font-mono">{promoter.referralCode}</td>

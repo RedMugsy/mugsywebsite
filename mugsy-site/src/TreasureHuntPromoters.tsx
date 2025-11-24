@@ -3,6 +3,8 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 export default function TreasureHuntPromoters() {
   const [contactForm, setContactForm] = useState({
@@ -12,10 +14,8 @@ export default function TreasureHuntPromoters() {
     message: ''
   })
 
-  // Wallet connection state
-  const [walletConnected, setWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState('')
-  const [connectingWallet, setConnectingWallet] = useState(false)
+  // Wallet adapter hooks
+  const { publicKey, connected, connecting } = useWallet()
 
   // Terms & Conditions state
   const [showTermsModal, setShowTermsModal] = useState(false)
@@ -27,48 +27,19 @@ export default function TreasureHuntPromoters() {
     if (accepted === 'true') {
       setTermsAccepted(true)
     } else {
-      // Show terms modal on first login
+      // Show terms modal on first visit
       setShowTermsModal(true)
     }
   }, [])
-
-  const handleConnectWallet = async () => {
-    setConnectingWallet(true)
-    try {
-      // Check if Terms are accepted first
-      if (!termsAccepted) {
-        alert('Please accept the Terms & Conditions first.')
-        setShowTermsModal(true)
-        setConnectingWallet(false)
-        return
-      }
-
-      // Phantom wallet integration (example)
-      if ('solana' in window) {
-        const provider = (window as any).solana
-        if (provider?.isPhantom) {
-          const resp = await provider.connect()
-          setWalletAddress(resp.publicKey.toString())
-          setWalletConnected(true)
-        } else {
-          alert('Phantom wallet not found. Please install Phantom wallet extension.')
-        }
-      } else {
-        alert('Please install a Solana wallet (Phantom, Backpack, or Trust Wallet).')
-      }
-    } catch (err) {
-      console.error('Wallet connection error:', err)
-      alert('Failed to connect wallet. Please try again.')
-    } finally {
-      setConnectingWallet(false)
-    }
-  }
 
   const handleAcceptTerms = () => {
     localStorage.setItem('promoterTermsAccepted', 'true')
     setTermsAccepted(true)
     setShowTermsModal(false)
   }
+
+  // Get wallet address as string
+  const walletAddress = publicKey?.toBase58() || ''
 
   // Sample data for demonstration - in production, this would come from an API
   const referralCode = 'PROMO123'
@@ -145,24 +116,36 @@ export default function TreasureHuntPromoters() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="pt-6"
           >
-            {!walletConnected ? (
-              <button
-                onClick={handleConnectWallet}
-                disabled={connectingWallet}
-                className="btn-neo text-lg sm:text-xl px-8 py-4 inline-block"
-              >
-                {connectingWallet ? 'Connecting...' : 'Connect Wallet'}
-              </button>
+            {!connected ? (
+              <div className="wallet-adapter-custom">
+                <WalletMultiButton
+                  className="btn-neo text-lg sm:text-xl px-8 py-4"
+                  disabled={!termsAccepted}
+                  onClick={() => {
+                    if (!termsAccepted) {
+                      alert('Please accept the Terms & Conditions first.')
+                      setShowTermsModal(true)
+                    }
+                  }}
+                >
+                  {connecting ? 'Connecting...' : 'Connect Wallet'}
+                </WalletMultiButton>
+              </div>
             ) : (
-              <div className="card inline-block bg-gradient-to-r from-[#ff1a4b]/20 to-[#00F0FF]/20 border-[#00F0FF]">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-[#00F0FF] rounded-full animate-pulse" />
-                  <div>
-                    <p className="text-sm text-slate-400">Connected Wallet</p>
-                    <p className="text-white font-mono text-sm">
-                      {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-                    </p>
+              <div className="flex flex-col items-center gap-4">
+                <div className="card inline-block bg-gradient-to-r from-[#ff1a4b]/20 to-[#00F0FF]/20 border-[#00F0FF]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-[#00F0FF] rounded-full animate-pulse" />
+                    <div>
+                      <p className="text-sm text-slate-400">Connected Wallet</p>
+                      <p className="text-white font-mono text-sm">
+                        {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                      </p>
+                    </div>
                   </div>
+                </div>
+                <div className="wallet-adapter-custom">
+                  <WalletMultiButton className="text-sm px-4 py-2" />
                 </div>
               </div>
             )}

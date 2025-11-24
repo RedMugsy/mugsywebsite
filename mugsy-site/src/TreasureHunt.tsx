@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
@@ -327,7 +326,7 @@ export default function TreasureHunt() {
                 a: "Top 3 winners are determined by speed + accuracy + complete progression. The token draw is separate and based on entries earned."
               },
               {
-                q: "What is "Automatic Admission to Mugsy Hunt II"?",
+                q: "What is \"Automatic Admission to Mugsy Hunt II\"?",
                 a: "Top winners get guaranteed entry into the next Treasure Hunt — no waitlists, no requirements, instant access."
               },
               {

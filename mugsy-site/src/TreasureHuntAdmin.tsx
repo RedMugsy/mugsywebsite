@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
-import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 type Participant = {
@@ -82,7 +81,7 @@ export default function TreasureHuntAdmin() {
     forecastedParticipants: 0,
     walletAddress: ''
   })
-  const [editingDraft, setEditingDraft] = useState<PromoterDraft | null>(null)
+  const [_editingDraft, setEditingDraft] = useState<PromoterDraft | null>(null)
   const [showRejectionForm, setShowRejectionForm] = useState<Promoter | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
@@ -177,7 +176,7 @@ export default function TreasureHuntAdmin() {
 
   const [drafts, setDrafts] = useState<PromoterDraft[]>([])
 
-  const [admins, setAdmins] = useState<AdminUser[]>([
+  const [admins, _setAdmins] = useState<AdminUser[]>([
     {
       id: '1',
       name: 'Admin User',

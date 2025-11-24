@@ -600,3 +600,87 @@ body { @apply bg-black text-slate-200 antialiased; }
   background-position: center;
   background-repeat: no-repeat;
 }
+
+/* =========================
+   Solana Wallet Adapter Custom Styles
+   Customize the wallet adapter buttons to match the site theme
+========================= */
+.wallet-adapter-button {
+  background: linear-gradient(135deg, #ff1a4b, #00F0FF) !important;
+  border: none !important;
+  color: #0b0b0b !important;
+  font-weight: 900 !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background: linear-gradient(135deg, #E01540, #2BDBEA) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(255, 26, 75, 0.35) !important;
+}
+
+.wallet-adapter-button[disabled] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Wallet modal styling */
+.wallet-adapter-modal-wrapper {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.wallet-adapter-modal {
+  background: linear-gradient(to bottom, #0a0b0f, #000000) !important;
+  border: 1px solid rgba(255, 26, 75, 0.3) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(255, 26, 75, 0.4) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.wallet-adapter-modal-list-more {
+  color: #00F0FF !important;
+}
+
+/* Individual wallet buttons in modal */
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 26, 75, 0.2) !important;
+  color: #ffffff !important;
+  padding: 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: rgba(255, 26, 75, 0.1) !important;
+  border-color: rgba(255, 26, 75, 0.5) !important;
+  box-shadow: 0 8px 20px rgba(255, 26, 75, 0.25) !important;
+}
+
+/* Wallet button icon */
+.wallet-adapter-button-start-icon {
+  margin-right: 0.5rem !important;
+}
+
+/* Close button in modal */
+.wallet-adapter-modal-button-close {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  background: rgba(255, 26, 75, 0.1) !important;
+}

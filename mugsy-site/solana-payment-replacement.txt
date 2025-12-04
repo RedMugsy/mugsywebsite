@@ -1,0 +1,59 @@
+        // Handle payment for paid tiers
+        if (selectedTier !== 'free') {
+          try {
+            const paymentAmount = getDiscountedPrice(selectedTier)
+            const lamports = Math.floor(paymentAmount * LAMPORTS_PER_SOL)
+            
+            // Create treasury wallet public key
+            const treasuryPubkey = new PublicKey(TREASURY_WALLET)
+            
+            // Create payment transaction
+            const transaction = new Transaction().add(
+              SystemProgram.transfer({
+                fromPubkey: publicKey!,
+                toPubkey: treasuryPubkey,
+                lamports: lamports,
+              })
+            )
+            
+            // Set recent blockhash
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash()
+            transaction.recentBlockhash = blockhash
+            transaction.feePayer = publicKey!
+            
+            console.log(`Sending ${paymentAmount} SOL (${lamports} lamports) to treasury...`)
+            
+            // Send and confirm transaction
+            const signature = await sendTransaction(transaction, connection, {
+              skipPreflight: false,
+              preflightCommitment: 'processed'
+            })
+            
+            console.log('Transaction signature:', signature)
+            
+            // Wait for transaction confirmation
+            const confirmation = await connection.confirmTransaction({
+              signature,
+              blockhash,
+              lastValidBlockHeight
+            }, 'confirmed')
+            
+            if (confirmation.value.err) {
+              throw new Error('Transaction failed: ' + confirmation.value.err.toString())
+            }
+            
+            console.log('Payment successful! Transaction confirmed:', signature)
+            
+          } catch (error: any) {
+            console.error('Payment failed:', error)
+            if (error.message?.includes('User rejected')) {
+              setErrors({ payment: 'Payment was cancelled. Please try again to secure your spot.' })
+            } else if (error.message?.includes('Insufficient funds')) {
+              setErrors({ payment: `Insufficient SOL balance. You need ${getDiscountedPrice(selectedTier)} SOL to register.` })
+            } else {
+              setErrors({ payment: 'Payment failed. Please check your wallet and try again.' })
+            }
+            setIsSubmitting(false)
+            return
+          }
+        }

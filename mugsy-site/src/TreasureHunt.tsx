@@ -9,7 +9,7 @@ export default function TreasureHunt() {
       <SiteHeader />
 
       {/* HERO SECTION */}
-      <section className="relative pt-8 pb-24 sm:pt-12 sm:pb-32 overflow-visible min-h-[90vh] px-6 sm:px-10">
+      <section className="relative pt-20 pb-24 sm:pt-28 sm:pb-32 overflow-visible min-h-[90vh] px-6 sm:px-10">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute -top-24 -left-24 h-80 w-80 bg-[#ff1a4b]/20 blur-3xl rounded-full animate-[blob_16s_ease-in-out_infinite]" />
           <div className="absolute -bottom-24 -right-24 h-80 w-80 bg-[#00F0FF]/20 blur-3xl rounded-full animate-[blob_18s_ease-in-out_infinite]" />
@@ -20,13 +20,19 @@ export default function TreasureHunt() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight"
           >
-            WELCOME TO THE<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF]">
-              RED MUGSY TREASURE HUNT
-            </span>
+            WELCOME TO THE
           </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF]"
+            style={{ fontSize: 'clamp(3rem, 14vw, 11rem)', lineHeight: 0.9 }}
+          >
+            THE RED MUGSY TREASURE HUNT
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -52,15 +58,15 @@ export default function TreasureHunt() {
 
             <div className="grid sm:grid-cols-3 gap-6 pt-8 max-w-2xl mx-auto">
               <div className="card card--red-ghost text-center">
-                <div className="text-5xl font-bold text-[#ff1a4b]">10</div>
+                <div className="text-7xl font-bold text-[#ff1a4b]">10</div>
                 <div className="text-sm text-slate-300 mt-2">Ciphers</div>
               </div>
               <div className="card card--red-ghost text-center">
-                <div className="text-5xl font-bold text-[#00F0FF]">100+</div>
+                <div className="text-7xl font-bold text-[#00F0FF]">100+</div>
                 <div className="text-sm text-slate-300 mt-2">Clues</div>
               </div>
               <div className="card card--red-ghost text-center">
-                <div className="text-5xl font-bold text-white">Dozens</div>
+                <div className="text-7xl font-bold text-white">Dozens</div>
                 <div className="text-sm text-slate-300 mt-2">Side Challenges</div>
               </div>
             </div>
@@ -88,7 +94,7 @@ export default function TreasureHunt() {
       <section id="prizes" className="relative min-h-[60vh] pt-8 pb-20 sm:pt-12 sm:pb-24 px-6 sm:px-10 max-w-7xl mx-auto">
         <div className="space-y-8">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl sm:text-6xl font-bold text-white">Prizes – Almost Everyone Is a Winner</h2>
+            <h2 className="text-4xl sm:text-6xl font-bold text-white">Prizes - For those of you who Survive.</h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
               Every time you successfully solve a Cipher,<br />
               you earn one entry into a draw for <span className="text-[#ff1a4b] font-bold">1,000,000 $MUGSY Tokens</span>.<br />
@@ -163,10 +169,9 @@ export default function TreasureHunt() {
               className="card"
             >
               <div className="text-5xl mb-3">🏅</div>
-              <h3 className="text-xl font-bold text-white mb-3">4th – 8th Place</h3>
+              <h3 className="text-xl font-bold text-white mb-3">4th – 10th Place</h3>
               <ul className="space-y-2 text-slate-200">
-                <li>$200 USDT (Cash) Each</li>
-                <li>Automatic Admission to Mugsy Hunt II</li>
+                <li>50% off Admission to Mugsy Hunt II</li>
               </ul>
             </motion.div>
 
@@ -178,10 +183,37 @@ export default function TreasureHunt() {
               className="card"
             >
               <div className="text-5xl mb-3">🎖️</div>
-              <h3 className="text-xl font-bold text-white mb-3">9th – 18th Place</h3>
+              <h3 className="text-xl font-bold text-white mb-3">11th – 20th Place</h3>
               <ul className="space-y-2 text-slate-200">
-                <li>$100 USDT (Cash) Each</li>
-                <li>Automatic Admission to Mugsy Hunt II</li>
+                <li>25% off Admission to Mugsy Hunt II</li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="card"
+            >
+              <div className="text-5xl mb-3">💎</div>
+              <h3 className="text-xl font-bold text-white mb-3">20th – 500th Place</h3>
+              <ul className="space-y-2 text-slate-200">
+                <li>200,000 $MUGSY Tokens Each</li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="card"
+            >
+              <div className="text-5xl mb-3">🎯</div>
+              <h3 className="text-xl font-bold text-white mb-3">500th – 2,500th Place</h3>
+              <ul className="space-y-2 text-slate-200">
+                <li>50,000 $MUGSY Tokens Each</li>
               </ul>
             </motion.div>
           </div>

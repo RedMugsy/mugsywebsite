@@ -17,6 +17,7 @@ import TreasureHuntPromoters from './TreasureHuntPromoters.tsx'
 import TreasureHuntAdmin from './TreasureHuntAdmin.tsx'
 import PromoterSelfRegistration from './PromoterSelfRegistration.tsx'
 import { SolanaWalletProvider } from './components/SolanaWalletProvider.tsx'
+import PromoterSignin from './PromoterSignin.tsx'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n/config'
 
@@ -78,6 +79,9 @@ function RootRouter() {
   }
   if (path === '/mugsywebsite/treasure-hunt/admin' || path === '/mugsywebsite/treasure-hunt/admin/' || path === '/treasure-hunt/admin' || path === '/treasure-hunt/admin/') {
     return <TreasureHuntAdmin />
+  }
+  if (path === '/mugsywebsite/treasure-hunt/promoter-signin' || path === '/mugsywebsite/treasure-hunt/promoter-signin/' || path === '/treasure-hunt/promoter-signin' || path === '/treasure-hunt/promoter-signin/') {
+    return <PromoterSignin />
   }
   if (path === '/mugsywebsite/treasure-hunt/promoter-register' || path === '/mugsywebsite/treasure-hunt/promoter-register/' || path === '/treasure-hunt/promoter-register' || path === '/treasure-hunt/promoter-register/') {
     return <PromoterSelfRegistration />

@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-type LinkItem = { label: string; href: string };
+type LinkItem = { 
+  label: string; 
+  href: string; 
+  hasDropdown?: boolean;
+  subLinks?: { label: string; href: string }[];
+};
 
 const DEFAULT_LINKS: LinkItem[] = [
   { label: "HOME", href: "#hero" },
@@ -29,8 +34,10 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
   const [focusIdx, setFocusIdx] = useState(0);
   const [ringX, setRingX] = useState(0);
   const [contactOpen, setContactOpen] = useState(false);
+  const [treasureHuntOpen, setTreasureHuntOpen] = useState(false);
   const submenuRef = useRef<HTMLDivElement | null>(null);
   const closeTimer = useRef<number | null>(null);
+  const treasureCloseTimer = useRef<number | null>(null);
   const [tubeLeft, setTubeLeft] = useState<number | null>(null);
   const [tubeWidth, setTubeWidth] = useState<number | null>(null);
 
@@ -41,18 +48,40 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
     }
   }, []);
 
+  const cancelTreasureClose = useCallback(() => {
+    if (treasureCloseTimer.current) {
+      window.clearTimeout(treasureCloseTimer.current);
+      treasureCloseTimer.current = null;
+    }
+  }, []);
+
   const scheduleClose = useCallback(() => {
     cancelClose();
     closeTimer.current = window.setTimeout(() => setContactOpen(false), 160);
   }, [cancelClose]);
+
+  const scheduleTreasureClose = useCallback(() => {
+    cancelTreasureClose();
+    treasureCloseTimer.current = window.setTimeout(() => setTreasureHuntOpen(false), 160);
+  }, [cancelTreasureClose]);
 
   const openContact = useCallback(() => {
     cancelClose();
     setContactOpen(true);
   }, [cancelClose]);
 
+  const openTreasureHunt = useCallback(() => {
+    cancelTreasureClose();
+    setTreasureHuntOpen(true);
+  }, [cancelTreasureClose]);
+
   const contactIdx = useMemo(
     () => links.findIndex((l) => l.href === '#/contact' || l.href === '/#/contact' || l.href === '/contact' || l.href?.startsWith('/contact') || l.href === '/mugsywebsite/contact' || l.href?.startsWith('/mugsywebsite/contact')),
+    [links]
+  );
+
+  const treasureHuntIdx = useMemo(
+    () => links.findIndex((l) => l.hasDropdown && l.label === 'TREASURE HUNT'),
     [links]
   );
 
@@ -128,13 +157,21 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
       setActiveIdx(idx);
       setHoverIdx(null);
       setRingX(centers[idx] ?? 0);
-      const href = links[idx]?.href;
+      const link = links[idx];
       if (idx === contactIdx) {
         setContactOpen((o) => !o);
+        setTreasureHuntOpen(false);
         return;
       }
+      if (idx === treasureHuntIdx) {
+        setTreasureHuntOpen((o) => !o);
+        setContactOpen(false);
+        return;
+      }
+      const href = link?.href;
       if (href) {
         setContactOpen(false);
+        setTreasureHuntOpen(false);
         onNavigate?.(href);
         if (href.startsWith("#")) {
           const el = document.getElementById(href.slice(1));
@@ -144,7 +181,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
         }
       }
     },
-    [centers, links, onNavigate, contactIdx]
+    [centers, links, onNavigate, contactIdx, treasureHuntIdx]
   );
 
   const onKeyDown = useCallback(
@@ -223,15 +260,25 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
                   }`}
                   onMouseEnter={() => {
                     setHoverIdx(idx);
-                    if (idx === contactIdx) openContact();
-                    else scheduleClose();
+                    if (idx === contactIdx) {
+                      openContact();
+                      scheduleTreasureClose();
+                    } else if (idx === treasureHuntIdx) {
+                      openTreasureHunt();
+                      scheduleClose();
+                    } else {
+                      scheduleClose();
+                      scheduleTreasureClose();
+                    }
                   }}
                   onFocus={() => {
                     setFocusIdx(idx);
                     if (idx !== contactIdx) setContactOpen(false);
+                    if (idx !== treasureHuntIdx) setTreasureHuntOpen(false);
                   }}
                   onMouseLeave={() => {
                     if (idx === contactIdx) scheduleClose();
+                    if (idx === treasureHuntIdx) scheduleTreasureClose();
                   }}
                   onClick={(e) => {
                     e.preventDefault();
@@ -276,6 +323,47 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
                   <a onClick={()=>setContactOpen(false)} href="https://www.tiktok.com/@redmugsy" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">TikTok</a>
                   <a onClick={()=>setContactOpen(false)} href="https://www.instagram.com/redmugsy/" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Instagram</a>
                   <a onClick={()=>setContactOpen(false)} href="https://www.reddit.com/user/redmugsy/" target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm">Reddit</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Treasure Hunt dropdown */}
+        {treasureHuntIdx >= 0 && treasureHuntOpen && (
+          <div
+            role="menu"
+            aria-label="Treasure Hunt menu"
+            className="absolute mt-2 w-[min(92vw,220px)] rounded-xl border border-white/10 bg-black/80 backdrop-blur-sm shadow-xl p-3 z-50"
+            style={{ top: "100%", left: centers[treasureHuntIdx] ?? 0, transform: "translateX(-50%)" }}
+            onMouseEnter={openTreasureHunt}
+            onMouseLeave={scheduleTreasureClose}
+          >
+            <div className="flex flex-col gap-2">
+              <a
+                href="/treasure-hunt"
+                className="relative inline-flex items-center justify-center rounded-lg px-4 py-3 font-extrabold text-black bg-[#ff1a4b] hover:bg-[#00F0FF] transition-colors text-center"
+                onClick={() => setTreasureHuntOpen(false)}
+              >
+                🏆 Main Page
+              </a>
+              <div className="pt-1">
+                <div className="text-xs uppercase tracking-widest text-slate-400 px-1 mb-1">Get Started</div>
+                <div className="flex flex-col gap-1">
+                  <a 
+                    href="/treasure-hunt/register" 
+                    className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm flex items-center gap-2"
+                    onClick={() => setTreasureHuntOpen(false)}
+                  >
+                    🎯 <span><strong>Participant</strong> - Join the Hunt</span>
+                  </a>
+                  <a 
+                    href="/treasure-hunt/promoter-register" 
+                    className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm flex items-center gap-2"
+                    onClick={() => setTreasureHuntOpen(false)}
+                  >
+                    📈 <span><strong>Promoter</strong> - Earn Rewards</span>
+                  </a>
                 </div>
               </div>
             </div>

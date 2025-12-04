@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
@@ -43,6 +43,25 @@ export default function PromoterSelfRegistration() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string>('')
   const [captchaError, setCaptchaError] = useState<string>('')
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || typeof window === 'undefined') {
+      return
+    }
+
+    const helper = (token: string) => {
+      setTurnstileToken(token)
+      setCaptchaError('')
+    }
+
+    ;(window as any).__setPromoterSelfRegistrationTurnstileToken = helper
+
+    return () => {
+      if ((window as any).__setPromoterSelfRegistrationTurnstileToken === helper) {
+        delete (window as any).__setPromoterSelfRegistrationTurnstileToken
+      }
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

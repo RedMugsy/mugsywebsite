@@ -3,6 +3,7 @@ import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { motion } from 'framer-motion'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { API_CONFIG, apiRequest } from './config/api'
 
 // Cloudflare Turnstile Site Key for Promoter Registration
 const TURNSTILE_SITE_KEY = '0x4AAAAAACCjPAPEx1KF6so2'

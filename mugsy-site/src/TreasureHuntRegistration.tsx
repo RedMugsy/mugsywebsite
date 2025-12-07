@@ -5,9 +5,12 @@ import { motion } from 'framer-motion'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { API_CONFIG, apiRequest } from './config/api'
 
 // Cloudflare Turnstile Site Key for Participant Registration
+// For localhost testing, you may need to add localhost to your Cloudflare domain list
 const TURNSTILE_SITE_KEY = '0x4AAAAAACCjOLDn-vMrwViE'
+const IS_LOCALHOST = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 
 type Tier = 'free' | 'pathfinder' | 'keymaster'
 
@@ -104,12 +107,10 @@ export default function TreasureHuntRegistration() {
       newErrors.wallet = 'Connect your wallet to continue.'
     }
 
-    // Captcha validation
-    if (!turnstileToken) {
-      newErrors.captcha = 'Please complete the security verification.'
-    }
-
-    setErrors(newErrors)
+      // Captcha validation (skip on localhost for testing)
+      if (!IS_LOCALHOST && !turnstileToken) {
+        newErrors.captcha = 'Please complete the security verification.'
+      }    setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
@@ -126,50 +127,58 @@ export default function TreasureHuntRegistration() {
 
     setIsSubmitting(true)
 
-    try {
-      // Log turnstile token for backend verification
-      console.log('===== PARTICIPANT REGISTRATION SUBMISSION =====')
-      console.log('Turnstile Token:', turnstileToken)
-      console.log('Form Data:', formData)
-      console.log('Tier:', selectedTier)
-      console.log('Wallet Address:', walletAddress)
-      console.log('Note: Token must be verified server-side with secret key')
-      console.log('=============================================')
+      try {
+        setIsSubmitting(true)
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+        // Log submission for debugging
+        console.log('===== PARTICIPANT REGISTRATION SUBMISSION =====')
+        console.log('Turnstile Token:', turnstileToken)
+        console.log('Form Data:', formData)
+        console.log('Tier:', selectedTier)
+        console.log('Wallet Address:', walletAddress)
+        console.log('Note: Token will be verified server-side with secret key')
+        console.log('=============================================')
 
-      // In production: Send to API with turnstile token for verification
-      // The backend should verify the token using the secret key before processing
-      // Check for duplicate email
-      const isDuplicate = false // Replace with actual API check
-      if (isDuplicate) {
-        setErrors({ email: 'This email is already registered. Try another one.' })
-        setIsSubmitting(false)
-        return
-      }
-
-      // Handle payment for paid tiers
-      if (selectedTier !== 'free') {
-        // Simulate payment processing
-        const paymentSuccess = true // Replace with actual payment logic
-        if (!paymentSuccess) {
-          setErrors({ payment: 'Your payment didn\'t go through. Try again to secure your spot.' })
-          setIsSubmitting(false)
-          return
+        // Send registration to Railway backend
+        const registrationData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          walletAddress,
+          tier: selectedTier,
+          referralCode: formData.referralCode || undefined,
+          turnstileToken: IS_LOCALHOST ? 'localhost-bypass' : turnstileToken
         }
-      }
 
-      // Success!
+        const response = await apiRequest(API_CONFIG.ENDPOINTS.PARTICIPANTS_REGISTER, {
+          method: 'POST',
+          body: JSON.stringify(registrationData)
+        })
+
+        console.log('Registration successful:', response)
+
+        // Handle payment for paid tiers
+        if (selectedTier !== 'free') {
+          // Payment processing would happen here
+          // For now, assume payment is handled separately via Solana wallet
+          console.log('Payment required for tier:', selectedTier, tierPricing[selectedTier])
+        }      // Success!
       setShowSuccess(true)
       setIsSubmitting(false)
 
     } catch (err: any) {
       setIsSubmitting(false)
-      if (err.message?.includes('timeout')) {
-        setErrors({ server: 'Submission timeout — check your connection and resubmit.' })
+      console.error('Registration error:', err)
+      
+      if (err.message?.includes('timeout') || err.message?.includes('fetch')) {
+        setErrors({ server: 'Connection timeout — check your internet and try again.' })
+      } else if (err.message?.includes('duplicate') || err.message?.includes('already exists')) {
+        setErrors({ email: 'This email is already registered. Try another one.' })
+      } else if (err.message?.includes('captcha') || err.message?.includes('turnstile')) {
+        setErrors({ captcha: 'Security verification failed. Please try again.' })
       } else {
-        setErrors({ server: 'Something went wrong on our side. Please try again in a moment.' })
+        setErrors({ server: 'Registration failed. Please try again in a moment.' })
       }
     }
   }
@@ -467,21 +476,27 @@ export default function TreasureHuntRegistration() {
                     Security Verification <span className="text-[#ff1a4b]">*</span>
                   </label>
                   <div className="flex justify-center">
-                    <Turnstile
-                      siteKey={TURNSTILE_SITE_KEY}
-                      onSuccess={(token: string) => {
-                        setTurnstileToken(token)
-                        setErrors({ ...errors, captcha: undefined })
-                      }}
-                      onError={() => {
-                        setTurnstileToken('')
-                        setErrors({ ...errors, captcha: 'Verification failed. Please try again.' })
-                      }}
-                      onExpire={() => {
-                        setTurnstileToken('')
-                        setErrors({ ...errors, captcha: 'Verification expired. Please verify again.' })
-                      }}
-                    />
+                    {IS_LOCALHOST ? (
+                      <div className="bg-green-500/20 border border-green-500/40 rounded-lg p-4 text-center">
+                        <p className="text-green-400 text-sm">✅ Localhost Testing Mode - Captcha Bypassed</p>
+                      </div>
+                    ) : (
+                      <Turnstile
+                        siteKey={TURNSTILE_SITE_KEY}
+                        onSuccess={(token: string) => {
+                          setTurnstileToken(token)
+                          setErrors({ ...errors, captcha: undefined })
+                        }}
+                        onError={() => {
+                          setTurnstileToken('')
+                          setErrors({ ...errors, captcha: 'Verification failed. Please try again.' })
+                        }}
+                        onExpire={() => {
+                          setTurnstileToken('')
+                          setErrors({ ...errors, captcha: 'Verification expired. Please verify again.' })
+                        }}
+                      />
+                    )}
                   </div>
                   {errors.captcha && (
                     <p className="text-red-400 text-sm mt-2 text-center">{errors.captcha}</p>

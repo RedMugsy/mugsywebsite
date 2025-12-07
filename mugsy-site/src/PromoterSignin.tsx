@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react'
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
 import { Turnstile } from '@marsidev/react-turnstile'
+import { API_CONFIG, apiRequest } from './config/api'
 
 // Cloudflare Turnstile Site Key for Promoter Sign-in
 const TURNSTILE_SITE_KEY_PROMOTER_SIGNIN = '0x4AAAAAACCjPAPEx1KF6so2' // Using promoter registration key temporarily

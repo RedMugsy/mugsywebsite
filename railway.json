@@ -1,1 +1,14 @@
-{"build":{"builder":"NIXPACKS"},"deploy":{"startCommand":"cd mugsy-site/backend && npm start","buildCommand":"cd mugsy-site/backend && npm install"}}
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 30,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
+  }
+}

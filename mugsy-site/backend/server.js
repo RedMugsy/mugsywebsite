@@ -11,6 +11,16 @@ import { config } from 'dotenv';
 // Load environment variables
 config();
 
+console.log('=== ES MODULES LOADED SUCCESSFULLY ===');
+
+// === STARTUP DEBUG LOGGING ===
+console.log('=== SERVER STARTING ===');
+console.log('Node.js version:', process.version);
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'MISSING');
+console.log('Port:', process.env.PORT || 'MISSING (using 3001)');
+console.log('Frontend URL:', process.env.FRONTEND_URL || 'MISSING (using localhost)');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'MISSING');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -52,12 +62,17 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 // Database connection
+console.log('=== MONGODB CONNECTION ATTEMPT ===');
+console.log('Attempting to connect to:', process.env.MONGODB_URI ? 'MongoDB URI (hidden)' : 'No URI provided');
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/treasure_hunt')
 .then(() => {
-  console.log('✅ Connected to MongoDB');
+  console.log('✅ Connected to MongoDB successfully');
+  console.log('Database name:', mongoose.connection.db.databaseName);
 })
 .catch((error) => {
-  console.warn('⚠️  MongoDB connection failed (server will continue without DB):', error.message);
+  console.error('❌ MongoDB connection failed:', error.message);
+  console.warn('⚠️  Server will continue without DB, but functionality may be limited');
 });
 
 // Health check endpoint
@@ -115,10 +130,21 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('💥 UNCAUGHT EXCEPTION:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('📴 SIGTERM received, shutting down gracefully...');
-  
+
   mongoose.connection.close()
     .then(() => {
       console.log('📴 MongoDB connection closed.');
@@ -132,7 +158,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('📴 SIGINT received, shutting down gracefully...');
-  
+
   mongoose.connection.close()
     .then(() => {
       console.log('📴 MongoDB connection closed.');
@@ -144,10 +170,12 @@ process.on('SIGINT', () => {
     });
 });
 
-app.listen(PORT, () => {
+console.log('=== STARTING SERVER ===');
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('=== SERVER STARTED SUCCESSFULLY ===');
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-});
-
-export default app;
+  console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
+  console.log('=== SERVER READY FOR CONNECTIONS ===');
+});export default app;

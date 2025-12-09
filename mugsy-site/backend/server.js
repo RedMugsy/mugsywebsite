@@ -65,9 +65,17 @@ app.use(compression());
 console.log('=== MONGODB CONNECTION ATTEMPT ===');
 console.log('Attempting to connect to:', process.env.MONGODB_URI ? 'MongoDB URI (hidden)' : 'No URI provided');
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/treasure_hunt')
+// Try MONGODB_URI first, then MONGO_URL with database name, then fallback
+const mongoUri = process.env.MONGODB_URI || 
+                 (process.env.MONGO_URL ? `${process.env.MONGO_URL}/treasure_hunt` : null) ||
+                 'mongodb://localhost:27017/treasure_hunt';
+
+console.log('Using connection method:', process.env.MONGODB_URI ? 'MONGODB_URI' : process.env.MONGO_URL ? 'MONGO_URL + /treasure_hunt' : 'localhost fallback');
+
+mongoose.connect(mongoUri)
 .then(() => {
   console.log('✅ Connected to MongoDB successfully');
+  console.log('Database name:', mongoose.connection.db.databaseName);
   console.log('Database name:', mongoose.connection.db.databaseName);
 })
 .catch((error) => {

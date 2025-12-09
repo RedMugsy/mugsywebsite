@@ -423,6 +423,23 @@ export const participantRegistrationSchema = Joi.object({
   }).optional()
 });
 
+export const participantLoginSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .lowercase()
+    .trim()
+    .required()
+    .messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    }),
+  turnstileToken: Joi.string()
+    .required()
+    .messages({
+      'any.required': 'Please complete the security verification'
+    })
+});
+
 export const messageTemplateUpdateSchema = Joi.object({
   id: Joi.string().optional(),
   key: Joi.string().optional(),
@@ -471,6 +488,7 @@ export default {
   passwordResetSchema,
   treasureHuntSchema,
   participantRegistrationSchema,
+  participantLoginSchema,
   messageTemplateUpdateSchema,
   messageTemplateBulkSchema,
   messageTemplateResetSchema,

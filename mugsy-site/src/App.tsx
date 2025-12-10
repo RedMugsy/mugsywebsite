@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import SiteHeader from './components/SiteHeader'
 import SiteFooter from './components/SiteFooter'
+import TreasureHuntCountdown from './components/TreasureHuntCountdown'
 import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from 'react-i18next'
 import Marquee from "react-fast-marquee";
@@ -144,11 +145,10 @@ function Section({
 export default function App() {
     const { t } = useTranslation()
   
-  // Parallax blobs + magnetic CTA
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [showSocialPopup, setShowSocialPopup] = useState(false);
-  
-  useEffect(() => {
+    // Parallax blobs + magnetic CTA
+    const [mouse, setMouse] = useState({ x: 0, y: 0 });
+    const [showSocialPopup, setShowSocialPopup] = useState(false);
+    const [showCountdownPopup, setShowCountdownPopup] = useState(true);  useEffect(() => {
     const handle = (e: MouseEvent) =>
       setMouse({
         x: e.clientX / window.innerWidth - 0.5,
@@ -172,6 +172,29 @@ export default function App() {
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [showSocialPopup]);
+  
+  // Handle countdown popup actions
+  const handleCloseCountdown = () => {
+    setShowCountdownPopup(false);
+    // Store that user has seen the countdown to not show again during this session
+    sessionStorage.setItem('countdownSeen', 'true');
+  };
+  
+  const handleMoreInfo = () => {
+    setShowCountdownPopup(false);
+    sessionStorage.setItem('countdownSeen', 'true');
+    // Navigate to treasure hunt page using hash routing
+    window.location.hash = '/treasure-hunt';
+  };
+  
+  // Check if countdown should be shown (only once per session)
+  useEffect(() => {
+    const countdownSeen = sessionStorage.getItem('countdownSeen');
+    if (countdownSeen) {
+      setShowCountdownPopup(false);
+    }
+  }, []);
+  
   const parallaxStyle = useMemo(
     () => ({ transform: `translate3d(${mouse.x * 12}px, ${mouse.y * 12}px, 0)` }),
     [mouse]
@@ -180,6 +203,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
       <ProgressBar />
+      
+      {/* Treasure Hunt Countdown Popup */}
+      {showCountdownPopup && (
+        <TreasureHuntCountdown 
+          onClose={handleCloseCountdown}
+          onMoreInfo={handleMoreInfo}
+        />
+      )}
 
       {/* Left vertical social icon rail (fixed) - Always visible */}
       <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">

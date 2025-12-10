@@ -583,3 +583,17 @@ body { @apply bg-black text-slate-200 antialiased; }
   background-position: center;
   background-repeat: no-repeat;
 }
+
+/* =========================
+   Treasure Hunt Countdown Styles
+   Neon red button effect for countdown popup
+========================= */
+.treasure-hunt-neon-button {
+  text-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444, 0 0 30px #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.3);
+}
+
+.treasure-hunt-neon-button:hover {
+  text-shadow: 0 0 15px #ef4444, 0 0 25px #ef4444, 0 0 35px #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.6), 0 0 50px rgba(239, 68, 68, 0.4);
+}

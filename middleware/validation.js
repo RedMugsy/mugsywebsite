@@ -121,7 +121,7 @@ export const promoterLoginSchema = Joi.object({
       'string.email': 'Please provide a valid email address',
       'any.required': 'Email is required'
     }),
-  
+
   password: Joi.string()
     .required()
     .messages({
@@ -129,7 +129,24 @@ export const promoterLoginSchema = Joi.object({
     })
 });
 
-// Password reset request schema
+// Participant login validation schema
+export const participantLoginSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .lowercase()
+    .trim()
+    .required()
+    .messages({
+      'string.email': 'Please provide a valid email address',
+      'any.required': 'Email is required'
+    }),
+
+  turnstileToken: Joi.string()
+    .required()
+    .messages({
+      'any.required': 'Turnstile verification is required'
+    })
+});// Password reset request schema
 export const passwordResetRequestSchema = Joi.object({
   email: Joi.string()
     .email()
@@ -467,6 +484,7 @@ export default {
   validateQuery,
   promoterRegistrationSchema,
   promoterLoginSchema,
+  participantLoginSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
   treasureHuntSchema,

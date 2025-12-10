@@ -207,6 +207,9 @@ mongoose.connect(mongoUri, {
   .catch((error) => {
     console.error('❌ MongoDB connection failed:', error.message);
     console.warn('⚠️  Server will continue without DB, but functionality may be limited');
+    
+    // Don't exit the process - let the server start without DB
+    console.log('🚀 Starting server without database connection...');
   });
 
 // Health check endpoint

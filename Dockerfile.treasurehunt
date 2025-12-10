@@ -17,6 +17,7 @@ COPY models/ ./models/
 COPY middleware/ ./middleware/
 COPY services/ ./services/
 COPY scripts/ ./scripts/
+COPY data/ ./data/
 
 # Expose port
 EXPOSE 3000

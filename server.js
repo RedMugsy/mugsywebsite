@@ -54,6 +54,18 @@ app.use(compression());
 // Database connection
 console.log('=== MONGODB CONNECTION ATTEMPT ===');
 
+// EMERGENCY DIAGNOSTIC - Remove after troubleshooting
+console.log('🔍 EMERGENCY DIAGNOSTIC:');
+console.log('- MONGODB_URI present:', !!process.env.MONGODB_URI);
+console.log('- MONGOHOST:', process.env.MONGOHOST || 'NOT SET');
+console.log('- MONGOUSER:', process.env.MONGOUSER || 'NOT SET');
+console.log('- MONGOPASSWORD present:', !!process.env.MONGOPASSWORD);
+console.log('- DATABASE_URL present:', !!process.env.DATABASE_URL);
+if (process.env.MONGODB_URI) {
+  const redacted = process.env.MONGODB_URI.replace(/:([^:@]+)@/, ':***@');
+  console.log('- URI pattern:', redacted);
+}
+
 const hasMongoScheme = (uri) => /^mongodb(\+srv)?:\/\//i.test(uri || '');
 const stripWrappingQuotes = (value) => value?.replace(/^['"]+|['"]+$/g, '');
 const resolvePlaceholders = (value) => {

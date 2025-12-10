@@ -1,0 +1,26 @@
+# Use Node.js 18 LTS
+FROM node:18-bullseye-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy treasure hunt backend files
+COPY server.js ./
+COPY controllers/ ./controllers/
+COPY routes/ ./routes/
+COPY models/ ./models/
+COPY middleware/ ./middleware/
+COPY services/ ./services/
+COPY scripts/ ./scripts/
+
+# Expose port
+EXPOSE 3000
+
+# Start the treasure hunt backend
+CMD ["node", "server.js"]

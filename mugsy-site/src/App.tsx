@@ -185,7 +185,8 @@ export default function App() {
     window.location.hash = '/treasure-hunt';
   };
 
-  // Popup shows on every page load - no localStorage check  const parallaxStyle = useMemo(
+  // Popup shows on every page load - no localStorage check
+  const parallaxStyle = useMemo(
     () => ({ transform: `translate3d(${mouse.x * 12}px, ${mouse.y * 12}px, 0)` }),
     [mouse]
   );

@@ -12,7 +12,6 @@ RUN npm ci --only=production
 
 # Copy treasure hunt backend files
 COPY server.js ./
-COPY controllers/ ./controllers/
 COPY routes/ ./routes/
 COPY models/ ./models/
 COPY middleware/ ./middleware/

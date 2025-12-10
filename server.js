@@ -52,18 +52,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 // Database connection
-console.log('=== MONGODB CONNECTION ATTEMPT ===');
 
 // EMERGENCY DIAGNOSTIC - Remove after troubleshooting
-console.log('🔍 EMERGENCY DIAGNOSTIC:');
-console.log('- MONGODB_URI present:', !!process.env.MONGODB_URI);
-console.log('- MONGOHOST:', process.env.MONGOHOST || 'NOT SET');
-console.log('- MONGOUSER:', process.env.MONGOUSER || 'NOT SET');
-console.log('- MONGOPASSWORD present:', !!process.env.MONGOPASSWORD);
-console.log('- DATABASE_URL present:', !!process.env.DATABASE_URL);
 if (process.env.MONGODB_URI) {
   const redacted = process.env.MONGODB_URI.replace(/:([^:@]+)@/, ':***@');
-  console.log('- URI pattern:', redacted);
 }
 
 const hasMongoScheme = (uri) => /^mongodb(\+srv)?:\/\//i.test(uri || '');
@@ -202,19 +194,14 @@ if (!validateMongoUri(mongoUri)) {
   mongoUri = `mongodb://localhost:27017/${databaseName}`;
 }
 
-console.log('MongoDB connection candidates (redacted):');
 candidates.forEach((candidate) => {
-  console.log(`- ${candidate.source}: ${redactMongoUri(candidate.uri)}`);
 });
-console.log('Attempting to connect using URI source:', validCandidate?.source || 'constructed internal fallback');
-console.log('MongoDB connection string (redacted):', redactMongoUri(mongoUri));
 
 mongoose.connect(mongoUri, {
   family: 4 // Force IPv4 to resolve Railway internal hostname issues
 })
   .then(() => {
     console.log('✅ Connected to MongoDB successfully');
-    console.log('Database name:', mongoose.connection.db.databaseName);
   })
   .catch((error) => {
     console.error('❌ MongoDB connection failed:', error.message);

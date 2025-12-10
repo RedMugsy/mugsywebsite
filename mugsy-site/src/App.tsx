@@ -176,26 +176,24 @@ export default function App() {
   // Handle countdown popup actions
   const handleCloseCountdown = () => {
     setShowCountdownPopup(false);
-    // Store that user has seen the countdown to not show again during this session
-    sessionStorage.setItem('countdownSeen', 'true');
+    // Store that user has dismissed the countdown (persists across sessions)
+    localStorage.setItem('hasSeenCountdown', 'true');
   };
-  
+
   const handleMoreInfo = () => {
     setShowCountdownPopup(false);
-    sessionStorage.setItem('countdownSeen', 'true');
+    localStorage.setItem('hasSeenCountdown', 'true');
     // Navigate to treasure hunt page using hash routing
     window.location.hash = '/treasure-hunt';
   };
-  
-  // Check if countdown should be shown (only once per session)
+
+  // Check if countdown should be shown (only show if user hasn't dismissed it)
   useEffect(() => {
-    const countdownSeen = sessionStorage.getItem('countdownSeen');
-    if (countdownSeen) {
+    const hasSeenCountdown = localStorage.getItem('hasSeenCountdown');
+    if (hasSeenCountdown) {
       setShowCountdownPopup(false);
     }
-  }, []);
-  
-  const parallaxStyle = useMemo(
+  }, []);  const parallaxStyle = useMemo(
     () => ({ transform: `translate3d(${mouse.x * 12}px, ${mouse.y * 12}px, 0)` }),
     [mouse]
   );

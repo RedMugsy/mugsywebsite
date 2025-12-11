@@ -37,9 +37,6 @@ jobs:
       - name: Build with environment variables
         working-directory: mugsy-site
         env:
-          BUILD_VERSION: v${{ github.run_number }}
-          BUILD_CACHE_BUSTER: ${{ github.sha }}
-          VITE_BUILD_VERSION: v${{ github.run_number }}
           VITE_TURNSTILE_SITEKEY: ${{ secrets.VITE_TURNSTILE_SITEKEY }}
           VITE_TURNSTILE_SITEKEY_CLAIM: ${{ secrets.VITE_TURNSTILE_SITEKEY_CLAIM }}
           VITE_TURNSTILE_SITEKEY_COMMUNITY: ${{ secrets.VITE_TURNSTILE_SITEKEY_COMMUNITY }}

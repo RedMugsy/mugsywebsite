@@ -21,20 +21,13 @@ const tokenomics: Slice[] = [
 ];
 
 function ProgressBar() {
-
-      {/* Treasure Hunt Countdown Popup */}
-      {showCountdownPopup && (
-        <TreasureHuntCountdown
-          onClose={handleCloseCountdown}
-          onMoreInfo={handleMoreInfo}
-        />
-      )}
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
   return (
     <motion.div
       style={{ scaleX }}
-  className="fixed top-0 left-0 right-0 h-1 origin-left bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF] z-40"
+      className="fixed top-0 left-0 right-0 h-1 origin-left bg-gradient-to-r from-[#ff1a4b] to-[#00F0FF] z-40"
     />
   );
 }
@@ -163,13 +156,16 @@ export default function App() {
       const isInternalNavigation = referrer.includes(window.location.hostname) && window.location.hash !== '';
       return !isInternalNavigation;
     });
-      setMouse({
-        x: e.clientX / window.innerWidth - 0.5,
-        y: e.clientY / window.innerHeight - 0.5,
-      });
-    window.addEventListener("mousemove", handle);
-    return () => window.removeEventListener("mousemove", handle);
-  }, []);
+    
+    useEffect(() => {
+      const handle = (e: MouseEvent) =>
+        setMouse({
+          x: e.clientX / window.innerWidth - 0.5,
+          y: e.clientY / window.innerHeight - 0.5,
+        });
+      window.addEventListener("mousemove", handle);
+      return () => window.removeEventListener("mousemove", handle);
+    }, []);
 
   // Handle scroll to close popup
   useEffect(() => {
@@ -207,6 +203,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
       <ProgressBar />
+
+        {/* Treasure Hunt Countdown Popup */}
+        {showCountdownPopup && (
+          <TreasureHuntCountdown
+            onClose={handleCloseCountdown}
+            onMoreInfo={handleMoreInfo}
+          />
+        )}
 
       {/* Left vertical social icon rail (fixed) - Always visible */}
       <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">

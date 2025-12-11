@@ -115,8 +115,9 @@ export default function TreasureHunt() {
               <div className="text-6xl mb-4">🥇</div>
               <h3 className="text-2xl font-bold text-white mb-4">First Place</h3>
               <ul className="space-y-3 text-slate-200">
-                <li className="text-xl font-bold text-[#ff1a4b]">$4,000 USDT (Cash)</li>
+                <li className="text-xl font-bold text-[#ff1a4b]">$4,000.00 USDT (Cash)</li>
                 <li className="text-lg">4,000,000 $MUGSY Tokens</li>
+                <li>30% PRESALE discount 96 hours before launch (Up to 400 million tokens)</li>
                 <li>Automatic Admission to Mugsy Hunt II</li>
                 <li>1 Year TradingView Premium Subscription</li>
               </ul>
@@ -133,8 +134,9 @@ export default function TreasureHunt() {
               <div className="text-6xl mb-4">🥈</div>
               <h3 className="text-2xl font-bold text-white mb-4">Second Place</h3>
               <ul className="space-y-3 text-slate-200">
-                <li className="text-xl font-bold text-[#00F0FF]">$2,500 USDT (Cash)</li>
+                <li className="text-xl font-bold text-[#00F0FF]">$2,500.00 USDT (Cash)</li>
                 <li className="text-lg">2,500,000 $MUGSY Tokens</li>
+                <li>25% PRESALE discount 72 hours before launch (Up to 250 million tokens)</li>
                 <li>Automatic Admission to Mugsy Hunt II</li>
                 <li>6 Months TradingView Premium Subscription</li>
               </ul>
@@ -151,8 +153,9 @@ export default function TreasureHunt() {
               <div className="text-6xl mb-4">🥉</div>
               <h3 className="text-2xl font-bold text-white mb-4">Third Place</h3>
               <ul className="space-y-3 text-slate-200">
-                <li className="text-xl font-bold text-white">$1,000 USDT (Cash)</li>
+                <li className="text-xl font-bold text-white">$1,000.00 USDT (Cash)</li>
                 <li className="text-lg">1,000,000 $MUGSY Tokens</li>
+                <li>25% PRESALE discount 48 hours before launch (Up to 100 million tokens)</li>
                 <li>Automatic Admission to Mugsy Hunt II</li>
                 <li>3 Months TradingView Premium Subscription</li>
               </ul>
@@ -171,7 +174,10 @@ export default function TreasureHunt() {
               <div className="text-5xl mb-3">🏅</div>
               <h3 className="text-xl font-bold text-white mb-3">4th – 10th Place</h3>
               <ul className="space-y-2 text-slate-200">
-                <li>50% off Admission to Mugsy Hunt II</li>
+                <li>$100.00 Cash</li>
+                <li>400,000 $RMUGSY Tokens</li>
+                <li>20% PRESALE discount 24 hours before launch (Up to 50 million tokens)</li>
+                <li>Automatic Admission to Mugsy Hunt II</li>
               </ul>
             </motion.div>
 
@@ -185,7 +191,10 @@ export default function TreasureHunt() {
               <div className="text-5xl mb-3">🎖️</div>
               <h3 className="text-xl font-bold text-white mb-3">11th – 20th Place</h3>
               <ul className="space-y-2 text-slate-200">
-                <li>25% off Admission to Mugsy Hunt II</li>
+                <li>$50.00 Cash</li>
+                <li>200,000 $RMUGSY Tokens</li>
+                <li>15% PRESALE discount 24 hours before launch (Up to 25 million tokens)</li>
+                <li>Automatic Admission to Mugsy Hunt II</li>
               </ul>
             </motion.div>
 
@@ -199,7 +208,9 @@ export default function TreasureHunt() {
               <div className="text-5xl mb-3">💎</div>
               <h3 className="text-xl font-bold text-white mb-3">20th – 500th Place</h3>
               <ul className="space-y-2 text-slate-200">
-                <li>200,000 $MUGSY Tokens Each</li>
+                <li>100,000 $MUGSY Tokens</li>
+                <li>10% PRESALE discount 12 hours before launch (Up to 10 million tokens)</li>
+                <li>Automatic Admission to Mugsy Hunt II</li>
               </ul>
             </motion.div>
 
@@ -214,6 +225,8 @@ export default function TreasureHunt() {
               <h3 className="text-xl font-bold text-white mb-3">500th – 2,500th Place</h3>
               <ul className="space-y-2 text-slate-200">
                 <li>50,000 $MUGSY Tokens Each</li>
+                <li>5% PRESALE discount 24 hours before launch (Up to 5 million tokens)</li>
+                <li>50% discount on Admission to Mugsy Hunt II</li>
               </ul>
             </motion.div>
           </div>

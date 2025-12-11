@@ -178,6 +178,7 @@ export default function PromoterSignin() {
                   setTurnstileToken('')
                   setErrors(prev => ({ ...prev, captcha: 'Security verification expired' }))
                 }}
+                
               />
             </div>
             {errors.captcha && <p className="text-sm text-red-400 text-center">{errors.captcha}</p>}

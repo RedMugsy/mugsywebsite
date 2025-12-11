@@ -7,10 +7,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Dynamic cache busting using BUILD_VERSION from environment
-        entryFileNames: `${process.env.BUILD_VERSION || 'v20251210'}/[name]-[hash].js`,
-        chunkFileNames: `${process.env.BUILD_VERSION || 'v20251210'}/[name]-[hash].js`,
-        assetFileNames: `${process.env.BUILD_VERSION || 'v20251210'}/[name]-[hash].[ext]`
+        // Nuclear cache busting - make every file completely unique with timestamp
+        entryFileNames: 'v20251119104500/[name]-[hash].js',
+        chunkFileNames: 'v20251119104500/[name]-[hash].js', 
+        assetFileNames: 'v20251119104500/[name]-[hash].[ext]'
       }
     },
     emptyOutDir: true,

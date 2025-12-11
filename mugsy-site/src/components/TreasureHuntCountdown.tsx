@@ -52,8 +52,8 @@ export default function TreasureHuntCountdown({ onClose, onMoreInfo }: TreasureH
   if (!isVisible) return null
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-8 max-w-md w-full mx-4 relative shadow-2xl transform transition-transform duration-300">
+    <div className={`fixed inset-0 backdrop-blur-sm bg-black bg-opacity-30 flex items-center justify-center z-[9999] transition-all duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="bg-gray-900 border border-gray-700 rounded-lg p-8 max-w-md w-full mx-4 mt-20 relative shadow-2xl transform transition-transform duration-300">
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -67,12 +67,15 @@ export default function TreasureHuntCountdown({ onClose, onMoreInfo }: TreasureH
 
         {/* Title */}
         <h1 className="text-2xl font-bold text-center mb-4 text-red-500">
-          RED MUGSY'S GENESIS TREASURE HUNT
+          Red Mugsy's
+          <br />
+          Genesis Treasure Hunt
         </h1>
 
         {/* Body */}
         <p className="text-center text-gray-300 mb-6 leading-relaxed">
-          Join Red Mugsy and many others in the largest Treasure Hunt to get a chance to win one of the largest cash prizes ever!!!!
+          Join Red Mugsy and many others in the largest Treasure Hunt. Get the chance to win one of the largest cash prizes ever!!!!<br /><br />
+          Register as a participant or as a promoter
         </p>
 
         {/* Subtitle */}

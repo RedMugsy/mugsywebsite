@@ -60,14 +60,14 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
           </a>
         </div>
       </div>
-      <header className="transition-all header-rabbit backdrop-blur supports-[backdrop-filter]:bg-white/5 border-b border-white/10 overflow-visible py-4">
-        <nav className="max-w-7xl mx-auto flex items-center gap-6 py-4 px-6">
+      <header className="transition-all header-rabbit backdrop-blur supports-[backdrop-filter]:bg-white/5 border-b border-white/10 overflow-visible py-3">
+        <nav className="max-w-7xl mx-auto flex items-center gap-6 py-3 px-6">
           {/* Logo */}
           <a
             href={onHome ? '#hero' : '/#'}
             className="flex items-center gap-2 font-extrabold text-white tracking-tight text-lg shrink-0"
           >
-            <img src="/img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-12 md:h-32 w-auto" />
+            <img src="/img/mugsy-logo-red.png" alt="RED $MUGSY logo" className="h-9 md:h-24 w-auto" />
             <span className="hidden sm:inline-flex flex-col leading-tight text-3xl md:text-4xl">
               <span className="text-white">RED</span>
               <span className="text-[#ff1a4b]">$MUGSY</span>
@@ -114,7 +114,7 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
                 Promoter Sign In
               </a>
               <a
-                href={`${participantSignInHref}?mode=signin`}
+                href={participantSignInHref}
                 className="text-white font-semibold py-2 border-b border-white/10 hover:text-[#ff1a4b]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

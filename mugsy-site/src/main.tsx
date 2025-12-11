@@ -83,6 +83,13 @@ function RootRouter() {
   if (path === '/mugsywebsite/treasure-hunt/promoter-signin' || path === '/mugsywebsite/treasure-hunt/promoter-signin/' || path === '/treasure-hunt/promoter-signin' || path === '/treasure-hunt/promoter-signin/') {
     return <PromoterSignin />
   }
+  if (path === '/mugsywebsite/treasure-hunt/participant-signin' || path === '/mugsywebsite/treasure-hunt/participant-signin/' || path === '/treasure-hunt/participant-signin' || path === '/treasure-hunt/participant-signin/') {
+    return (
+      <SolanaWalletProvider>
+        <TreasureHuntRegistration />
+      </SolanaWalletProvider>
+    )
+  }
   if (path === '/mugsywebsite/treasure-hunt/promoter-register' || path === '/mugsywebsite/treasure-hunt/promoter-register/' || path === '/treasure-hunt/promoter-register' || path === '/treasure-hunt/promoter-register/') {
     return <PromoterSelfRegistration />
   }
@@ -117,41 +124,6 @@ function AppBoot({ children }: { children: React.ReactNode }) {
     // Load GA only once
     loadAnalytics()
   }
-  
-  // Dynamic version checking and cache clearing
-  useEffect(() => {
-    const currentVersion = (import.meta as any).env?.VITE_BUILD_VERSION
-    const storedVersion = localStorage.getItem('app-version')
-    
-    if (currentVersion && storedVersion && currentVersion !== storedVersion) {
-      console.log(`Version change detected: ${storedVersion} → ${currentVersion}`)
-      // Clear all caches when version changes
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => caches.delete(name))
-        })
-      }
-      // Clear localStorage except essential items
-      const preserve = ['cookie-consent', 'theme-preference']
-      const toRemove = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && !preserve.includes(key)) toRemove.push(key)
-      }
-      toRemove.forEach(key => localStorage.removeItem(key))
-      
-      localStorage.setItem('app-version', currentVersion)
-      
-      // Force reload to ensure fresh content
-      setTimeout(() => window.location.reload(), 100)
-      return
-    }
-    
-    if (currentVersion && !storedVersion) {
-      localStorage.setItem('app-version', currentVersion)
-    }
-  }, [])
-  
   // Sync document direction for RTL languages
   useEffect(() => {
     const lang = i18n.language

@@ -21,6 +21,14 @@ const tokenomics: Slice[] = [
 ];
 
 function ProgressBar() {
+
+      {/* Treasure Hunt Countdown Popup */}
+      {showCountdownPopup && (
+        <TreasureHuntCountdown
+          onClose={handleCloseCountdown}
+          onMoreInfo={handleMoreInfo}
+        />
+      )}
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
   return (
@@ -145,11 +153,16 @@ function Section({
 export default function App() {
     const { t } = useTranslation()
   
-    // Parallax blobs + magnetic CTA
-    const [mouse, setMouse] = useState({ x: 0, y: 0 });
-    const [showSocialPopup, setShowSocialPopup] = useState(false);
-    const [showCountdownPopup, setShowCountdownPopup] = useState(true);  useEffect(() => {
-    const handle = (e: MouseEvent) =>
+  // Parallax blobs + magnetic CTA
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [showSocialPopup, setShowSocialPopup] = useState(false);
+    const [showCountdownPopup, setShowCountdownPopup] = useState(() => {
+      // Show popup on first visit or if coming from external site
+      // Don't show if navigating within the site
+      const referrer = document.referrer;
+      const isInternalNavigation = referrer.includes(window.location.hostname) && window.location.hash !== '';
+      return !isInternalNavigation;
+    });
       setMouse({
         x: e.clientX / window.innerWidth - 0.5,
         y: e.clientY / window.innerHeight - 0.5,
@@ -172,7 +185,7 @@ export default function App() {
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [showSocialPopup]);
-  
+
   // Handle countdown popup actions
   const handleCloseCountdown = () => {
     setShowCountdownPopup(false);
@@ -194,14 +207,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-slate-200 antialiased relative overflow-x-hidden">
       <ProgressBar />
-      
-      {/* Treasure Hunt Countdown Popup */}
-      {showCountdownPopup && (
-        <TreasureHuntCountdown 
-          onClose={handleCloseCountdown}
-          onMoreInfo={handleMoreInfo}
-        />
-      )}
 
       {/* Left vertical social icon rail (fixed) - Always visible */}
       <div id="social-links" className="hidden md:flex fixed left-0 top-20 bottom-20 z-40 w-16 flex-col items-center justify-center">

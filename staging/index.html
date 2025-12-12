@@ -11,6 +11,23 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#0b0c10" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Decode GitHub Pages SPA redirect (?/path) -->
+    <script>
+      (function(l) {
+        if (l.search && l.search.startsWith('?/')) {
+          const decoded = l.search
+            .slice(2)
+            .split('&')
+            .map(s => s.replace(/~and~/g, '&'))
+            .join('?');
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
     
     <!-- ULTIMATE CACHE KILLER -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">

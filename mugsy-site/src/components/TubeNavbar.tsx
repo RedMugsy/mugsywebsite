@@ -349,7 +349,7 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
           >
             <div className="flex flex-col gap-2">
               <a
-                href="/treasure-hunt"
+                href="#/treasure-hunt"
                 className="relative inline-flex items-center justify-center rounded-lg px-4 py-3 font-extrabold text-black bg-[#ff1a4b] hover:bg-[#00F0FF] transition-colors text-center"
                 onClick={() => setTreasureHuntOpen(false)}
               >
@@ -359,14 +359,14 @@ export default function TubeNavbar({ links = DEFAULT_LINKS, onNavigate, classNam
                 <div className="text-xs uppercase tracking-widest text-slate-400 px-1 mb-1">Get Started</div>
                 <div className="flex flex-col gap-1">
                   <a 
-                    href="/treasure-hunt/register" 
+                    href="#/treasure-hunt/register" 
                     className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm flex items-center gap-2"
                     onClick={() => setTreasureHuntOpen(false)}
                   >
                     🎯 <span><strong>Participant</strong> - Join the Hunt</span>
                   </a>
                   <a 
-                    href="/treasure-hunt/promoter-register" 
+                    href="#/treasure-hunt/promoter-register" 
                     className="px-3 py-2 rounded-lg hover:bg-white/10 text-sm flex items-center gap-2"
                     onClick={() => setTreasureHuntOpen(false)}
                   >

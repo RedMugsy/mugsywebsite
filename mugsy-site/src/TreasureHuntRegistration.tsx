@@ -6,6 +6,9 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { API_CONFIG, apiRequest } from './config/api'
+import slothImg from './assets/tier-sloth.png'
+import pantherImg from './assets/tier-panther.png'
+import owlImg from './assets/tier-owl.png'
 
 // Cloudflare Turnstile Site Key for Participant Registration
 // For localhost testing, you may need to add localhost to your Cloudflare domain list
@@ -559,7 +562,7 @@ export default function TreasureHuntRegistration() {
                       </div>
                       <div className="sm:w-40 flex justify-center">
                         <img
-                          src="/img/tier-sloth.png"
+                          src={slothImg}
                           alt="Sloth avatar for Free Loader tier"
                           className="w-32 h-48 object-contain drop-shadow-[0_0_25px_rgba(21,255,142,0.35)]"
                           loading="lazy"
@@ -604,7 +607,7 @@ export default function TreasureHuntRegistration() {
                       </div>
                       <div className="sm:w-40 flex justify-center">
                         <img
-                          src="/img/tier-panther.png"
+                          src={pantherImg}
                           alt="Panther avatar for Pathfinder tier"
                           className="w-32 h-48 object-contain drop-shadow-[0_0_28px_rgba(0,240,255,0.35)]"
                           loading="lazy"
@@ -650,7 +653,7 @@ export default function TreasureHuntRegistration() {
                       </div>
                       <div className="sm:w-40 flex justify-center">
                         <img
-                          src="/img/tier-owl.png"
+                          src={owlImg}
                           alt="Owl avatar for Key Master tier"
                           className="w-32 h-48 object-contain drop-shadow-[0_0_28px_rgba(255,180,0,0.35)]"
                           loading="lazy"

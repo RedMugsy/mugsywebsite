@@ -15,6 +15,34 @@ type Props = {
 export default function SiteHeader({ onHome = false, className = '' }: Props) {
   const { t } = useTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+  const [currentLocation, setCurrentLocation] = React.useState(() => 
+    window.location.pathname + window.location.hash
+  )
+  
+  // Update location state when URL changes
+  React.useEffect(() => {
+    const updateLocation = () => {
+      setCurrentLocation(window.location.pathname + window.location.hash)
+    }
+    
+    window.addEventListener('popstate', updateLocation)
+    window.addEventListener('hashchange', updateLocation)
+    
+    return () => {
+      window.removeEventListener('popstate', updateLocation)
+      window.removeEventListener('hashchange', updateLocation)
+    }
+  }, [])
+  
+  // Detect current page to set active navigation item
+  const getActiveIndex = React.useMemo(() => {
+    // Check if on any treasure hunt page
+    if (currentLocation.includes('/treasure-hunt') || currentLocation.includes('#/treasure-hunt')) {
+      return 6 // Index of TREASURE HUNT in the links array
+    }
+    // Default to HOME (index 0) for other pages
+    return 0
+  }, [currentLocation])
   const participantSignInHref = onHome ? '#/treasure-hunt/register' : '/#/treasure-hunt/register'
   const promoterSignInHref = onHome ? '#/treasure-hunt/promoter-signin' : '/#/treasure-hunt/promoter-signin'
   const links = onHome
@@ -76,7 +104,7 @@ export default function SiteHeader({ onHome = false, className = '' }: Props) {
 
           {/* Desktop TubeNavbar */}
           <div className="hidden md:flex flex-1 justify-start pl-4">
-            <TubeNavbar links={links} />
+            <TubeNavbar links={links} activeIndex={getActiveIndex} />
           </div>
 
           {/* Mobile hamburger menu button */}
